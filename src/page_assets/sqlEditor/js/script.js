@@ -71,7 +71,6 @@ async function init() {
     const result = await gm.fetchTableFormatter(modelName,tableName)
 
     column_formatters = result[0][0];
-    freeze_col_num = result[0][2]
     if (result[0][1]){
         document.getElementById("viewQuery").style.display = ""
         document.getElementById("queryInput").value = result[0][1]

@@ -124,7 +124,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.getElementById("uploadPackage").onclick = uploadPackage
     document.getElementById('downloadOutput').onclick = downloadOutput    
 
-    get_project_names()
     await executePython('init')
     shareBtn.classList.remove('blink');
 });
@@ -205,16 +204,6 @@ async function get_model_tables(model_name,template) {
     }    
 }
 
-function get_project_names() {    
-    const Projects = localStorage.getItem('Projects')
-    let all_projects;
-    if (Projects) {
-        all_projects = JSON.parse(Projects)
-        if (all_projects) {
-            project_names = Object.keys(all_projects)
-        }
-    }
-}
 
 function get_scc_tree(model_dict,parent_icon = "fa-server",project = null) {
     let tree = get_cl_element("ul", "tree")

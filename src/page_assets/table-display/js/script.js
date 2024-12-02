@@ -72,7 +72,6 @@ async function init() {
         document.getElementById("addNewColBtn").parentNode.style.display = "none"
         document.getElementById("delNewColBtn").parentNode.style.display = "none"
         document.getElementById("multiUpdate").parentNode.style.display = "none"
-        document.getElementById("textUploadBtn").parentNode.style.display = "none"
     }
 }
 

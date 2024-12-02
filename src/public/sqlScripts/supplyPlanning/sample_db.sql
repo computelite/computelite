@@ -71,10 +71,11 @@ CREATE TABLE S_ExecutionFiles (
 
 CREATE TABLE S_DataFiles (
 	FileId	            INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	FileName	        VARCHAR UNIQUE,
+	FileName	        VARCHAR,
 	FileType   	        VARCHAR,
     FileBlob            BLOB NOT NULL,
-	Status	            VARCHAR DEFAULT ('Active')	
+	Status	            VARCHAR DEFAULT ('Active'),
+    UNIQUE(FileName,FileType)	
 );
 
 CREATE TABLE S_PackageWheels (
