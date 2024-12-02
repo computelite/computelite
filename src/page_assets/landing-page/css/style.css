@@ -1,0 +1,114 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-image: url('/assets/img/pages/form-image.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    color: #ffffff;
+    position: relative;
+}
+
+.hero {
+    height: 35vh;
+    color: #fff;
+}
+
+.hero .display-4 {
+    font-weight: bold;
+}
+
+.hero .lead {
+    max-width: 600px;
+    font-size: 19px;
+    font-weight: 400;
+}
+
+.feature-card {
+    transition: transform 0.2s ease;
+    border: 2px solid grey;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+}
+
+
+.footer a {
+    text-decoration: none;
+    color: #aaa;
+}
+
+.footer a:hover {
+    color: #fff;
+}
+
+.navbar-logo {
+    color: white !important;
+    font-size: 20px;
+}
+
+.navbar-el {
+    color: #aaa !important;
+    font-size: 18px;
+}
+
+.btn .bg-white:hover {
+    color: black !important;
+}
+
+.tool-features {
+    position: relative;
+    top: 170px;
+    min-height: 400px;
+    font-size: 20px;
+}
+
+.footer-features {
+    position: relative;
+    top: 70px;
+    min-height: 200px;
+}
+
+#tool-features h3 {
+    font-size: 24px;
+}
+
+#tool-features p {
+    font-size: 20px;
+}
+
+.footer {
+    margin-top: 60px;
+    position: relative;
+    bottom: 0px;
+    color: #fff;
+    font-weight: 500;
+    font-family: sans-serif;
+    font-size: 15px;
+    text-align: center;
+}
+
+.footer a {
+    text-decoration: none;
+}
+
+p {
+    color: rgb(191 190 190);
+}
+
+#accordionFeatures button{
+    background-color: #f3f4f6 !important;
+}
+
+#accordionFeatures{
+    height: 155vh;
+}
+
+.accordion-body p{
+    color: #1c2540;
+}

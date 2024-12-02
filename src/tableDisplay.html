@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!-- Primary Meta Tags -->
+    <!-- <title>Home</title> -->
+    <meta name="viewport" content="width=1024, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Compute Lite">
+    <meta name="author" content="SCL">
+    <meta name="description" content="Compute in Browser">
+    <meta name="keywords" content="compute lite, edge compute, edge data, macro in browser, compute in browser, wasm" />
+    <link rel="canonical" href="https://www.ComputeLite.com">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.ComputeLite.com">
+    <meta property="og:title" content="Compute Lite">
+    <meta property="og:description" content="Compute in Browser">
+    <meta property="og:image" content="assets/img/favicon/summence.svg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.ComputeLite.com">
+    <meta property="twitter:title" content="Compute Lite">
+    <meta property="twitter:description" content="Compute in Browser">
+    <meta property="twitter:image" content="assets/img/favicon/summence.svg">
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon.ico">
+    <link rel="mask-icon" href="favicon.ico" color="#ffffff">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="theme-color" content="#ffffff">
+
+   
+    <link type="text/css" href='scss/pixel.scss' rel="stylesheet">
+    <link type="text/css" href='scss/scl.css' rel="stylesheet">
+    <link type="text/css" href="page_assets/table-display/css/style.css" rel="stylesheet">
+    <!-- NOTICE: You can use the _analytics.html partial to include production code specific code & trackers -->
+    
+</head>
+<body>
+    <main>
+
+        <div class="preloader bg-dark flex-column justify-content-center align-items-center">
+            <svg id="loader-logo" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 64 78.4">
+                <path fill="#fff" d="M10,0h1.2V11.2H0V10A10,10,0,0,1,10,0Z" />
+                <rect fill="none" stroke="#fff" stroke-width="11.2" x="40" y="17.6" width="0" height="25.6" />
+                <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="11.2" x="23" y="35.2" width="0"
+                    height="25.6" />
+                <path fill="#fff" d="M52.8,35.2H64V53.8a7,7,0,0,1-7,7H52.8V35.2Z" />
+                <rect fill="none" stroke="#fff" stroke-width="11.2" x="6" y="52.8" width="0" height="25.6" />
+                <path fill="#fff" d="M52.8,0H57a7,7,0,0,1,7,7h0v4.2H52.8V0Z" />
+                <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="11.2" x="57.8" y="17.6" width="0"
+                    height="11.2" />
+                <rect fill="none" stroke="#fff" stroke-width="11.2" x="6" y="35.2" width="0" height="11.2" />
+                <rect fill="none" stroke="#fff" stroke-width="11.2" x="40.2" y="49.6" width="0" height="11.2" />
+                <path fill="#fff" d="M17.6,67.2H28.8v1.2a10,10,0,0,1-10,10H17.6V67.2Z" />
+                <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="28.8" x="31.6" width="0" height="11.2" />
+                <rect fill="none" stroke="#fff" x="14" stroke-width="28.8" y="17.6" width="0" height="11.2" />
+            </svg>
+        </div>
+        <div id="displayTable" class="test">
+            <div id="data-loader" class="center" style="display:none;"></div>
+            <table class="table table-bordered table-hover table-sm" style="width: min-content; margin-bottom: 0px;">
+                <thead class=""></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="row table-footer">
+    
+            <div class="col-lg-6">
+    
+                <table id="pagerBasicControls">
+    
+                    <tbody>
+    
+                        <tr>
+    
+                            <td>
+                               
+                                <span id="deleteRecordsBtn" title="Delete Records" class="fa fa-trash"></span>
+                            </td>
+                            <td>
+                                <span id="excelDownloadBtn" title="Export Data" class="fa fa-download"></span>
+                            </td>
+                            <td>
+                                <span id="excelUploadBtn" title="Import Data" class="fa fa-upload"
+                                    data-bs-target="#modal-file-upload" data-bs-toggle="modal"></span>
+                            </td>
+                            <td>
+                                <span id="showSummaryBtn" title="Show Summary" class="fa fa-sum"></span>
+                            </td>
+                            <td>
+                                <span id="addNewColBtn" title="Add New Column" class="fa fa-plus-circle"
+                                    data-bs-target="#modal-add-column" data-bs-toggle="modal"></span>
+                            </td>
+                            <td>
+                                <span id="delNewColBtn" title="Delete Column" class="fa fa-minus-circle"></span>
+                            </td>
+                            <td>
+                                <span id="refreshBtn" title="Refresh Table" class="fas fa-sync-alt"></span>
+                            </td>
+                            <td>
+                                <span id="chooseColBtn" title="Choose Columns To Show" class="fa fa-list-alt"
+                                    data-bs-target="#modal-select-column" data-bs-toggle="modal"></span>
+                            </td>
+                            <td>
+                                <span id="incrDecimals" title="Increase decimal points" class="fa fa-chevron-left"></span>
+                            </td>
+                            <td>
+                                <span id="decrDecimals" title="Decrease decimal points" class="fa fa-chevron-right"></span>
+                            </td>
+                            <td>
+                                <span id="multiUpdate" title="Update multiple rows" class="fas fa-pencil-alt"></span>
+                            </td>
+                            
+                            <td>
+                                <span id="thousandSepBtn" title="Thousand Separator" class="fa fa-SingleQuote"></span>
+                            </td>
+                            <td>
+                                <span id="formatColumn" title="Format Columns" class="fas fa-server"></span>
+                            </td>
+                            <td>
+                                <span id="resetSort" title="Clear Sort" class="fa fa-random"
+                                    ></span>
+                            </td>
+                            <td>
+                                <span id="copyTable" title="Copy Table" class="fas fa-copy"></span>
+                            </td>
+                            <td>
+                                <span id="saveSort" title="Save Sort" class="fas fa-save"></span>
+                            </td>
+                            <td>
+                                <span id="saveFreeze" title="Freeze Column" class="fas fa-columns"></span>
+                            </td>
+                            <td>
+                                <span id="viewQuery" title="View Create Statement" class="fas fa-database"
+                                data-bs-target="#modal-get-viewQuery" data-bs-toggle="modal" style="display: none;"></span>
+                            </td>
+                            
+                        </tr>
+    
+                    </tbody>
+    
+                </table>
+    
+            </div>
+            <div class="col-lg-6">
+                <table id="pagerDetailsSection">
+    
+                    <tbody>
+    
+                        <tr>
+    
+                            <td id="firstPageBtn" title="First Page">
+                                <span class="fa fa-step-backward"></span>
+                            </td>
+                            <td id="prevPageBtn" title="Previous Page">
+                                <span class="fa fa-backward"></span>
+                            </td>
+                            <td>
+                                Page <input id="currentPage" type="text" value="1" style="width:36px;"> of 0
+                            </td>
+                            <td id="nextPageBtn" title="Next Page">
+                                <span class="fa fa-forward"></span>
+                            </td>
+                            <td id="lastPageBtn" title="Last Page">
+                                <span class="fa fa-step-forward"></span>
+                            </td>
+                            <td id="totalRecordsPanel" style="padding-left:20px;">
+                                1-1000 of 0
+                            </td>
+                        </tr>
+    
+                    </tbody>
+    
+                </table>
+            </div>
+    
+        </div>
+        <div class="modal fade show" id="modal-file-upload" tabindex="-1" aria-labelledby="modal-file-upload"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">Import Excel</h2><button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <input accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" type="file"
+                                class="form-control" id="fileUpload" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="importExcel" data-bs-dismiss="modal"
+                            class="btn btn-primary ml-auto">Import</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal fade show" id="modal-text-file-upload" tabindex="-1" aria-labelledby="modal-text-file-upload"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">Import Text File</h2><button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <input type="file"
+                                class="form-control" id="textfileUpload" />
+                        </div>
+                        <div class="row row-header align-items-center my-4">
+                            <div class="col-12 col-sm-4 align-self-center">
+                                <label for="selectDelimeter">Choose Delimeter</label>
+                            </div>
+                            <div class="col-12 col-sm align-self-center">
+                                <select class="form-select" id="selectDelimeter" aria-label="Delimeter Type">
+                                    <option value="1" selected>comma(,)</option>
+                                    <option value="2">tab</option>
+                                    <option value="3">space</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="importCSV" data-bs-dismiss="modal"
+                            class="btn btn-primary ml-auto">Import</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade show" id="modal-add-column" tabindex="-1" aria-labelledby="modal-add-column"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">Add New Column</h2><button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="form-group mb-4">
+                                <div class="input-group"><input type="text" placeholder="Column Name" class="form-control"
+                                        id="newColName">
+                                    <span class="input-group-text"><span class="fas fa-columns"></span></span>
+                                </div>
+                            </div>
+                            <select class="form-select" id="addColumnSelect" aria-label="Data Type">
+                                <option value="0" selected>Choose DataType</option>
+                                <option value="1">TEXT</option>
+                                <option value="2">NUMERIC</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="addNewColumn" class="btn btn-primary ml-auto">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade show" id="modal-remove-column" tabindex="-1" aria-labelledby="modal-remove-column"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">Remove Column</h2><button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="form-group mb-4">
+                                <!-- <label for="removeColumnSelect">Column Name</label> -->
+                                <select class="form-select" id="removeColumnSelect" aria-label="Data Type">
+                                    <option value="0" selected>Select a Column to Remove</option>
+                                    <option value="1">Col1</option>
+                                    <option value="2">Col2</option>
+                                </select>
+                            </div>
+    
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="removeColumn" class="btn btn-primary ml-auto">Remove</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade show" id="modal-select-column" tabindex="-1" aria-labelledby="modal-select-column"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">Select Columns</h2><button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row  mt-3">
+                            <div class="card border-light col-md-5 col-sm-12 position-relative ml-4">
+                                <div class="card-header bg-white border-0 text-center pb-1">
+                                    <h5>Available Columns</h5>
+                                </div>
+                                <div class="card-body scc-box">
+                                    <ul id="availableColumn" class="connectedSortable m-0 p-0 h-100" dest="selectedColumn">
+                                        <li>Holt's Model - Additive</li>
+                                        <li>Holt Winters Model - Additive</li>
+                                        <li>Linear Regression</li>
+                                    </ul>
+                                </div>
+                            </div>
+    
+                            <div class="col-md-1 col-sm-12 mt-5">
+                                <div class="text-center">
+                                    <a href="#" id="allLeft" bttype="all" src="selectedColumn" dest="availableColumn"
+                                        class="text-primary">
+                                        <span class="mr-1"><span class="fa fa-angle-double-left"></span></span>
+                                    </a>
+                                    <br>
+                                    <br>
+                                    <a id="selectedLeft" bttype="one" src="selectedColumn" dest="availableColumn"
+                                        class="text-primary">
+                                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                    </a>
+                                    <br>
+                                    <br>
+                                    <a id="selectedRight" bttype="one" src="availableColumn" dest="selectedColumn"
+                                        class="text-primary">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </a>
+                                    <br>
+                                    <br>
+                                    <a id="allRight" bttype="all" src="availableColumn" dest="selectedColumn"
+                                        class="text-primary">
+                                        <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+                            </div>
+    
+                            <div class="card border-light col-md-5 col-sm-12 position-relative">
+                                <div class="card-header bg-white border-0 text-center pb-1">
+                                    <h5>Selected Columns</h5>
+                                </div>
+                                <div class="card-body scc-box">
+                                    <ul id="selectedColumn" class="connectedSortable m-0 p-0 h-100" dest="availableColumn">
+                                        <li>Moving Average</li>
+                                        <li>Exponential Smoothing</li>
+                                        <li>Holt's Model - Multiplicative</li>
+                                        <li>Holt Winters Model - Multiplicative</li>
+                                        <li>Logistic Regression</li>
+                                        <li>Moving Average</li>
+                                        <li>Exponential Smoothing</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="saveColumnSelection" data-bs-dismiss="modal"
+                            class="btn btn-primary ml-auto">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade show" id="modal-update-column" tabindex="-1" aria-labelledby="modal-update-column"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">Update Column</h2><button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="form-group mb-4" id="updateColInp">
+                                <label id="ColValueLabel" class="my-1 mx-2" for="colValue">Column Name</label>
+                                <div class="input-group"><input placeholder="Column Value" class="form-control"
+                                        id="colValue">
+                                    <span class="input-group-text"><span class="fas fa-columns"></span></span>
+                                </div>
+                                <div class="input-group">
+                                    <select class="form-select" id="colSelectValue">
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
+                                    <span class="input-group-text"><span class="fas fa-columns"></span></span>
+                                </div>
+                                <!-- <datalist id="optionsList"></datalist> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="updateColumn" class="btn btn-primary ml-auto">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade show" id="modal-format-column" tabindex="-1" aria-labelledby="modal-format-column"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">Format Column</h2><button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row align-items-end mb-2 mx-3">
+                            <label class="col" for="fieldType">Field Type</label>
+                            <select class="form-select col" id="fieldType">
+                                <option value='freetext' selected>Free Text</option>
+                                <option value='autofiller' >Auto Filler</option>
+                                <option value='date'>Date</option>
+                                <option value='lov'>LOV</option>
+                                <option value='numeric'>Numeric</option>
+                            </select>
+                        </div>
+                        <div class="row align-items-end mx-3">
+                            <label class="col" for="decimalPlaces">Decimal Places</label>
+                            <input  class="form-control col pr-4" id="decimalPlaces" value="0">
+                        </div>
+                        <div class="row align-items-end my-2 mx-3">
+                            <label class="col" for="commaSeparator">Comma Separator</label>
+                            <select class="form-select col" id="commaSeparator">
+                                <option value=1>True</option>
+                                <option value=0>False</option>
+                                <option value=2>Percentage</option>
+                            </select>
+                        </div>
+                        
+                        <div class="row my-0 mx-3 ">
+                            <div class="col-sm-7 pr-0 pl-2 pl-4 align-self-center ml-auto col-12">
+                                <textarea name="lov" id="lovText" rows="6" class="form-control"></textarea>
+                            </div>
+                        </div>
+                        <div class="row align-items-end my-0 mx-3">
+                            <label class="col" for="localeString">Locale</label>
+                            <select class="form-select col" id="localeString">
+                                <option value=0></option>
+                                <option value="en-US">en-US</option>
+                                <option value="en-GB">en-GB</option>
+                                <option value="de-CH">de-CH</option>
+                                <option value="de-DE">de-DE</option>
+                                <option value="en-IN">en-IN</option>
+                                <option value="hi-IN">hi-IN</option>
+                                <option value="fr-FR">fr-FR</option>
+                            </select>
+                        </div>
+                        <div class="row align-items-end my-2 mx-3">
+                            <label class="col" for="displayCurrency">Currency</label>
+                            <select class="form-select col" id="displayCurrency">
+                                <option value=0></option>
+                                <option value="CHF">CHF</option>
+                                <option value="EUR">EUR</option>
+                                <option value="INR">INR</option>
+                                <option value="USD">USD</option>
+                                <option value="JPY">JPY</option>
+                                <option value="GBP">GBP</option>
+                                <option value="CNY">CNY</option>
+                                <option value="ZAR">ZAR</option>
+                            </select>
+                        </div>
+                        <div class="row align-items-end my-2 mx-3 mb-0">
+                            <label class="col" for="aggregateFunction">Aggregate Function</label>
+                            <select class="form-select col" id="aggregateFunction">
+                                <option value="SUM">SUM</option>
+                                <option value="AVG">AVG</option>
+                                <option value="MIN">MIN</option>
+                                <option value="MAX">MAX</option>
+                                <option value="COUNT">COUNT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="updateFormats" class="btn btn-primary ml-auto">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade show" id="modal-get-viewQuery" tabindex="-1" aria-labelledby="modal-file-upload"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">View Query</h2><button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="container">
+                        <div class="modal-body p-0">
+                            <div class="row row-header my-4">
+                                <div class = "col-3 align-self-start">
+                                    <label for="cluster-input"><h6>Query</h6></label>
+                                </div>
+                                <div class="col-9">
+                                    <textarea id="queryInput"
+                                            class="form-control" rows="7"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="ok-query" data-bs-dismiss="modal"
+                            class="btn btn-primary ml-auto">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="dataList_div"></div>
+    
+        
+    </main>
+    
+    <div class="modal fade" id="modal-flow-constraint" data-backdrop="static" tabindex="-1"
+      aria-labelledby="modal-flow-constraint" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div id="headerDiv" class="modal-header mb-3">
+                <h2 class="h5 modal-title">Define Constraint</h2>
+                
+                <div id="itmTypeRow" class="row ml-auto align-items-center" style="display: none;">    
+                    <div class="col-auto mt-2">
+                        <label ><h6>ITEMTYPE</h6></label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="form-select" id="itemType"></select>
+                    </div>
+                </div>
+                <div id="srcTypeRow" class="row ml-auto align-items-center" style="display: none;">    
+                    <div class="col-auto mt-2">
+                        <label ><h6>SOURCETYPE</h6></label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="form-select" id="srcType"></select>
+                    </div>
+                </div>
+                <div id="destTypeRow" class="row ml-auto align-items-center" style="display: none;">    
+                    <div class="col-auto mt-2">
+                        <label ><h6>DESTINATIONTYPE</h6></label>
+                    </div>
+                    <div class="col-auto">
+                            <select class="form-select" id="destType"></select>
+                    </div>
+                </div>
+                <div id="prdTypeRow" class="row ml-auto align-items-center" style="display: none;">    
+                    <div class="col-auto mt-2">
+                        <label ><h6>PERIODTYPE</h6></label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="form-select" id="prdType"></select>
+                    </div>
+                </div>
+                <div id="modeTypeRow" class="row ml-auto align-items-center" style="display: none;">    
+                    <div class="col-auto mt-2">
+                        <label ><h6>MODETYPE</h6></label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="form-select" id="modeType"></select>
+                    </div>
+                </div>
+                
+            </div>
+    
+          <div class="model-body">
+            <div class="container-fluid">
+              <div class="row modelBodycontenier">
+                <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12">
+                  <nav>
+                    <ul id="tabList" class="nav nav-pills square nav-fill flex-column vertical-tab" role="tablist">
+                      <li class="nav-item mb-0" style="display: none;">
+                        <a id="item-new" class="nav-link p-2 rounded-0" data-toggle="tab" href="#ItemTab"
+                          role="tab">
+                          <span class="d-block text-left">Item</span>
+                        </a>
+                      </li>
+                      <li class="nav-item mb-0" style="display: none;">
+                        <a id="src-location-new" class="nav-link p-2 rounded-0" data-toggle="tab" href="#sourceLocationTab" role="tab">
+                          <span class="d-block text-left">Source Location</span>
+                        </a>
+                      </li>
+                      <li class="nav-item mb-0" style="display: none;">
+                        <a id="dest-location-new" class="nav-link p-2 rounded-0" data-toggle="tab" href="#destLocationTab" role="tab">
+                          <span class="d-block text-left">Destination Location</span>
+                        </a>
+                      </li>
+                      <li class="nav-item mb-0" style="display: none;">
+                        <a id="period-new" class="nav-link p-2 rounded-0" data-toggle="tab" href="#PeriodTab" role="tab">
+                          <span class="d-block text-left">Period</span>
+                        </a>
+                      </li>
+                      <li class="nav-item mb-0" style="display: none;">
+                        <a id="mode-new" class="nav-link p-2 rounded-0" data-toggle="tab" href="#ModeTab" role="tab">
+                          <span class="d-block text-left">Mode</span>
+                        </a>
+                      </li>
+                      <li class="nav-item mb-0">
+                        <a id="details-new" class="nav-link p-2 rounded-0" data-toggle="tab" href="#detailsTab" role="tab">
+                          <span class="d-block text-left">
+                            <span class="fab fa-wpforms pr-2" aria-hidden="true"></span>Details</span>
+                        </a>
+                      </li>
+                      
+                    </ul>
+                  </nav>
+                </div>
+    
+                <div class="col-xl-9 col-lg-9 col-md-12 col-sm-12 border-module-column tab-content">
+                    <div id="combination-loader" class="center" style="display: none;z-index: 1000;"></div>
+                    <div id="ItemTab" class="h-100 tab-pane fade active show" role="tabpanel">
+                        <div class="d-flex flex-column justify-content-between">
+                            <div class="d-flex flex-row align-items-stretch justify-content-between">
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Available Levels</h5>
+                                    </div>
+    
+                                    <div class="filter-module scc-box1" style="height: 180px;">
+                                        <ul id="availableItemLevel" dest="selectedItemLevel" class="tree parent-div">
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="align-self-center h-25 d-flex flex-column justify-content-around" style="flex: 1;">
+                                    <a id="removeAllItemFilters" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-left"></span>
+                                    </a>
+                                </div>
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Selected Levels</h5>
+                                    </div>
+                                    <div class="scc-box1 parent-div" id="selectedItemLevel" dest="availableItemLevel"
+                                        style="height: 180px;">
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div class="d-flex flex-row align-items-stretch justify-content-between mt-3">
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Available Members<i type="button" id="buttonAvailableItemMembers"
+                                            class="fa fa-search" aria-hidden="true" style="padding-left: 11px;font-size: 1rem;"></i>
+                                        </h5>
+                                    </div>
+                                    <div id="Item-data-loader" class="center" style="display:none;"></div>
+                                    <div class="filter-module scc-box1 px-2" style="height: 180px;">
+                                        <input id="searchAvailableItemMembers" type="search" name="searchfilter"
+                                        class="form-control moduleForm-feild mr-3" placeholder="Search  Available Members..">
+                                        <table class="table table-sm">
+                                        <tbody id="availableItemMembers" destination-table="selectedItemMembers"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+    
+                                <div class="d-flex flex-column justify-content-around py-3" style="flex: 1;">
+                                    <a id="Item_allRight" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-right"></span>
+                                    </a>
+                                    <a id="Item_oneRight" class="text-primary text-center">
+                                        <span class="fa fa-chevron-right"></span>
+                                    </a>
+                                    <a id="Item_oneLeft" class="text-primary text-center">
+                                        <span class="fa fa-chevron-left"></span>
+                                    </a>
+                                    <a id="Item_allLeft" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-left"></span>
+                                    </a>
+                                </div>
+    
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Selected Members<i type="button" id="buttonSelectedItemMembers"
+                                            class="fa fa-search" aria-hidden="true" style="padding-left: 15px;font-size: 1rem;"></i>
+                                        </h5>
+                                    </div>
+                                    <div class="filter-module scc-box1 px-2" style="height: 180px;">
+                                        <input id="searchSelectedItemMembers" type="search" name="searchfilter"
+                                        class="form-control moduleForm-feild mr-2" placeholder="Search Selected Members..">
+                                        <table class="table table-sm">
+                                        <tbody id="selectedItemMembers" destination-table="availableItemMembers">
+                                        </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+    
+                            </div>
+                        </div>
+                    </div>
+                    <div id="sourceLocationTab" class="h-100 tab-pane fade" role="tabpanel">
+                        <div class="d-flex flex-column justify-content-between">
+                            <div class="d-flex flex-row align-items-stretch justify-content-between">
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Available Levels</h5>
+                                    </div>
+    
+                                    <div class="filter-module scc-box1" style="height: 180px;">
+                                        <ul id="availableSrcLocationLevel" dest="selectedSrcLocationLevel" class="tree parent-div">
+                                        <ul id="availableSrcLocationLevel" dest="selectedSrcLocationLevel" class="tree parent-div">
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="align-self-center h-25 d-flex flex-column justify-content-around" style="flex: 1;">
+                                    <a id="removeAllSrcLocationFilters" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-left"></span>
+                                    </a>
+                                </div>
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Selected Levels</h5>
+                                    </div>
+                                    <div class="scc-box1 parent-div" id="selectedSrcLocationLevel" dest="availableSrcLocationLevel"
+                                        style="height: 180px;">
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div class="d-flex flex-row align-items-stretch justify-content-between mt-3">
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Available Members<i type="button" id="buttonAvailableSrcLocationMembers"
+                                            class="fa fa-search" aria-hidden="true" style="padding-left: 11px;font-size: 1rem;"></i>
+                                        </h5>
+                                    </div>
+                                    <div id="srcLocation-data-loader" class="center" style="display:none;"></div>
+                                    <div class="filter-module scc-box1 px-2" style="height: 180px;">
+                                        <input id="searchAvailableSrcLocationMembers" type="search" name="searchfilter"
+                                        class="form-control moduleForm-feild mr-3" placeholder="Search  Available Members..">
+                                        <table class="table table-sm">
+                                        <tbody id="availableSrcLocationMembers" destination-table="selectedSrcLocationMembers"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+    
+                                <div class="d-flex flex-column justify-content-around py-3" style="flex: 1;">
+                                    <a id="srcLocation_allRight" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-right"></span>
+                                    </a>
+                                    <a id="srcLocation_oneRight" class="text-primary text-center">
+                                        <span class="fa fa-chevron-right"></span>
+                                    </a>
+                                    <a id="srcLocation_oneLeft" class="text-primary text-center">
+                                        <span class="fa fa-chevron-left"></span>
+                                    </a>
+                                    <a id="srcLocation_allLeft" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-left"></span>
+                                    </a>
+                                </div>
+    
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Selected Members<i type="button" id="buttonSelectedSrcLocationMembers"
+                                            class="fa fa-search" aria-hidden="true" style="padding-left: 15px;font-size: 1rem;"></i>
+                                        </h5>
+                                    </div>
+                                    <div class="filter-module scc-box1 px-2" style="height: 180px;">
+                                        <input id="searchSelectedSrcLocationMembers" type="search" name="searchfilter"
+                                        class="form-control moduleForm-feild mr-2" placeholder="Search Selected Members..">
+                                        <table class="table table-sm">
+                                        <tbody id="selectedSrcLocationMembers" destination-table="availableSrcLocationMembers">
+                                        </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+    
+                            </div>
+                        </div>
+                    </div>
+                    <div id="destLocationTab" class="h-100 tab-pane fade" role="tabpanel">
+                        <div class="d-flex flex-column justify-content-between">
+                            <div class="d-flex flex-row align-items-stretch justify-content-between">
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Available Levels</h5>
+                                    </div>
+    
+                                    <div class="filter-module scc-box1" style="height: 180px;">
+                                        <ul id="availableDestLocationLevel" dest="selectedDestLocationLevel" class="tree parent-div">
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="align-self-center h-25 d-flex flex-column justify-content-around" style="flex: 1;">
+                                    <a id="removeAllDestLocationFilters" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-left"></span>
+                                    </a>
+                                </div>
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Selected Levels</h5>
+                                    </div>
+                                    <div class="scc-box1 parent-div" id="selectedDestLocationLevel" dest="availableDestLocationLevel"
+                                        style="height: 180px;">
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div class="d-flex flex-row align-items-stretch justify-content-between mt-3">
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Available Members<i type="button" id="buttonAvailableDestLocationMembers"
+                                            class="fa fa-search" aria-hidden="true" style="padding-left: 11px;font-size: 1rem;"></i>
+                                        </h5>
+                                    </div>
+                                    <div id="destLocation-data-loader" class="center" style="display:none;"></div>
+                                    <div class="filter-module scc-box1 px-2" style="height: 180px;">
+                                        <input id="searchAvailableDestLocationMembers" type="search" name="searchfilter"
+                                        class="form-control moduleForm-feild mr-3" placeholder="Search  Available Members..">
+                                        <table class="table table-sm">
+                                        <tbody id="availableDestLocationMembers" destination-table="selectedDestLocationMembers"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+    
+                                <div class="d-flex flex-column justify-content-around py-3" style="flex: 1;">
+                                    <a id="destLocation_allRight" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-right"></span>
+                                    </a>
+                                    <a id="destLocation_oneRight" class="text-primary text-center">
+                                        <span class="fa fa-chevron-right"></span>
+                                    </a>
+                                    <a id="destLocation_oneLeft" class="text-primary text-center">
+                                        <span class="fa fa-chevron-left"></span>
+                                    </a>
+                                    <a id="destLocation_allLeft" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-left"></span>
+                                    </a>
+                                </div>
+    
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Selected Members<i type="button" id="buttonSelectedDestLocationMembers"
+                                            class="fa fa-search" aria-hidden="true" style="padding-left: 15px;font-size: 1rem;"></i>
+                                        </h5>
+                                    </div>
+                                    <div class="filter-module scc-box1 px-2" style="height: 180px;">
+                                        <input id="searchSelectedDestLocationMembers" type="search" name="searchfilter"
+                                        class="form-control moduleForm-feild mr-2" placeholder="Search Selected Members..">
+                                        <table class="table table-sm">
+                                        <tbody id="selectedDestLocationMembers" destination-table="availableDestLocationMembers">
+                                        </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+    
+                            </div>
+                        </div>
+                    </div>
+                    <div id="PeriodTab" class="h-100 tab-pane fade" role="tabpanel">
+                        <div class="d-flex flex-column justify-content-between">
+                            <div class="d-flex flex-row align-items-stretch justify-content-between">
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Available Levels</h5>
+                                    </div>
+    
+                                    <div class="filter-module scc-box1" style="height: 180px;">
+                                        <ul id="availablePeriodLevel" dest="selectedPeriodLevel" class="tree parent-div">
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="align-self-center h-25 d-flex flex-column justify-content-around" style="flex: 1;">
+                                    <a id="removeAllPeriodFilters" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-left"></span>
+                                    </a>
+                                </div>
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Selected Levels</h5>
+                                    </div>
+                                    <div class="scc-box1 parent-div" id="selectedPeriodLevel" dest="availablePeriodLevel"
+                                        style="height: 180px;">
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div class="d-flex flex-row align-items-stretch justify-content-between mt-3">
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Available Members<i type="button" id="buttonAvailablePeriodMembers"
+                                            class="fa fa-search" aria-hidden="true" style="padding-left: 11px;font-size: 1rem;"></i>
+                                        </h5>
+                                    </div>
+                                    <div id="Period-data-loader" class="center" style="display:none;"></div>
+                                    <div class="filter-module scc-box1 px-2" style="height: 180px;">
+                                        <input id="searchAvailablePeriodMembers" type="search" name="searchfilter"
+                                        class="form-control moduleForm-feild mr-3" placeholder="Search  Available Members..">
+                                        <table class="table table-sm">
+                                        <tbody id="availablePeriodMembers" destination-table="selectedPeriodMembers"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+    
+                                <div class="d-flex flex-column justify-content-around py-3" style="flex: 1;">
+                                    <a id="Period_allRight" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-right"></span>
+                                        
+                                    </a>
+                                    <a id="Period_oneRight" class="text-primary text-center">
+                                        <span class="fa fa-chevron-right"></span>
+                                    </a>
+                                    <a id="Period_oneLeft" class="text-primary text-center">
+                                        <span class="fa fa-chevron-left"></span>
+                                    </a>
+                                    <a id="Period_allLeft" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-left"></span>
+                                    </a>
+                                </div>
+    
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Selected Members<i type="button" id="buttonSelectedPeriodMembers"
+                                            class="fa fa-search" aria-hidden="true" style="padding-left: 15px;font-size: 1rem;"></i>
+                                        </h5>
+                                    </div>
+                                    <div class="filter-module scc-box1 px-2" style="height: 180px;">
+                                        <input id="searchSelectedPeriodMembers" type="search" name="searchfilter"
+                                        class="form-control moduleForm-feild mr-2" placeholder="Search Selected Members..">
+                                        <table class="table table-sm">
+                                            <tbody id="selectedPeriodMembers" destination-table="availablePeriodMembers">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+    
+                            </div>
+                        </div>
+                    </div>
+                    <div id="ModeTab" class="h-100 tab-pane fade" role="tabpanel">
+                        <div class="d-flex flex-column justify-content-between">
+                            <div class="d-flex flex-row align-items-stretch justify-content-between">
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Available Levels</h5>
+                                    </div>
+    
+                                    <div class="filter-module scc-box1" style="height: 180px;">
+                                        <ul id="availableModeLevel" dest="selectedModeLevel" class="tree parent-div">
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="align-self-center h-25 d-flex flex-column justify-content-around" style="flex: 1;">
+                                    <a id="removeAllModeFilters" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-left"></span>
+                                    </a>
+                                </div>
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Selected Levels</h5>
+                                    </div>
+                                    <div class="scc-box1 parent-div" id="selectedModeLevel" dest="availableModeLevel"
+                                        style="height: 180px;">
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div class="d-flex flex-row align-items-stretch justify-content-between mt-3">
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Available Members<i type="button" id="buttonAvailableModeMembers"
+                                            class="fa fa-search" aria-hidden="true" style="padding-left: 11px;font-size: 1rem;"></i>
+                                        </h5>
+                                    </div>
+                                    <div id="Mode-data-loader" class="center" style="display:none;"></div>
+                                    <div class="filter-module scc-box1 px-2" style="height: 180px;">
+                                        <input id="searchAvailableModeMembers" type="search" name="searchfilter"
+                                        class="form-control moduleForm-feild mr-3" placeholder="Search  Available Members..">
+                                        <table class="table table-sm">
+                                        <tbody id="availableModeMembers" destination-table="selectedModeMembers"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+    
+                                <div class="d-flex flex-column justify-content-around py-3" style="flex: 1;">
+                                    <a id="Mode_allRight" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-right"></span>
+                                    </a>
+                                    <a id="Mode_oneRight" class="text-primary text-center">
+                                        <span class="fa fa-chevron-right"></span>
+                                    </a>
+                                    <a id="Mode_oneLeft" class="text-primary text-center">
+                                        <span class="fa fa-chevron-left"></span>
+                                    </a>
+                                    <a id="Mode_allLeft" class="text-primary text-center">
+                                        <span class="fa fa-angle-double-left"></span>
+                                    </a>
+                                </div>
+    
+                                <div class="card border-light" style="flex: 4;">
+                                    <div class="card-header bg-white border-0 text-center py-2">
+                                        <h5 class="m-0">Selected Members<i type="button" id="buttonSelectedModeMembers"
+                                            class="fa fa-search" aria-hidden="true" style="padding-left: 15px;font-size: 1rem;"></i>
+                                        </h5>
+                                    </div>
+                                    <div class="filter-module scc-box1 px-2" style="height: 180px;">
+                                        <input id="searchSelectedModeMembers" type="search" name="searchfilter"
+                                        class="form-control moduleForm-feild mr-2" placeholder="Search Selected Members..">
+                                        <table class="table table-sm">
+                                            <tbody id="selectedModeMembers" destination-table="availableModeMembers">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+    
+                            </div>
+                        </div>
+                    </div>
+                    <div id="detailsTab" class="h-100 tab-pane fade" role="tabpanel">
+                        <div class="d-flex flex-column justify-content-between" >
+                            <div class="card border-light" style="height: 465px;overflow: auto;">
+                                <div id="columns-div" class="filter-module container">
+                                    <div class="row align-items-center mt-3">
+                                        <div class="col-5">
+                                            <label for="period_input">DESTINATION LOCATION</label>
+                                        </div>
+                                        <div class="col-7">
+                                            <input type="text" class="form-control">
+                                        </div> 
+                                    </div>                                
+                                </div>
+                            </div>                        
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          <div class="model-footer mb-2">
+            <div class="container-fluid">
+              <div class="d-flex flex-row justify-content-end my-2">
+                <button data-bs-dismiss="modal" class="btn btn-tertiary">Cancel</button>
+                <button id="ok-constraint" type="button" class="ml-auto btn btn-primary">Ok</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./workers/sw.js')
+            .then(function(registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
+            }).catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+      </script>
+<script src="./page_assets/table-display/js/script.js" type="module"></script>
+<script src="./page_assets/table-display/js/script2.js" type="module"></script>
+
+  <script type="module" src="./assets/js/pixel.js"></script> 
+  
+</body>
+
+</html>

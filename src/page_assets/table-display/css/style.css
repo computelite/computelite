@@ -1,0 +1,354 @@
+
+div.test {
+    height: 95vh;
+    width: 100%;
+    overflow: auto;
+}
+
+.fa-sum:before {
+    content: "\03a3";
+    font-family: sans-serif;
+    font-weight: 600;
+}
+
+
+.table-footer td {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+.table-footer span {
+    cursor: pointer;
+}
+
+
+.fa-SingleQuote:before {
+    content: "\275C";
+    font-family: sans-serif;
+    font-weight: 600;
+}
+
+#displayTable .headers th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    outline: 1px solid rgb(220, 230, 243);
+    outline-offset: 0px;
+}
+
+#displayTable .lovRow th{
+    position: sticky;
+    top: 2.1rem;
+    z-index: 30;
+    outline: 1px solid rgb(220, 230, 243);
+    outline-offset: 0px;
+    background-color: white;
+}
+
+#displayTable .footer td {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    outline: 1px solid #174F84;
+    outline-offset: 0px;
+    background-color: #DDE1ED !important;
+}
+
+
+
+
+
+#displayTable .headers th {
+    border: 1px solid rgb(220, 230, 243);
+    background-color: white;
+    cursor: pointer;
+}
+
+#displayTable .selected_col{
+    background-color: #EFF2F5 !important;
+}
+
+#displayTable a.selected{
+    background-color: #EFF2F5 !important;
+}
+
+
+#displayTable .headers span {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    cursor: pointer;
+}
+
+#displayTable .headers span:hover {
+    outline: 1px solid rgb(220, 230, 243);
+    outline-offset: -1px;
+}
+
+#lovRow span.input-group-text {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+}
+
+.multiselect-container li {
+    padding-left: 0.75rem;
+}
+
+.dropdown-menu a {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+th.min-width{
+    min-width: 100px;
+}
+
+.dropdown-item button {
+    float: right;
+}
+
+.dropdown-item label.form-check-label {
+    padding-left: 0.25rem;
+}
+
+div.lov-values {
+    max-height: 50vh;
+    overflow-y: auto;
+
+}
+
+.scc-box {
+    height: 400px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    list-style-type: none;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.scc-box li {
+    user-select: none; 
+    border-bottom: thin solid rgb(137, 207, 240);
+    list-style-type: none;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    font-weight: 400;
+}
+
+.scc-box ul {
+    padding-left: 0rem;
+}
+
+.scc-box li.selectedValue{
+	background-color:#ddd;
+}
+
+.no_user_select td{
+    user-select: none;
+}
+
+#displayTable td input[type=number] {
+    -moz-appearance: textfield;
+}
+
+#displayTable td input::-webkit-outer-spin-button,
+#displayTable td input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#colValue {
+    -moz-appearance: textfield;
+}
+
+#colValue::-webkit-outer-spin-button,
+#colValue::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
+.datepicker{
+    z-index: 1100 !important;
+}
+
+.center { 
+    border: 12px solid #f3f3f3; 
+    border-radius: 50%; 
+    border-top: 12px solid #1c2540; 
+    width: 70px; 
+    height: 70px; 
+    animation: spin 1s linear infinite; 
+} 
+  
+@keyframes spin { 
+    100% { 
+        transform: rotate(360deg); 
+    } 
+} 
+  
+.center { 
+    position: absolute; 
+    top: 0; 
+    bottom: 0; 
+    left: 0; 
+    right: 0; 
+    margin: auto; 
+} 
+
+.scc-box1{
+    max-height: 400px;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    list-style-type: none;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    user-select: none;
+    }
+
+.scc-box1 li.selectedValue{
+    background-color:#ddd;
+}  
+.scc-box1 tr.selectedValue{
+    background-color: #EFF2F5 !important;}  
+
+.tree li {
+    list-style-type: none;
+    margin: 0px;
+    position: relative;
+    line-height: 24px;
+}
+
+.tree li::before {
+    content: "";
+    position: absolute;
+    top: -4px;
+    left: -27px;
+    border-left: 1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    border-radius:0 0 0 0px;
+    width:20px;
+    height:15px;
+}
+
+.tree li::after {
+    position:absolute;
+    content:"";
+    top: 10px;
+    left: -27px;
+    border-left: 1px solid #ccc;
+    border-top:1px solid #ccc;
+    border-radius:0px 0 0 0;
+    width:20px;
+    height:100%;
+}
+
+.tree li:last-child::after  {
+    display:none;
+}
+
+.tree li:last-child:before{
+    border-radius:0;
+}
+
+ul.tree>li:first-child::before {
+    display:none;
+}
+
+ul.tree>li:first-child::after {
+    border-radius:0;
+}
+
+.tree li a {
+    padding:2px 5px;
+    position: relative;
+    bottom: 5px;
+    font-size: 15px;
+}
+
+label.checkBox-label{
+    display: block;
+    position: relative;
+    cursor: pointer;
+    font-size: 13px;
+        margin-bottom: 0;
+        position: relative;
+        bottom: 3px;
+        right: 5px;
+}
+    
+label.checkBox-label:before {
+    background-color: transparent;
+    color: #893168;
+    content: " ";
+    display: block;
+    border-radius: 50%;
+    position: absolute;
+    top: -1px;
+    left: -5px;
+    width: 25px;
+    height: 25px;
+    text-align: center;
+    line-height: 28px;
+    transition-duration: 0.4s;
+    transform: scale(7px);
+    font-size: 24px;
+    font-weight: 900;
+    transform:scale(0);
+}
+    
+:checked + label.checkBox-label {
+    border-color: #ddd;
+}
+
+:checked + label.checkBox-label:before {
+    content: "✓";
+    background-color: transparent;
+    transform: scale(1);
+}
+
+input.inputcheckbox[type="checkbox"]{
+    display: none;
+}
+
+.checkBox-label span {
+    padding-right: 0.25rem;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+.ZDX_H{
+    z-index: 50 !important;
+    background-color: #fff !important;
+}
+
+.ZDX_R{
+    z-index: 40;
+    background-color: #fff !important;
+    outline: 1px solid rgb(220, 230, 243);
+    outline-offset: 0px;
+}
+
+.STX {
+    position: sticky;
+}
+
+.FXC{
+    color: white;
+    background-color: rgb(66, 71, 103) !important;
+}
+
+.selected_col{
+    color: rgb(66, 71, 103) !important;
+}

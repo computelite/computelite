@@ -1,0 +1,429 @@
+
+.left-sidebar {
+    z-index: 1030;
+    height: 100vh;
+    position:relative;
+    align-content: flex-start;
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    transition: max-width .3s;
+}
+
+.left-sidebar .sidebar-text {
+    color: #dce6f3;
+    font-size: 1rem;
+    white-space: nowrap;
+    list-style: none;
+}
+.right-sidebar {
+    z-index: 1030;
+    position:relative;
+    align-content: flex-start;
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    bottom: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    transition: max-width .3s;
+}
+
+.right-sidebar .sidebar-text {
+    color: #dce6f3;
+    font-size: 1rem;
+    white-space: nowrap;
+    list-style: none;
+}
+.lower-sidebar {
+    z-index: 1030;
+    position:relative;
+    align-content: flex-start;
+    width: 100%;
+    height: 33vh;    
+    top: 0;    
+    overflow-y: auto;
+    transition: max-width .3s;
+    margin-top: auto;
+    background-color: #1e1e1e;
+    
+}
+
+.lower-sidebar .sidebar-text {
+    color: #dce6f3;
+    font-size: 1rem;
+    white-space: nowrap;
+    list-style: none;
+}
+
+.left-sidebar p{
+    color:#4279ce;
+}
+.upper-sidebar {
+    z-index: 1030;
+    position:relative;
+    align-content: flex-start;
+    width: 100%;
+    height: 65vh;    
+    top: 0;    
+    transition: max-width .3s;
+    margin-bottom: auto;
+    background-color: #1e1e1e;
+    
+}
+
+.upper-sidebar .sidebar-text {
+    color: #dce6f3;
+    font-size: 1rem;
+    white-space: nowrap;
+    list-style: none;
+}
+
+.dropdown-divider{
+    height: 0;
+    margin: .5rem 0;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    border-top: 1px solid #eff1f5;
+    border-top-color: rgb(239, 241, 245);
+}
+
+.file-tree {
+    width: 20%;
+    color: #4279ce;
+    padding: 15px;
+  }
+  
+  .file-tree h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  
+  .file-tree ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .file-tree li {
+    margin: 10px 0;
+    cursor: pointer;
+  }
+
+  .code-editor {
+    background-color: #1e1e1e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #editor {
+    background-color: #1e1e1e;
+    color: #dcdcdc;
+    font-size: 16px;
+    border: none;
+    outline: none;
+  }
+  #editor1 {
+    background-color: #1e1e1e;
+    color: #dcdcdc;
+    font-size: 16px;
+    border: none;
+    outline: none;
+  }
+  
+  .preview-pane {
+    width: 100%;
+    background-color: white;
+  }
+  
+  #preview {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .CodeMirror{
+    width: 100%;
+    height: 405px !important;
+  }
+
+  ul {
+    list-style: none;
+    padding-left: 20px;
+  }
+  
+  li {
+    cursor: pointer;
+    margin: 5px 0;
+  }
+  
+  li.folder {
+    font-weight: bold;
+    color: #569cd6;
+  }
+  
+  li.file {
+    color: #9cdcfe;
+  }
+  
+  li.folder::before {
+    content: "📁";
+    margin-right: 5px;
+  }
+  
+  li.file::before {
+    content: "📄";
+    margin-right: 5px;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+
+  .scc-box{
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    list-style-type: none;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+
+
+.tree li {
+    list-style-type: none;
+    margin: 0px;
+    position: relative;
+    line-height: 24px;
+    
+}
+
+.tree li::before {
+content: "";
+position: absolute;
+top: -4px;
+left: -27px;
+border-left: 1px solid #ccc;
+border-bottom:1px solid #ccc;
+border-radius:0 0 0 0px;
+width:20px;
+height:15px;
+}
+
+.tree li::after {
+position:absolute;
+content:"";
+top: 10px;
+left: -27px;
+border-left: 1px solid #ccc;
+border-top:1px solid #ccc;
+border-radius:0px 0 0 0;
+width:20px;
+height:100%;
+}
+
+.tree li:last-child::after  {
+display:none;
+}
+
+.tree li:last-child:before{
+border-radius:0;
+}
+
+ul.tree>li:first-child::before {
+display:none;
+}
+
+ul.tree>li:first-child::after {
+border-radius:0;
+}
+
+label.checkBox-label{
+  width: 100%;
+display: block;
+position: relative;
+cursor: pointer;
+font-size: 14px;
+font-weight: 400;
+margin-bottom: 0;
+position: relative;
+bottom: 3px;
+right: 5px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.tree li.selectedValue label.checkBox-label{
+  padding-left: 0.4rem;
+  background-color:#1c2540;
+  color: #eeecec;
+}
+
+.checkBox-label span {
+    padding-right: 0.25rem;
+}
+
+
+.bottom-run-button {
+  position: absolute;
+  bottom: 4px;
+  right: 0.8rem;
+  padding: 0.4rem;
+  z-index: 50 !important;
+  color: #e4e1e1;
+}
+.bottom-home-button {
+  position: absolute;
+  bottom: 4px;
+  right: 2.8rem;
+  padding: 0.4rem;
+  z-index: 50 !important;
+  color: #e4e1e1;
+}
+
+.sidebar {
+  width: 0; 
+  position: absolute; 
+  z-index: 1001; 
+  top: 0;
+  right: 0;
+  background-color:white; 
+  overflow-x: hidden; 
+  transition: 0.5s; 
+}
+
+.hide-canvas-button {
+  top: 2px;
+  position: fixed;
+  padding: 0.4rem;
+  font-size: large;
+  z-index: 1060;
+}
+
+.download-canvas-button {
+  top:370px;
+  bottom: 2px;
+  position: fixed;
+  padding: 0.4rem;
+  font-size: large;
+  z-index: 1060;
+  color: black;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 70;
+}
+
+.three-dots-loader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+.loading-overlay.hidden {
+  display: none;
+}
+
+.small-input {
+  width: 150px !important;
+  height: 25px;
+  flex: none !important;
+  margin-left: -1.5rem;
+}
+
+.tree li.selectedFolder label.checkBox-label{
+  padding-left: 0.2rem;
+  background-color:#1c2540;
+  color: #eeecec;
+}
+
+.spinner-loading {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: red;
+  animation: blink 1s infinite;
+  position: fixed;
+  top: 4px;
+  right: 4px;
+  z-index: 1050;
+}
+
+
+.spinner-complete {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: green;
+  position: fixed;
+  top: 4px;
+  right: 4px;
+  z-index: 1050;
+  animation: none;
+}
+
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.CodeMirror{
+  height: 65vh !important;
+}
+
+#filesDiv {
+  width: 100%;
+}
+
+.sticky-button {
+  position: fixed;
+  right: 5px; 
+  float: right;
+}
+

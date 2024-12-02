@@ -1,0 +1,26 @@
+@import '@fortawesome/fontawesome-free/css/all.min.css' ;
+
+.bg-soft {
+    background-color: #eff1f5!important
+}
+
+.swal2-title,
+.swal2-content {
+    color: #242E4C !important;
+}
+
+.sidebar .nav-link span:hover {
+    color: unset;
+}
+
+.nav-link span:hover {
+    color: unset;
+}
+
+.modal-footer {
+    justify-content: space-between;
+}
+
+.swal2-actions{
+    margin: 0px !important;
+}

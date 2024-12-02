@@ -1,0 +1,53 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.navbar-logo {
+    color: black !important;
+    font-size: 20px;
+}
+
+.navbar-el {
+    color: #534e4e !important;
+    font-size: 18px;
+}
+
+.footer a {
+    text-decoration: none;
+    color: black;
+}
+
+.footer a:hover {
+    color: #fff;
+}
+
+.footer-features {
+    position: relative;
+    top: 70px;
+    min-height: 200px;
+}
+
+.footer {
+    margin-top: 60px;
+    position: relative;
+    bottom: 0px;
+    color: black;
+    font-weight: 500;
+    font-family: sans-serif;
+    font-size: 15px;
+    text-align: center;
+}
+
+.footer a {
+    text-decoration: none;
+}
+
+p {
+    color: black;
+}
+
+.hero .lead {
+    font-size: 17px;
+}

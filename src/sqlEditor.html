@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!-- Primary Meta Tags -->
+    <title>Editor</title>
+    <meta name="viewport" content="width=1024, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Compute Lite">
+    <meta name="author" content="SCL">
+    <meta name="description" content="Compute in Browser">
+    <meta name="keywords" content="compute lite, edge compute, edge data, macro in browser, compute in browser, wasm" />
+    <link rel="canonical" href="https://www.ComputeLite.com">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.ComputeLite.com">
+    <meta property="og:title" content="Compute Lite">
+    <meta property="og:description" content="Compute in Browser">
+    <meta property="og:image" content="assets/img/favicon/summence.svg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.ComputeLite.com">
+    <meta property="twitter:title" content="Compute Lite">
+    <meta property="twitter:description" content="Compute in Browser">
+    <meta property="twitter:image" content="assets/img/favicon/summence.svg">
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32"
+    href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16"
+    href="favicon.ico">
+    <link rel="mask-icon" href="favicon.ico" color="#ffffff">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="theme-color" content="#ffffff">
+
+   
+    <link type="text/css" href='scss/pixel.scss' rel="stylesheet">
+    <link type="text/css" href="./page_assets/sqlEditor/css/style.css" rel="stylesheet">
+    <link type="text/css" href='scss/scl.css' rel="stylesheet">
+    <link type="text/css" href="./page_assets/table-display/css/style.css" rel="stylesheet">
+    <!-- NOTICE: You can use the _analytics.html partial to include production code specific code & trackers -->
+    
+</head>
+<body>
+    <main>
+        <div class="preloader bg-dark flex-column justify-content-center align-items-center">
+            <svg id="loader-logo" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 64 78.4">
+                <path fill="#fff" d="M10,0h1.2V11.2H0V10A10,10,0,0,1,10,0Z" />
+                <rect fill="none" stroke="#fff" stroke-width="11.2" x="40" y="17.6" width="0" height="25.6" />
+                <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="11.2" x="23" y="35.2" width="0"
+                    height="25.6" />
+                <path fill="#fff" d="M52.8,35.2H64V53.8a7,7,0,0,1-7,7H52.8V35.2Z" />
+                <rect fill="none" stroke="#fff" stroke-width="11.2" x="6" y="52.8" width="0" height="25.6" />
+                <path fill="#fff" d="M52.8,0H57a7,7,0,0,1,7,7h0v4.2H52.8V0Z" />
+                <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="11.2" x="57.8" y="17.6" width="0"
+                    height="11.2" />
+                <rect fill="none" stroke="#fff" stroke-width="11.2" x="6" y="35.2" width="0" height="11.2" />
+                <rect fill="none" stroke="#fff" stroke-width="11.2" x="40.2" y="49.6" width="0" height="11.2" />
+                <path fill="#fff" d="M17.6,67.2H28.8v1.2a10,10,0,0,1-10,10H17.6V67.2Z" />
+                <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="28.8" x="31.6" width="0" height="11.2" />
+                <rect fill="none" stroke="#fff" x="14" stroke-width="28.8" y="17.6" width="0" height="11.2" />
+            </svg>
+        </div>
+        <div class= "row" id="mainDiv" style="transition: 0.5s;">
+            <div id="tableDiv">
+                
+                <div id="displayTable" class="test">
+                    <button id="sidebarBtn" class="btn btn-primary float-right openbtn"><span class="fas" style="font-size:16px;">SQL</span></button>
+                    <div id = "sidebarDiv" class="sidebar1  flex-grow d-flex flex-column">
+                        <div class="right-div">
+                            <button id="editor-button" class="btn btn-primary m-1"><span class="fas fa-play"></span></button>
+                            <button id="logButton" class="btn btn-primary m-1">Log</button>
+                            <button id="editorButton" class="btn btn-primary m-1">Editor</button>
+                            <button id="copyBtn" class="btn btn-primary m-1" style="display: none" title = "Copy to clipboard"><span class="fa-regular fa-clipboard"></span></button>
+                        </div>
+                        <div >
+                            <div id="editorDiv">
+                                <textarea name="any" id="editorText" ></textarea>
+                                <p class="mt-2"><strong id="solutionMsg"></strong></p>
+                            </div>                        
+                            <div id="logtableDiv" class="mt-2" style="max-height: 87vh;overflow-y: scroll;display: none; ">
+                                <table id="logTable" class="table table-bordered table-hover table-sm" style="width:100%; margin-bottom: 0px;">
+                                    <thead class="">
+                                        <tr class="headers">
+                                            <th class="min-width">LOGTIME</th>
+                                            <th class="min-width">QUERY_SQL</th>
+                                            <th class="min-width">MESSAGE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>                    
+                        
+                    </div>
+                    
+                    <div id="data-loader" class="center" style="display:none;"></div>
+                    <table id="editortableDiv" class="table table-bordered table-hover table-sm" style="width: min-content; margin-bottom: 0px;">
+                        <thead class=""></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="row table-footer">
+            
+                    <div class="col-lg-6">
+            
+                        <table id="pagerBasicControls">
+            
+                            <tbody>
+            
+                                <tr>            
+                                    <td>
+                                        <span id="excelDownloadBtn" title="Export Data" class="fa fa-download"></span>
+                                    </td>
+                                    
+                                    <td>
+                                        <span id="showSummaryBtn" title="Show Summary" class="fa fa-sum"></span>
+                                    </td>
+                                    
+                                    <td>
+                                        <span id="refreshBtn" title="Refresh Table" class="fas fa-sync-alt"></span>
+                                    </td>
+                                    <td>
+                                        <span id="chooseColBtn" title="Choose Columns To Show" class="fa fa-list-alt"
+                                            data-bs-target="#modal-select-column" data-bs-toggle="modal"></span>
+                                    </td>
+                                    <td>
+                                        <span id="incrDecimals" title="Increase decimal points" class="fa fa-chevron-left"></span>
+                                    </td>
+                                    <td>
+                                        <span id="decrDecimals" title="Decrease decimal points" class="fa fa-chevron-right"></span>
+                                    </td>
+                                    
+                                    <td>
+                                        <span id="multiUpdate" title="Update multiple rows" class="fas fa-pencil-alt"></span>
+                                    </td>
+                                    
+                                    
+                                    <td>
+                                        <span id="thousandSepBtn" title="Thousand Separator" class="fa fa-SingleQuote"></span>
+                                    </td>
+                                    
+                                    
+                                    <td>
+                                        <span id="formatColumn" title="Format Columns" class="fas fa-server"></span>
+                                    </td>
+                                    
+                                    <td>
+                                        <span id="copyTable" title="Copy Table" class="fas fa-copy"></span>
+                                    </td>
+                                    <td>
+                                        <span id="viewQuery" title="View Create Statement" class="fas fa-database"
+                                        data-bs-target="#modal-get-viewQuery" data-bs-toggle="modal" style="display: none;"></span>
+                                    </td>
+                                </tr>
+            
+                            </tbody>
+            
+                        </table>
+            
+                    </div>
+                    <div class="col-lg-6">
+                        <table id="pagerDetailsSection">
+            
+                            <tbody>
+            
+                                <tr>
+            
+                                    <td id="firstPageBtn" title="First Page">
+                                        <span class="fa fa-step-backward"></span>
+                                    </td>
+                                    <td id="prevPageBtn" title="Previous Page">
+                                        <span class="fa fa-backward"></span>
+                                    </td>
+                                    <td>
+                                        Page <input id="currentPage" type="text" value="1" style="width:36px;"> of 0
+                                    </td>
+                                    <td id="nextPageBtn" title="Next Page">
+                                        <span class="fa fa-forward"></span>
+                                    </td>
+                                    <td id="lastPageBtn" title="Last Page">
+                                        <span class="fa fa-step-forward"></span>
+                                    </td>
+                                    <td id="totalRecordsPanel" style="padding-left:20px;">
+                                        1-1000 of 0
+                                    </td>
+                                </tr>
+            
+                            </tbody>
+            
+                        </table>
+                    </div>
+            
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="modal fade show" id="modal-select-column" tabindex="-1" aria-labelledby="modal-select-column"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">Select Columns</h2><button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row  mt-3">
+                            <div class="card border-light col-md-5 col-sm-12 position-relative ml-4">
+                                <div class="card-header bg-white border-0 text-center pb-1">
+                                    <h5>Available Columns</h5>
+                                </div>
+                                <div class="card-body scc-box">
+                                    <ul id="availableColumn" class="connectedSortable m-0 p-0 h-100" dest="selectedColumn">
+                                        <li>Holt's Model - Additive</li>
+                                        <li>Holt Winters Model - Additive</li>
+                                        <li>Linear Regression</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-1 col-sm-12 mt-5">
+                                <div class="text-center">
+                                    <a href="#" id="allLeft" bttype="all" src="selectedColumn" dest="availableColumn"
+                                        class="text-primary">
+                                        <span class="mr-1"><span class="fa fa-angle-double-left"></span></span>
+                                    </a>
+                                    <br>
+                                    <br>
+                                    <a id="selectedLeft" bttype="one" src="selectedColumn" dest="availableColumn"
+                                        class="text-primary">
+                                        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                                    </a>
+                                    <br>
+                                    <br>
+                                    <a id="selectedRight" bttype="one" src="availableColumn" dest="selectedColumn"
+                                        class="text-primary">
+                                        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                                    </a>
+                                    <br>
+                                    <br>
+                                    <a id="allRight" bttype="all" src="availableColumn" dest="selectedColumn"
+                                        class="text-primary">
+                                        <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="card border-light col-md-5 col-sm-12 position-relative">
+                                <div class="card-header bg-white border-0 text-center pb-1">
+                                    <h5>Selected Columns</h5>
+                                </div>
+                                <div class="card-body scc-box">
+                                    <ul id="selectedColumn" class="connectedSortable m-0 p-0 h-100" dest="availableColumn">
+                                        <li>Moving Average</li>
+                                        <li>Exponential Smoothing</li>
+                                        <li>Holt's Model - Multiplicative</li>
+                                        <li>Holt Winters Model - Multiplicative</li>
+                                        <li>Logistic Regression</li>
+                                        <li>Moving Average</li>
+                                        <li>Exponential Smoothing</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="saveColumnSelection" data-bs-dismiss="modal"
+                            class="btn btn-primary ml-auto">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade show" id="modal-update-column" tabindex="-1" aria-labelledby="modal-add-column"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">Update Column</h2><button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="form-group mb-4" id="updateColInp">
+                                <label id="ColValueLabel" class="my-1 mx-2" for="colValue">Column Name</label>
+                                <div class="input-group"><input placeholder="Column Value" class="form-control"
+                                        id="colValue">
+                                    <span class="input-group-text"><span class="fas fa-columns"></span></span>
+                                </div>
+                                <div class="input-group">
+                                    <select class="form-select" id="colSelectValue">
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
+                                    <span class="input-group-text"><span class="fas fa-columns"></span></span>
+                                </div>
+                                <!-- <datalist id="optionsList"></datalist> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="updateColumn" class="btn btn-primary ml-auto">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade show" id="modal-format-column" tabindex="-1" aria-labelledby="modal-format-column"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">Format Column</h2><button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row align-items-end mx-3">
+                            <label class="col" for="decimalPlaces">Decimal Places</label>
+                            <input  class="form-control col pr-4" id="decimalPlaces">
+                        </div>
+                        <div class="row align-items-end my-2 mx-3">
+                            <label class="col" for="commaSeparator">Comma Separator</label>
+                            <select class="form-select col" id="commaSeparator">
+                                <option value=1>True</option>
+                                <option value=0>False</option>
+                                <option value=2>Percentage</option>
+                            </select>
+                        </div>
+                        <div class="row align-items-end my-2 mx-3">
+                            <label class="col" for="fieldType">Field Type</label>
+                            <select class="form-select col" id="fieldType">
+                                <option value='freetext' selected>Free Text</option>
+                                <option value='autofiller' >Auto Filler</option>
+                                <option value='date'>Date</option>
+                                <option value='lov'>LOV</option>
+                            </select>
+                        </div>
+                        <div class="row my-0 mx-3 ">
+                            <div class="col-sm-7 pr-0 pl-2 pl-4 align-self-center ml-auto col-12">
+                                <textarea name="lov" id="lovText" rows="6" class="form-control"></textarea>
+                            </div>
+                        </div>
+                        <div class="row align-items-end my-0 mx-3">
+                            <label class="col" for="localeString">Locale</label>
+                            <select class="form-select col" id="localeString">
+                                <option value=0></option>
+                                <option value="en-US">en-US</option>
+                                <option value="en-GB">en-GB</option>
+                                <option value="de-CH">de-CH</option>
+                                <option value="de-DE">de-DE</option>
+                                <option value="en-IN">en-IN</option>
+                                <option value="hi-IN">hi-IN</option>
+                                <option value="fr-FR">fr-FR</option>
+                            </select>
+                        </div>
+                        <div class="row align-items-end my-2 mx-3">
+                            <label class="col" for="displayCurrency">Currency</label>
+                            <select class="form-select col" id="displayCurrency">
+                                <option value=0></option>
+                                <option value="CHF">CHF</option>
+                                <option value="EUR">EUR</option>
+                                <option value="INR">INR</option>
+                                <option value="USD">USD</option>
+                                <option value="JPY">JPY</option>
+                                <option value="GBP">GBP</option>
+                                <option value="CNY">CNY</option>
+                                <option value="ZAR">ZAR</option>
+                            </select>
+                        </div>
+                        <div class="row align-items-end my-2 mx-3 mb-0">
+                            <label class="col" for="aggregateFunction">Aggregate Function</label>
+                            <select class="form-select col" id="aggregateFunction">
+                                <option value="SUM">SUM</option>
+                                <option value="AVG">AVG</option>
+                                <option value="MIN">MIN</option>
+                                <option value="MAX">MAX</option>
+                                <option value="COUNT">COUNT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="updateFormats" class="btn btn-primary ml-auto">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade show" id="modal-get-viewQuery" tabindex="-1" aria-labelledby="modal-file-upload"
+            style="display: none;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="h5 modal-title">View Query</h2><button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="container">
+                        <div class="modal-body p-0">
+                            <div class="row row-header my-4">
+                                <div class = "col-3 align-self-start">
+                                    <label for="cluster-input"><h6>Query</h6></label>
+                                </div>
+                                <div class="col-9">
+                                    <textarea id="queryInput"
+                                            class="form-control" rows="7"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-tertiary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="ok-query" data-bs-dismiss="modal"
+                            class="btn btn-primary ml-auto">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="dataList_div"></div>
+
+        
+    </main>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./workers/sw.js')
+            .then(function(registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
+            }).catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+      </script>
+    <script type="module" src="./page_assets/sqlEditor/js/script.js"></script>
+    <script type="module" src="./assets/js/pixel.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,67 @@
+/**
+ * = Accordions
+ */
+//
+
+
+.accordion-button {
+    text-align: left;
+    background-color: #fafafb;
+    &:not(.collapsed) {
+        background-color: #fafafb;
+        &::after {
+          background-image: none;
+          @include transform(rotateZ(45deg));
+        }
+    }
+
+    // Accordion icon
+    &::after {
+        background-image: none;
+        content: '\f067';
+        font-family: $font-awesome-5;
+        font-size: $font-size-base;
+        font-weight: 900;
+    }
+
+    // Added by SCC
+    &:focus {
+        // border-color: inherit;
+        // &:not(.collapsed) {
+        //     border: none;
+        // }
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        // border: .0625rem solid rgba(23,31,56,.125);
+        box-shadow: none;
+    }
+}
+
+
+// Flush accordion items
+//
+// Remove borders and border-radius to keep accordion items edge-to-edge.
+
+.accordion-flush {
+    .accordion-button {
+        background-color: transparent;
+
+        &:not(.collapsed) {
+            color: $tertiary;
+        }
+
+        &:focus {
+            border-color: $light;
+            box-shadow: none;
+        }
+    }
+
+    .accordion-collapse {
+        border: 0;
+    }
+}
+
+
+.accordion-body {
+    background-color: #fff;
+}

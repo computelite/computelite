@@ -1,0 +1,39 @@
+.openbtn {
+  position: absolute !important;
+  right: 1px;
+  z-index: 1000;
+  transition: 0.5s !important;
+  font-size: 1.3rem !important;
+  border-radius: 30% 0px 0px 30% !important;
+}
+
+.sidebar1 {
+  height: 95vh;
+  width: 0;
+  position: absolute;
+  z-index: 1001;
+  top: 0;
+  right: 0;
+  background-color: white;
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+
+#logtableDiv tr.selected {
+  background-color: #EFF2F5 !important
+}
+
+.right-div {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+}
+
+#editorDiv,
+#logtableDiv {
+  width: 100%;
+}
+
+.CodeMirror {
+  height: 80vh !important;
+}
