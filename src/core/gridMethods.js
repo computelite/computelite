@@ -973,9 +973,9 @@ async function createAndImportTable(modelName, tableName, sheet, sheetHeaders) {
         const ncol = colTypes.length;
         let values = []
     
-        for (let j = 2; j < sheet.rowCount; j++) {
+        for (let j = 2; j <= sheet.rowCount; j++) {
             const newTpl = Array.from({ length: ncol }, (_, i) => {
-                const cell = sheet.getRow(j + 1).getCell(i + 1)
+                const cell = sheet.getRow(j).getCell(i + 1)
                 const cellValue = cell.value;
                 if (!cellValue && cellValue != 0) return null;
                 if (colTypes[i] === 'VARCHAR' && typeof cellValue === 'number') return getVarcharVal(cellValue);
