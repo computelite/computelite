@@ -1,5 +1,5 @@
-const cacheName = 'v4';
-const dynamicCacheName = 'd4';
+const cacheName = 'v6';
+const dynamicCacheName = 'd6';
 
 const cachedFiles = [
     '/',
@@ -36,6 +36,9 @@ self.addEventListener('activate', event => {
   
 // Fetch event - Serve cached content when offline
 self.addEventListener('fetch', event => {
+    const scopeURL = self.registration.scope;
+    const url = new URL(scopeURL);
+    const hostDomain = url.host;
    
     event.respondWith(
       caches.match(event.request).then(response => {
@@ -45,7 +48,7 @@ self.addEventListener('fetch', event => {
         return fetch(event.request).then(networkResponse => {
             return caches.open(dynamicCacheName).then(cache => {
                 if (event.request.method === "GET" && event.request.url.indexOf('https') === 0 && 
-                event.request.url.indexOf('static.supplychainlite.com') > -1){
+                event.request.url.indexOf(hostDomain) > -1){
                   cache.put(event.request, networkResponse.clone());
                 }
                 return networkResponse;
