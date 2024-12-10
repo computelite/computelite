@@ -808,13 +808,12 @@ export async function uploadExcel(modelName, tableNames, file,excelInfo = {}) {
             msgList[sheetName] = 'No column matches with existing table'
             continue
         }
-        
         let dateColumns = []
         let col_formatter = columnFormatter[0][0]
         
         for (let [idx,col] of colList.entries()){
-            
-            if (col_formatter['lov'] && col[4].toLowerCase() === "date"){
+
+            if (col_formatter['lov'] && col_formatter['lov'][col[4]] && col_formatter['lov'][col[4]].toLowerCase()==='date'){
                 dateColumns.push(idx)
             }
         }
@@ -829,7 +828,7 @@ export async function uploadExcel(modelName, tableNames, file,excelInfo = {}) {
             const newTpl = colList.map(i => {
                 const cell = newRow.getCell(i[3] + 1)
                 const cellValue = cell.value;
-                if (!cellValue && cellValue != '0') return null;
+                if (!cellValue && cellValue != '0') return null;    
                 if (i[1] === 'VARCHAR' && typeof cellValue === 'number') return getVarcharVal(cellValue);
                 if (i[1] === 'NUMERIC' && cell.model.type == 4) return getNumericVal(cellValue)
                 return cellValue;
@@ -838,7 +837,16 @@ export async function uploadExcel(modelName, tableNames, file,excelInfo = {}) {
             const dataRow = newTpl
             .map((val, idx) => {
                     if (checkValue(val)) {
-                        return dateColumns.includes(idx) ? convertDate(val) : val;
+                        if (typeof val === 'object'){                            
+                            try{
+                                const date = new Date(val)
+                                return convertDate(date)
+                            }catch{
+                                return val
+                            }                              
+                        }else{
+                            return val
+                        }                
                     }
                     return null
              })
@@ -846,6 +854,7 @@ export async function uploadExcel(modelName, tableNames, file,excelInfo = {}) {
             let breakLoop = false;
             for (let idx = 0; idx < colList.length; idx++) {
                 const colName = colList[idx];
+                
                 if (colName[1].toLowerCase() === 'numeric' && getDataType(newTpl[idx]) === 0) {
                     msgList[sheetName] = `Invalid Value "${newTpl[idx]}" at location (${j},${idx + 1}) for sheet ${sheetName}, expecting numeric value`;
                     breakLoop = true;
@@ -866,7 +875,7 @@ export async function uploadExcel(modelName, tableNames, file,excelInfo = {}) {
         const header = colList.map((col, idx) => col[0]);
     
         const insertQuery = `INSERT INTO [${sheetName}](${header.join(',')}) VALUES(${header.map(() => '?').join(',')})`;
-        try {                
+        try {    
             const last_insert_rowid = await executeQuery('executeMany',modelName,insertQuery,values);
         } catch (ex) {
             msgList[sheetName] = `Invalid Row "${newTpl}" at ${j}th row in sheet ${sheetName}, error ${ex}`;
@@ -1135,4 +1144,18 @@ export async function createTable(modelName,tablename, colNames, colTypes) {
     const query = colNames.map((colName, index) => `${colName} ${colTypes[index]}`).join(', ');
     await executeQuery('executeQuery',modelName,`CREATE TABLE ${tablename} (${query})`,['script'])
     return true
+}
+
+function convertDate(dateObj) {
+    if (!(dateObj instanceof Date)) {
+        return date
+    }
+
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const date = String(dateObj.getDate()).padStart(2, '0');
+    
+
+    return `${year}-${month}-${date}`;
+
 }

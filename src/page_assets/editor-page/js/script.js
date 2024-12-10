@@ -28,7 +28,27 @@ window.onload = async function () {
       mode: "python",
       theme:"dracula",
       autoRefresh:true,
-      autofocus:true,        
+      autofocus:true,   
+      tabSize:4,
+      indentUnit:4, 
+      
+
+  });
+
+  editor.addKeyMap({
+    'Backspace': function (cm) {
+      const cursor = cm.getCursor(); 
+      const line = cm.getLine(cursor.line);
+      const indentUnit = cm.getOption('indentUnit');
+  
+      const leadingSpaces = line.slice(0, cursor.ch);
+      if (/^\s*$/.test(leadingSpaces) && cursor.ch > 0) {
+        const newCh = Math.max(0, cursor.ch - indentUnit);
+        cm.setCursor({ line: cursor.line, ch: newCh });
+      } else {
+        cm.execCommand('delCharBefore');
+      }
+    },
   });
   
   let result = await executeQuery('init')

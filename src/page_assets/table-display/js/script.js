@@ -1577,7 +1577,7 @@ function add_insert_row() {
             td.id = 0
         }
         else if (idx > 0) {
-            if (col_name in column_formatters["lov"]) {
+            if (col_name in column_formatters["lov"] && column_formatters["lov"][col_name].toLowerCase() != 'freetext') {
                 input_el = get_cl_element("select", "form-select p-1", null)
                 for (let opt_val of column_formatters["lov"][col_name]) {
                     let el = get_cl_element("option", null, null, document.createTextNode(opt_val))
@@ -1824,7 +1824,7 @@ document.getElementById("formatColumn").onclick = function (e) {
         }
         else {
             let col_vals = []
-            if (col_name in column_formatters['lov']) {
+            if (col_name in column_formatters['lov'] && column_formatters['lov'][col_name].toLowerCase() != 'freetext') {
                 fieldType.value = 'lov'
                 col_vals = column_formatters['lov'][col_name]
 
