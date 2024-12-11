@@ -80,7 +80,7 @@ const handleDatabaseOperations = async (action,dbname,projName,query = null,para
       
       return result
     }catch(err){
-      console.log(`Some Erorr occurred while handle operation ${action} in query ${query} : Error ${err} `)
+      console.log(`Some Error occurred while handle operation ${action} in query ${query} : Error ${err} `)
       return {error:err}
 
     }  
