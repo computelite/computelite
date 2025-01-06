@@ -432,6 +432,12 @@
             }).catch(function(error) {
                 console.log('Service Worker registration failed:', error);
             });
+            navigator.serviceWorker.register('/coi-serviceworker.js')
+            .then(function(registration) {
+                console.log('CROSS ORGIN HEADER Service Worker registered with scope:', registration.scope);
+            }).catch(function(error) {
+                console.log('CROSS ORGIN HEADER Service Worker registration failed:', error);
+            });
         }
       </script>
     <script type="module" src="./page_assets/sqlEditor/js/script.js"></script>

@@ -1049,17 +1049,22 @@
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('/sw.js')
             .then(function(registration) {
                 console.log('Service Worker registered with scope:', registration.scope);
             }).catch(function(error) {
                 console.log('Service Worker registration failed:', error);
             });
+            navigator.serviceWorker.register('/coi-serviceworker.js')
+            .then(function(registration) {
+                console.log('CROSS ORGIN HEADER Service Worker registered with scope:', registration.scope);
+            }).catch(function(error) {
+                console.log('CROSS ORGIN HEADER Service Worker registration failed:', error);
+            });
         }
       </script>
 <script src="./page_assets/table-display/js/script.js" type="module"></script>
 <script src="./page_assets/table-display/js/script2.js" type="module"></script>
-
   <script type="module" src="./assets/js/pixel.js"></script> 
   
 </body>
