@@ -15,7 +15,7 @@ export default defineConfig({
         sqlEditor: path.resolve(__dirname, 'src/sqlEditor.html'),
         home: path.resolve(__dirname, 'src/homePage.html'),
         policy: path.resolve(__dirname, 'src/privacyPolicy.html'),
-        notebook: path.resolve(__dirname, 'src/S_notebook.html'),
+        notebook: path.resolve(__dirname, 'src/S_Notebook.html'),
       },
       output: {
         assetFileNames: 'assets/[name].[hash].[ext]',

@@ -196,6 +196,12 @@ function get_li_element(model_name) {
         document.getElementById('outputTxt').innerHTML = ""
         
         if (!this.classList.contains("selectedValue")) {
+            // UPGRADE VERSION
+            let version = await fetchData('home','getVersion',{ model_name: this.innerText })
+            if (version !== '1.0.4'){
+                await upgradeVersion(this.innerText,'1.0.4')
+            }
+            
             for (let cn of this.parentNode.querySelectorAll("li.selectedValue")) {
                 cn.classList.remove("selectedValue")
             }
@@ -1459,5 +1465,31 @@ document.getElementById("notebookBtn").onclick = function(){
         return
     }
     const modelName = selected_model.innerText
-    window.open(`/S_notebook.html?modelName=${modelName}`);
+    window.open(`/S_Notebook.html?modelName=${modelName}`);
+}
+
+async function upgradeVersion(modelName,version){
+    let msg = 'Success'
+    try {
+        const response = await fetch(`../sqlScripts/supplyPlanning/Version${version}.sql`); // Fetch the SQL script file from the specified path
+        
+        if (!response.ok) {
+            msg = `Failed to load SQL script: ${response.statusText}`
+        }
+
+        const sqlScript = await response.text(); // Retrieve the text content of the SQL script
+        try {
+            await executeQuery('executeQuery',modelName,sqlScript,['script'])
+
+            let query = `UPDATE S_ModelParams SET ParamValue = ? WHERE ParamName = ?`
+            await executeQuery('updateData',modelName,query,[version,'DBVersion'])
+        } catch (error) {
+            console.error('Error executing SQL script:', error);
+            msg = error
+        }
+
+    } catch (error) {
+        console.error(error);
+    }
+    return msg
 }

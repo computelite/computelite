@@ -327,3 +327,9 @@ export async function getUserModels() {
   }
   return all_models
 }
+
+export async function getVersion(data) {
+  let query = `select ParamValue from S_ModelParams where ParamName = 'DBVersion'`
+  let result = await executeQuery('fetchData',data.model_name,query)
+  return result[0][0]
+}

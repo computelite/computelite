@@ -104,7 +104,7 @@ INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, Col
 INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES ('All Other', 'V_TEMPV', 'Temp View', 'Output', NULL, 'Active', NULL);
 INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_DataFiles','Data Files','Input','["FileId","FileName","FileType","Status"]','Active',NULL);
 INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_PackageWheels','PackageWheels','Input','["WheelId","WheelName","Status"]','Active',NULL);
-INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','Notebook','Notebook','Input',null,'Active',NULL);
+INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_Notebook','Notebook','Input',null,'Active',NULL);
 
 INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('ModelIcon', 'fas fa-cube');
 INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('ModelName', 'Sample DB');
