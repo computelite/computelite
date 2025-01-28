@@ -85,9 +85,9 @@ CREATE TABLE S_PackageWheels (
 	Status	            VARCHAR DEFAULT ('Active')	
 );
 
-CREATE TABLE Notebook (
-	CellId	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	Cell_Content	VARCHAR,
+CREATE TABLE S_Notebook (
+	CellId	        INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	CellContent	    VARCHAR,
 	CreationDate	VARCHAR DEFAULT (datetime('now','localtime'))
 );
 
