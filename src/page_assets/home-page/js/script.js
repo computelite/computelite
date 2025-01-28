@@ -7,6 +7,10 @@ let excelUploadInfo = {}
 let selectedFile = null
 let imgBlob = null
 
+const params = new URLSearchParams(window.location.search)
+
+const modelName = params.get('modelName');
+
 const icons_class = {'Sample DB': 'fas fa-database','Supply Planning':'fas fa-database'}
 
 
@@ -55,6 +59,14 @@ document.addEventListener("DOMContentLoaded", async function() {
         return
     }
 
+    if (modelName){
+        await postData('/home/get-attached-model',{modelName:modelName})
+        const url = window.location.origin + window.location.pathname;
+        history.replaceState(null, '', url);        
+    }
+
+    setTimeout(get_user_models, 400);
+
     const shareBtn = document.getElementById('shareBtn');
     shareBtn.classList.add('blink');
     
@@ -66,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
     });
     
-    get_user_models();
+    
 
     document.getElementById("modal-createView").addEventListener('hide.bs.modal',function(){
         document.getElementById("viewName").value = ""
@@ -104,6 +116,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         window.open(`/editorPage.html?projectName=${projectName}&modelName=${modelName}`);
     }
 
+
     document.getElementById("closeOutput").onclick = function(){
         document.getElementById('outputDiv').style.display = "none"     
     }
@@ -124,7 +137,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.getElementById("uploadPackage").onclick = uploadPackage
     document.getElementById('downloadOutput').onclick = downloadOutput    
 
-    await executePython('init')
+    await executePython('init','editor')
     shareBtn.classList.remove('blink');
 });
 
@@ -159,9 +172,11 @@ function populate_models(model_names) {
     model_body.innerHTML = ""
     for (let model_name of model_names) {
         model_body.appendChild(get_li_element(model_name))
-       
     }
-    if (model_body.firstChild){
+
+    if (modelName && model_body.lastChild){
+        model_body.lastChild.click()
+    }else if ( model_body.firstChild){
         model_body.firstChild.click()
     }
 }
@@ -184,7 +199,7 @@ function get_li_element(model_name) {
             for (let cn of this.parentNode.querySelectorAll("li.selectedValue")) {
                 cn.classList.remove("selectedValue")
             }
-            get_model_tables(this.innerText,model_name[1])            
+            get_model_tables(this.innerText,model_name[1])
 
             this.classList.add("selectedValue")
             e.preventDefault();
@@ -1079,7 +1094,7 @@ async function populateExecutableFiles(modelName){
             const result = await executeQuery('updateData',selected_model.innerText,query,[get_current_datetime(),TaskId]);
 
             const task_id = await update_task(TaskName,'Started',null,null,TaskId)
-            let res = await executePython('executeScript',fileContent,proj_name,selected_model.innerText,execFiles,null,blobFiles,wheelFiles)
+            let res = await executePython('executeScript','editor',fileContent,proj_name,selected_model.innerText,execFiles,null,blobFiles,wheelFiles)
             
             if (res.stderr){
                 update_task(TaskName,'Errored',res.stderr,task_id)
@@ -1435,4 +1450,14 @@ async function downloadOutput() {
     setTimeout(function () {
       window.URL.revokeObjectURL(downloadLink.href);
     }, 1000);  
+}
+
+document.getElementById("notebookBtn").onclick = function(){
+    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+    if (!selected_model){
+        confirmBox("Alert!","Please select a model")
+        return
+    }
+    const modelName = selected_model.innerText
+    window.open(`/S_notebook.html?modelName=${modelName}`);
 }

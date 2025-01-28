@@ -8,7 +8,7 @@ const pageAlias = {'home':hm,'grid':gm}
 const btn_class =   { 
                         customClass:    {
                                             confirmButton: 'btn btn-primary',
-                                            cancelButton: 'btn btn-tertiary ms-3'
+                                            cancelButton: 'btn btn-tertiary mst-3'
                                         },
                         buttonsStyling: false,
                         reverseButtons: true,
@@ -17,19 +17,11 @@ const btn_class =   {
                         showCancelButton: false
                     }
 
-export async function postData(url = '', data = {}) {
-    // Default options are marked with *
-    const session_var = Object.keys(sessionStorage)
-    if (session_var.indexOf("owner_name") > -1 && sessionStorage["owner_name"] !== "None") {
-        data["owner_name"] = sessionStorage["owner_name"]
-    }
-    if (session_var.indexOf("model_name") > -1 && sessionStorage["model_name"] !== "None") {
-        data["model_name"] = sessionStorage["model_name"]
-    }
-    if (session_var.indexOf("table_name") > -1 && sessionStorage["table_name"] !== "None") {
-        data["table_name"] = sessionStorage["table_name"]
-    }
+let CURRENT_CELL
 
+
+
+export async function postData(url = '', data = {}) {
     const response = await fetch(server_url+url, {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         mode: 'cors', // no-cors, *cors, same-origin
@@ -49,7 +41,13 @@ export async function postData(url = '', data = {}) {
         } else {
             let blobType = response.headers.get('Content-Type')
             let file_name = response.headers.get('Content-Disposition').split("filename=")[1].slice(0, -1)
-            response.blob().then(blob_obj => downloadExcel(blob_obj, file_name, blobType))
+            response.blob().then(blob_obj => {
+                if (url === '/home/get-attached-model'){
+                    attachModel(blob_obj, file_name, blobType)
+                }else{
+                    downloadExcel(blob_obj, file_name, blobType)
+                }
+            })
 
         }
     } else if (response.status == 401) {
@@ -150,6 +148,52 @@ function downloadExcel(blob, filename, blobType) {
         // For Firefox it is necessary to delay revoking the ObjectURL
         window.URL.revokeObjectURL(data);
     }, 1000);
+}
+
+
+async function attachModel(blob, filename, blobType) {
+    var newBlob = new Blob([blob], { type: blobType })
+    const initialModelName = filename.split('.')[0]
+    let modelName = filename.split('.')[0]
+    
+
+    const projectName = 'Default'
+    const modelTemplate = 'Sample DB'
+    if (!localStorage.getItem('Projects')) {
+        localStorage.setItem('Projects', JSON.stringify({}))
+    }
+
+    const Projects = localStorage.getItem('Projects')
+    let all_projects = JSON.parse(Projects)
+
+
+    let msg = 'Success'
+    
+    try {
+        if (Object.keys(all_projects).includes(projectName)) {
+            if (!(modelName in all_projects[projectName]['Models'])) {
+                all_projects[projectName]['Models'][modelName] = { templateName: modelTemplate, status: 'Active' }
+            } else {
+                let count = 0;
+                while (modelName in all_projects[projectName]['Models']) {
+                    modelName = initialModelName
+                    count++;
+                    modelName = `${modelName}_${count}`;
+                }
+                all_projects[projectName]['Models'][modelName] = { templateName: modelTemplate, status: 'Active' }
+            }
+        } else {
+            all_projects[projectName] = { 'Models': { [modelName]: { templateName: modelTemplate, status: 'Active' } }, status: 'Active' }
+        }
+        const res = await executeQuery('attachModel', modelName, null, [newBlob])
+        localStorage.setItem('Projects', JSON.stringify(all_projects))
+
+    } catch (error) {
+        msg = error
+    }
+    return msg
+
+    
 }
 
 async function postFile(url, file, data = {}) {
@@ -278,24 +322,33 @@ export async function uploadFile(pageName,action,file, data = {},useBackend = fa
     }
 }
 
-export function executePython(action,code,projectName,modelName,files,fileName,blobFiles,wheelFiles) {
+
+export function executePython(action,type,code,projectName,modelName,files,fileName,blobFiles,wheelFiles,kernelId = null) {
     return new Promise((resolve, reject) => {
         const id = Date.now() + Math.random(); // Unique ID for tracking
+        const cell = document.getElementById(kernelId)
+        if (cell != null){
+            CURRENT_CELL = cell
+        }
         // Send a message to the worker with the query details and unique ID
-        py_worker.postMessage({ id,action, code,projectName,modelName,files,fileName,blobFiles,wheelFiles });
+        py_worker.postMessage({ id,action, code,projectName,modelName,files,fileName,blobFiles,drawCanvas:drawCanvas.toString(),wheelFiles,type });
         // Handler function to process the response from the worker
         const onMessageHandler = (event) => {
             if (event.data.type == 'stdout'){
-                const outputContainer = document.getElementById('outputTxt');    
                 const stdoutLines = event.data.text.split(';');
-
-                stdoutLines.forEach(line => {
-                    if (line) {
-                        const lineElement = document.createElement('div');
-                        lineElement.textContent = line;
-                        outputContainer.appendChild(lineElement);
-                    }
-                });
+                if (kernelId != null){
+                    const cell = document.getElementById(kernelId);
+                    consoleNotebookOutput(cell,stdoutLines)
+                }else{
+                    const outputContainer = document.getElementById('outputTxt');    
+                    stdoutLines.forEach(line => {
+                        if (line) {
+                            const lineElement = document.createElement('div');
+                            lineElement.textContent = line;
+                            outputContainer.appendChild(lineElement);
+                        }
+                    });
+                }                
             }
             if (event.data.id === id) {
                 // Remove the event listener once the relevant response is received
@@ -311,3 +364,93 @@ export function executePython(action,code,projectName,modelName,files,fileName,b
         py_worker.addEventListener('message', onMessageHandler);
     });
 }
+
+export function consoleNotebookOutput(cell,Lines,type = 'output') {
+    let outputContainer = cell.querySelector('div.sidebar-inner');  
+    if (!outputContainer){
+        const outputInner = get_cl_element('computelite-output',null,null,get_cl_element('div','sidebar-inner px-4 py-2'))
+        cell.querySelector('.cell-bottom').appendChild(outputInner);
+        outputContainer = cell.querySelector('div.sidebar-inner');
+    }
+
+    Lines.forEach(line => {
+        if (line) {
+            const lineElement = document.createElement('div');
+            if (type == 'error'){
+                lineElement.classList.add('text-danger')
+            }
+            lineElement.textContent = line;
+            outputContainer.appendChild(lineElement);
+        }
+    });
+
+}
+
+function drawCanvas(pixels, width, height) {
+    let CURRENT_HTML_OUTPUT_ELEMENT = CURRENT_CELL.querySelector('.cell-bottom');
+    const elem = document.createElement("div");
+    if (!CURRENT_HTML_OUTPUT_ELEMENT) {
+      console.log("HTML output from pyodide but nowhere to put it, will append to body instead.");
+      document.querySelector("body")?.appendChild(elem);
+    } else { 
+      CURRENT_HTML_OUTPUT_ELEMENT.appendChild(elem);
+    }
+    const image = new ImageData(new Uint8ClampedArray(pixels), width, height);
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      console.warn("Failed to acquire canvas context");
+      return;
+    }
+    ctx.putImageData(image, 0, 0);
+    CURRENT_HTML_OUTPUT_ELEMENT?.appendChild(canvas);
+}
+
+export async function drawImageFromPython(data) {
+    let CURRENT_HTML_OUTPUT_ELEMENT = CURRENT_CELL.querySelector('.cell-bottom');
+    // Convert Python buffer to a Blob
+    const blob = new Blob([data], { type: "image/png" }); // Adjust MIME type if necessary
+    const imgURL = URL.createObjectURL(blob);
+
+    // Create a new Image object
+    const img = new Image();
+    img.src = imgURL;
+
+    img.onload = () => {
+        // Create a canvas element
+        const canvas = get_cl_element("canvas");
+        canvas.style = "width: 100%; height: auto;";
+        
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        if (ctx) {
+            // Draw the image on the canvas
+            ctx.drawImage(img,0,0,canvas.width,canvas.height);
+            // ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+            CURRENT_HTML_OUTPUT_ELEMENT.appendChild(canvas); // Append the canvas to the body
+        } else {
+            console.error("Failed to get canvas context.");
+        }
+
+        // Clean up the object URL
+        URL.revokeObjectURL(imgURL);
+    };
+
+    img.onerror = () => {
+        console.error("Failed to load the image.");
+        URL.revokeObjectURL(imgURL);
+    };
+}
+
+
+py_worker.onmessage = function (event) {
+    if (event.data.type == 'canvas'){
+        drawCanvas(event.data.pixels, event.data.width, event.data.height);
+    }
+}
+
+

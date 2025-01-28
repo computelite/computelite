@@ -68,6 +68,10 @@ const handleDatabaseOperations = async (action,dbname,projName,query = null,para
   
         result = await uploadModel(params[0],dbname,projName)
   
+      }else if (action === 'attachModel'){
+  
+        result = await attachModel(params[0],dbname,projName)
+  
       }else if(action === 'executeMany'){
         result = executeMany(db,query,params)
       }else if(action === 'tableData'){
@@ -277,6 +281,50 @@ const uploadModel = async (file, dbname,projectName) => {
 
 };
 
+// Function to replace the in-memory database with the uploaded file
+const attachModel = async (file, dbname,projectName) => {
+  return new Promise(async (resolve, reject) => {
+    
+    const reader = new FileReader();
+
+
+    reader.onload = async (event) => {
+      const fileBuffer = new Uint8Array(await file.arrayBuffer());
+
+
+      try {        
+        const dbPath = `/data/${projectName}/${dbname}.sqlite3`;   
+        console.log('dbpath',dbPath)       
+        console.log('filebuffer',fileBuffer)
+        try {
+          let db = new sqlite.oo1.OpfsDb(dbPath);
+          sqlite.oo1.OpfsDb.importDb(dbPath, fileBuffer);        
+  
+        } catch (error) {
+            console.error(error);
+        }
+
+
+        resolve(true);
+      } catch (error) {
+        console.error('Error replacing the database:', error);
+        reject(error);
+      }
+    };
+
+
+    reader.onerror = () => {
+      console.error('File read error:', reader.error);
+      reject(reader.error);
+    };
+
+
+    // Start reading the uploaded file
+    reader.readAsArrayBuffer(file);
+  });
+
+
+};
 
 
 onmessage = async(e) => {

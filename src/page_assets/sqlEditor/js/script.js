@@ -1,4 +1,4 @@
-import { postData,get_cl_element,confirmBox,executeQuery,fetchData } from "../../../assets/js/scc"
+import { get_cl_element,confirmBox,executeQuery,fetchData } from "../../../assets/js/scc"
 import * as gm from "../../../core/gridMethods"
 import * as bootstrap from 'bootstrap'
 import flatpickr from "flatpickr"

@@ -26,6 +26,8 @@
     "headroom.js": "^0.12.0",
     "pyodide": "0.26.2",
     "smooth-scroll": "^16.1.3",
+    "starboard-notebook": "^0.15.7",
+    "starboard-python": "^0.15.7",
     "sweetalert2": "^11.14.1",
     "vanillajs-datepicker": "^1.0.3",
     "vivus": "^0.4.6"

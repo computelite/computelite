@@ -65,7 +65,7 @@ window.onload = async function () {
   const wheelQuery = `SELECT WheelName,WheelBlob FROM S_PackageWheels`
   const wheelFiles = await executeQuery("fetchData",modelName, wheelQuery)
   
-  let py_result = await executePython('init','',projectName,modelName,query_res,'',[],wheelFiles)
+  let py_result = await executePython('init','editor','',projectName,modelName,query_res,'',[],wheelFiles)
 
   let spinnerEl = document.getElementById('packageIndicator')
   displayOutput(py_result.stderr)
@@ -116,7 +116,7 @@ async function runPythonCode(){
   const wheelQuery = `SELECT WheelName,WheelBlob FROM S_PackageWheels`
   const wheelFiles = await executeQuery("fetchData",modelName, wheelQuery)
   const task_id = await update_task('Started')
-  let res = await executePython('execute',query,projectName,modelName,exec_files,filepath,blobFiles,wheelFiles)
+  let res = await executePython('execute','editor',query,projectName,modelName,exec_files,filepath,blobFiles,wheelFiles)
   document.getElementById("loadingOverlay").classList.add("hidden");
 
   if (res.stderr){
@@ -180,7 +180,7 @@ async function saveFileContent(){
     const FileData = editor.getValue()
 
     if (fileName === 'requirements.txt'){
-      const res = await executePython('loadPackages',FileData)
+      const res = await executePython('loadPackages','editor',FileData)
       if (res.stderr){
         displayOutput(res.stderr)
       }

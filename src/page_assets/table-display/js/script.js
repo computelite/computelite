@@ -1,4 +1,4 @@
-import { postData, get_cl_element, confirmBox, executeQuery } from "../../../assets/js/scc"
+import { get_cl_element, confirmBox, executeQuery } from "../../../assets/js/scc"
 import * as gm from "../../../core/gridMethods"
 import * as bootstrap from 'bootstrap'
 import flatpickr from "flatpickr"
@@ -711,36 +711,6 @@ document.getElementById("importExcel").onclick = async function (e) {
 }
 
 
-document.getElementById("importCSV").onclick = function (e) {
-    const delimiter = document.getElementById("selectDelimeter").value
-    if (document.getElementById("textfileUpload").files[0]) {
-        document.getElementById("data-loader").style.display = ""
-        postFile("/grid/upload-csv", document.getElementById("textfileUpload").files[0], {
-            delimiter: delimiter
-        }
-        ).then(data => {
-            document.getElementById("data-loader").style.display = "none"
-            let file_name = Object.keys(data)
-            let idx = file_name.indexOf(sessionStorage.table_name.toLowerCase())
-            if (idx > -1) {
-                if (!isNaN(data[file_name[idx]])) {
-                    reload_table_data()
-                    confirmBox("Success!", "Total Rows: " + data[file_name[idx]] + " Imported")
-
-                } else {
-                    confirmBox("Error!", data[file_name[idx]])
-                }
-
-            } else {
-                confirmBox("Error!", "No sheet matches with table name")
-            }
-        })
-    } else {
-        confirmBox('Alert!', 'Please choose a file to upload')
-    }
-
-}
-
 async function update_column_formatters(header_rows) {
     let numeric_columns = ['NUMERIC', 'INTEGER']
     let formatters = { decimals: 2, comma: 0, locale: 0, currency: 0, aggregate: 'SUM' }
@@ -1172,7 +1142,7 @@ document.getElementById("removeColumn").onclick = async function (e) {
 
 }
 
-document.getElementById("delNewColBtn").onclick = function (e) {
+document.getElementById("delNewColBtn").onclick = async function (e) {
     const selected_header = table_el.querySelector('thead .selected_col')
     if (selected_header) {
         const col_num = col_names.indexOf(selected_header.firstChild.textContent)
@@ -1183,7 +1153,7 @@ document.getElementById("delNewColBtn").onclick = function (e) {
         let li_el = document.getElementById("selectedColumn").childNodes[col_num - 1]
         document.getElementById("availableColumn").appendChild(li_el)
         const selected_column = col_names.filter(function (value, index, arr) { return index > 0; })
-        postData('/grid/set-columns', { col_list: selected_column })
+        await gm.updateColumnOrders(modelName,tableName,selected_column)
     } else {
         const bs_modal = new bootstrap.Modal(document.getElementById("modal-remove-column"))
         bs_modal.show()
@@ -2155,20 +2125,6 @@ function reset_sort() {
         get_table_data(col_names);
         save_sort();
     }
-}
-
-document.getElementById("ok-query").onclick = function () {
-    const view_query = document.getElementById("queryInput").value
-    if (view_query.trim() == "") {
-        confirmBox("Alert!", "Please enter a query")
-    }
-    postData('/home/check-or-createview', { view_name: sessionStorage.table_name, view_query: view_query, is_exist: true }).then(data => {
-        document.getElementById("queryInput").value = view_query
-        const bs_modal = bootstrap.Modal.getInstance(document.getElementById("modal-get-viewQuery"))
-        bs_modal.hide()
-        init()
-        confirmBox("Success", "View updated successfully")
-    })
 }
 
 
