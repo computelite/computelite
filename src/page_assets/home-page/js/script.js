@@ -1,4 +1,4 @@
-import { postData,get_cl_element,confirmBox,executeQuery, fetchData, uploadFile,executePython } from "../../../assets/js/scc"
+import { postData,get_cl_element,confirmBox,executeQuery, fetchData, uploadFile,executePython,addDefaultModel } from "../../../assets/js/scc"
 import {uploadExcel,downloadExcel,get_uploadExcel_info} from "../../../core/gridMethods"
 import * as bootstrap from 'bootstrap'
 const scc_one_modal = document.getElementById("scc-one-modal")
@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             confirmBox("Alert!","Please select a model")
             return
         }    
-        window.open(`/sqlEditor.html?tableName=V_TEMPV&modelName=${selected_model}`);
+        window.open(`/playground/client.html?modelName=${selected_model}`);
     }
 
     document.getElementById('availInpFiles').onclick = function(){
@@ -145,26 +145,13 @@ async function get_user_models() {
     document.getElementById("tableGroup").innerHTML = ""
     let all_models = await fetchData('home','getUserModels')
     if (all_models.length == 0){
-
-        let data = {
-            model_name: 'Default_DB',
-            model_template: 'Sample DB',
-            project_name: 'Default',
-            db_user: '',
-            password : '',
-            host:'',
-            port:0,
-            db_type:'SQLITE'
+        let model = await addDefaultModel()
+        if ((model).length > 0){
+            all_models.push(model)
         }
-
-        const res = await fetchData('home','addNewModel',data)
-
-        if (res.msg === 'Success'){
-            all_models.push(['Default_DB', 'Sample DB', 'Default','SQLITE'])
-        }
-        
     }
     populate_models(all_models)
+    return all_models
 }
 
 function populate_models(model_names) {

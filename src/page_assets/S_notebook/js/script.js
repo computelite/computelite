@@ -1,44 +1,55 @@
 import { get_cl_element } from '../../../assets/js/scc';
 import {createCodeMirrorEditor} from './codemirrorEditor'
-import {executePython,executeQuery,confirmBox} from '../../../assets/js/scc'
+import {executePython,executeQuery,confirmBox,addDefaultModel,fetchData} from '../../../assets/js/scc'
 import {nanoid} from 'nanoid'
 
 const params = new URLSearchParams(window.location.search)
-const modelName = params.get('modelName');
+let modelName = params.get('modelName');
 
 const container = document.getElementById("cellContainer");
-window.onload = async function () { 
-  if (!modelName){
-    confirmBox('Alert!','Model Name not found in the URL.')
+window.onload = async function () {
+
+  let result = await executeQuery('init')
+  if (!result || result.msg != 'Success') {
+    confirmBox('Alert!', 'Some error occured while initializing sqlite.')
     return
-  }
-   
-   let result = await executeQuery('init')
-   if (!result || result.msg != 'Success'){
-       confirmBox('Alert!','Some error occured while initializing sqlite.')
-       return
-    }else{
-      let query = "SELECT CellId,CellContent FROM S_Notebook"
-      const data = await executeQuery('fetchData',modelName,query)
-      for (let row of data){
-        createCodeEditor(row[0],row[1])
+  } else {
+    if (!modelName) {
+      let all_models = await fetchData('home', 'getUserModels')
+      const defaultDbExists = all_models.some(subArr => subArr[0] === 'Default_DB');
+  
+      if ( !defaultDbExists) {
+        let model = await addDefaultModel()
+        if (model.length > 0) {
+          modelName = model[0]
+        } else {
+          confirmBox('Alert!', 'Model Name not found in the URL.')
+          return
+        }
+      }else{
+        modelName = 'Default_DB'
       }
     }
- 
- 
-   let filesQuery = `SELECT FilePath,FileData FROM S_ExecutionFiles WHERE Filename is NOT NULL AND Status = 'Active' `
-   const exec_files = await executeQuery("fetchData",modelName, filesQuery)
- 
- 
-   const blobQuery = `SELECT FileName,FileBlob FROM S_DataFiles WHERE FileType = 'Input'`
-   const blobFiles = await executeQuery("fetchData",modelName, blobQuery)
- 
-   const wheelQuery = `SELECT WheelName,WheelBlob FROM S_PackageWheels`
-   const wheelFiles = await executeQuery("fetchData",modelName, wheelQuery)
+  }
+  let query = "SELECT CellId,CellContent FROM S_Notebook"
+  const data = await executeQuery('fetchData', modelName, query)
+  for (let row of data) {
+    createCodeEditor(row[0], row[1])
+  }
 
-   document.getElementById("loadingOverlay").classList.remove("hidden");
-   let py_result = await executePython('init','notebook','','Default',modelName,exec_files,'',blobFiles,wheelFiles)
-   document.getElementById("loadingOverlay").classList.add("hidden");   
+  let filesQuery = `SELECT FilePath,FileData FROM S_ExecutionFiles WHERE Filename is NOT NULL AND Status = 'Active' `
+  const exec_files = await executeQuery("fetchData", modelName, filesQuery)
+
+
+  const blobQuery = `SELECT FileName,FileBlob FROM S_DataFiles WHERE FileType = 'Input'`
+  const blobFiles = await executeQuery("fetchData", modelName, blobQuery)
+
+  const wheelQuery = `SELECT WheelName,WheelBlob FROM S_PackageWheels`
+  const wheelFiles = await executeQuery("fetchData", modelName, wheelQuery)
+
+  document.getElementById("loadingOverlay").classList.remove("hidden");
+  let py_result = await executePython('init', 'notebook', '', 'Default', modelName, exec_files, '', blobFiles, wheelFiles)
+  document.getElementById("loadingOverlay").classList.add("hidden");   
 }
 
 

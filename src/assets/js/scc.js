@@ -446,6 +446,26 @@ export async function drawImageFromPython(data) {
     };
 }
 
+export async function addDefaultModel() {
+    let data = {
+        model_name: 'Default_DB',
+        model_template: 'Sample DB',
+        project_name: 'Default',
+        db_user: '',
+        password : '',
+        host:'',
+        port:0,
+        db_type:'SQLITE'
+    }
+
+    const res = await fetchData('home','addNewModel',data)
+
+    if (res.msg === 'Success'){
+        return ['Default_DB', 'Sample DB', 'Default','SQLITE']
+    }
+    return []
+}
+
 
 py_worker.onmessage = function (event) {
     if (event.data.type == 'canvas'){

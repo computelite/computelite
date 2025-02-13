@@ -2,12 +2,12 @@ import CodeMirror from "codemirror";
 import 'codemirror/theme/dracula.css';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/python/python.js';
-import { confirmBox, executePython,executeQuery, get_cl_element } from "../../../assets/js/scc"
+import { confirmBox, executePython,executeQuery, get_cl_element,fetchData,addDefaultModel } from "../../../assets/js/scc"
 const params = new URLSearchParams(window.location.search)
 import * as bootstrap from 'bootstrap'
 
-const modelName = params.get('modelName');
-const projectName = params.get('projectName');
+let modelName = params.get('modelName');
+let projectName = params.get('projectName');
 var editor = null
 let selected_li_el = null
 let selected_folder_el = null
@@ -55,6 +55,25 @@ window.onload = async function () {
   if (!result || result.msg != 'Success'){
       confirmBox('Alert!','Some error occured while initializing sqlite.')
       return
+  }
+
+  if (!modelName) {
+    let all_models = await fetchData('home', 'getUserModels')
+    const defaultDbExists = all_models.some(subArr => subArr[0] === 'Default_DB');
+
+    if ( !defaultDbExists) {
+      let model = await addDefaultModel()
+      if (model.length > 0) {
+        modelName = model[0]
+        projectName = 'Default'
+      } else {
+        confirmBox('Alert!', 'Model Name not found in the URL.')
+        return
+      }
+    }else{
+      modelName = 'Default_DB'
+      projectName = 'Default'
+    }
   }
 
   buildFileStructure()

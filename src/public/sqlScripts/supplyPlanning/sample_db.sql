@@ -108,7 +108,7 @@ INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, Col
 
 INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('ModelIcon', 'fas fa-cube');
 INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('ModelName', 'Sample DB');
-INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('DBVersion', '1.0.3');
+INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('DBVersion', '1.0.4');
 
 INSERT INTO S_TaskMaster(TaskId, TaskName, TaskDisplayName) VALUES(1,'cats.py','Download Cats');
 INSERT INTO S_TaskMaster(TaskId, TaskName, TaskDisplayName) VALUES(2,'dogs.py','Show Dog');
