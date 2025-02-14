@@ -85,17 +85,20 @@ async function initializePyodide(eventData) {
   const { id,files,blobFiles, wheelFiles, drawCanvas,type } = eventData;
 
   self.pyodide = await loadPyodide({
-    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.2/full",
+    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.2/full",
     stdout: pythonConsoleStdOut,
   });
   await self.pyodide.loadPackage(["micropip"]);
   self.micropip = self.pyodide.pyimport("micropip");
   self.type = type;
 
-  await self.micropip.install('./wheels/apsw-3.46.1.0-cp312-cp312-pyodide_2024_0_wasm32.whl');
-  await self.micropip.install('./wheels/PuLP-2.9.0-py3-none-any.whl');
-  await self.micropip.install('./wheels/highspy-1.8.0-cp312-cp312-pyodide_2024_0_wasm32.whl');
-  
+  try{
+    await self.micropip.install('https://cdn.jsdelivr.net/gh/computelite/computelite.github.io@main/wheels/highspy-1.9.0-cp312-cp312-pyodide_2024_0_wasm32.whl');
+  }
+  catch {
+    console.log("HiGHS package not loaded")
+  }
+
   self.DrawCanvas = new Function(`return (${drawCanvas})`)();
   globalThis.drawPyodideCanvas = (pixels, width, height) => {
     if (pixels && pixels.toJs) pixels = pixels.toJs();

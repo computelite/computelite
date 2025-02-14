@@ -24,7 +24,7 @@
     "exceljs": "^4.4.0",
     "flatpickr": "^4.6.13",
     "headroom.js": "^0.12.0",
-    "pyodide": "0.26.2",
+    "pyodide": "0.27.2",
     "smooth-scroll": "^16.1.3",
     "starboard-notebook": "^0.15.7",
     "starboard-python": "^0.15.7",
