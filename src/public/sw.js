@@ -2,11 +2,11 @@ const cacheName = 'v6';
 const dynamicCacheName = 'd6';
 
 const cachedFiles = [
-    '/',
-    '/homePage.html',
-    '/privacyPolicy.html',
-    '/sqlEditor.html',
-    'tableDisplay.html'
+    './',
+    './homePage.html',
+    './privacyPolicy.html',
+    './sqlEditor.html',
+    './tableDisplay.html'
 ];
   
 // Install event - Cache files
