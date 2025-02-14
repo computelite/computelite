@@ -221,47 +221,35 @@ const uploadModel = async (file, dbname,projectName) => {
         const dbPath = `/data/${projectName}/${dbname}.sqlite3`;
         sqlite.oo1.OpfsDb.importDb(dbPath, fileBuffer);
         
+        
         try {
+            let db = new sqlite.oo1.OpfsDb(dbPath);
 
-          const response = await fetch('/update_script.sql'); // Fetch the SQL script file from the specified path
-    
-          if (!response.ok) {
-              console.error(`Failed to load SQL script: ${response.statusText}`)
-          }
-    
-          const sqlScript = await response.text(); // Retrieve the text content of the SQL script
-          
-          try {
-              let db = new sqlite.oo1.OpfsDb(dbPath);
-              let result = executeQuery(db,sqlScript,['script'])
+            let allTableQuery = `SELECT name FROM sqlite_master WHERE type in ('table','view')` 
+            let AllDBTables = readData(db,allTableQuery).map(arr => arr[0])
 
-              let allTableQuery = `SELECT name FROM sqlite_master WHERE type in ('table','view')` 
-              let AllDBTables = readData(db,allTableQuery).map(arr => arr[0])
+            let availableQuery = `SELECT TABLENAME FROM S_TableGroup`
+            let availableTables = readData(db,availableQuery).map(arr => arr[0])
 
-              let availableQuery = `SELECT TABLENAME FROM S_TableGroup`
-              let availableTables = readData(db,availableQuery).map(arr => arr[0])
-
-              for (let tblName of AllDBTables){
-                if (!availableTables.includes(tblName)){
-                  let groupname = 'All Others'
-                  if (['S_TableGroup','S_TableParameters'].includes(tblName)){
-                    groupname = 'Setups'
-                  }
-                  
-                  let insertQuery = `INSERT INTO S_TableGroup (GroupName, TableName, 
-                  TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) 
-                  VALUES ('${groupname}', '${tblName}', '${tblName}', 'Input', NULL, 'Active', NULL);`
-                  
-                  insertData(db,insertQuery)
+            for (let tblName of AllDBTables){
+              if (!availableTables.includes(tblName)){
+                let groupname = 'All Others'
+                if (['S_TableGroup','S_TableParameters'].includes(tblName)){
+                  groupname = 'Setups'
                 }
+                
+                let insertQuery = `INSERT INTO S_TableGroup (GroupName, TableName, 
+                TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) 
+                VALUES ('${groupname}', '${tblName}', '${tblName}', 'Input', NULL, 'Active', NULL);`
+                
+                insertData(db,insertQuery)
               }
-          } catch (error) {
-              console.error('Error executing SQL script:', error);
-          }
+            }
+        } catch (error) {
+            console.error('Error executing SQL script:', error);
+        }
     
-      } catch (error) {
-          console.error(error);
-      }
+      
 
         resolve(true);
       } catch (error) {
