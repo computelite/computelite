@@ -92,9 +92,9 @@ async function initializePyodide(eventData) {
   self.micropip = self.pyodide.pyimport("micropip");
   self.type = type;
 
-  await self.micropip.install('/wheels/apsw-3.46.1.0-cp312-cp312-pyodide_2024_0_wasm32.whl');
-  await self.micropip.install('/wheels/PuLP-2.9.0-py3-none-any.whl');
-  await self.micropip.install('/wheels/highspy-1.8.0-cp312-cp312-pyodide_2024_0_wasm32.whl');
+  await self.micropip.install('./wheels/apsw-3.46.1.0-cp312-cp312-pyodide_2024_0_wasm32.whl');
+  await self.micropip.install('./wheels/PuLP-2.9.0-py3-none-any.whl');
+  await self.micropip.install('./wheels/highspy-1.8.0-cp312-cp312-pyodide_2024_0_wasm32.whl');
   
   self.DrawCanvas = new Function(`return (${drawCanvas})`)();
   globalThis.drawPyodideCanvas = (pixels, width, height) => {
