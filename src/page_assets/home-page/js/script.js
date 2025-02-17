@@ -39,7 +39,7 @@ function get_accordian(group_name, table_list) {
             get_cl_element("td", null, null, document.createTextNode(table_name[1])))
         el.onclick = function () {
             const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
-            window.open(`/tableDisplay.html?tableName=${table_name[0]}&modelName=${selected_model.innerText}`);
+            window.open(`./tableDisplay.html?tableName=${table_name[0]}&modelName=${selected_model.innerText}`);
         }
         el.setAttribute("tableName", table_name[0])
         card_body.querySelector("tbody").appendChild(el)
@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             confirmBox("Alert!","Please select a model")
             return
         }    
-        window.open(`/playground/client.html?modelName=${selected_model}`);
+        window.open(`./playground/client.html?modelName=${selected_model}`);
     }
 
     document.getElementById('availInpFiles').onclick = function(){
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
         const modelName = selected_model.innerText
         const projectName = selected_model.getAttribute('project')
-        window.open(`/editorPage.html?projectName=${projectName}&modelName=${modelName}`);
+        window.open(`./editorPage.html?projectName=${projectName}&modelName=${modelName}`);
     }
 
 
@@ -1452,6 +1452,6 @@ document.getElementById("notebookBtn").onclick = function(){
         return
     }
     const modelName = selected_model.innerText
-    window.open(`/S_Notebook.html?modelName=${modelName}`);
+    window.open(`./S_Notebook.html?modelName=${modelName}`);
 }
 
