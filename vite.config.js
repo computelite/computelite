@@ -18,6 +18,7 @@ export default defineConfig({
         home: path.resolve(__dirname, 'src/homePage.html'),
         policy: path.resolve(__dirname, 'src/privacyPolicy.html'),
         notebook: path.resolve(__dirname, 'src/S_Notebook.html'),
+        notebookJS: path.resolve(__dirname, 'src/javascriptNB.html'),
       },
       output: {
         assetFileNames: 'assets/[name].[hash].[ext]',

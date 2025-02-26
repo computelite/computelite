@@ -22,7 +22,9 @@ export function createCodeMirrorEditor(kernelId,modelName,CellId,content) {
         cm.getInputField().blur();
         const query = editor.getValue();
         cell.querySelector(".cell-bottom").innerHTML = "";
-        cell.querySelector(".sidebar-inner")?.innerHTML = "";
+        if (cell.querySelector('.sidebar-inner')){
+          cell.querySelector('.sidebar-inner').innerHTML = '';
+        }
 
         // Show Running
         const btn = cell.querySelector('span.fa-regular')

@@ -329,21 +329,25 @@ export async function getVersion(data) {
 
 export async function upgradeVersion(data){
   let modelName = data.modelName
-  let version = data.version
+  let db_version = data.db_version
 
   let msg = 'Success'
   try {
-      const sqlScript = versions[version]; // Retrieve the text content of the SQL script
-      console.log('version script',sqlScript)
-      try {
-          await executeQuery('executeQuery',modelName,sqlScript,['script'])
-
-          let query = `UPDATE S_ModelParams SET ParamValue = ? WHERE ParamName = ?`
-          await executeQuery('updateData',modelName,query,[version,'DBVersion'])
-      } catch (error) {
-          console.error('Error executing SQL script:', error);
-          msg = error
+    for (let version in versions){
+      if (version !== db_version){
+        const sqlScript = versions[version]; // Retrieve the text content of the SQL script
+        console.log('version script',sqlScript)
+        try {
+            await executeQuery('executeQuery',modelName,sqlScript,['script'])
+  
+            let query = `UPDATE S_ModelParams SET ParamValue = ? WHERE ParamName = ?`
+            await executeQuery('updateData',modelName,query,[version,'DBVersion'])
+        } catch (error) {
+            console.error('Error executing SQL script:', error);
+            msg = error
+        }
       }
+    }
 
   } catch (error) {
       console.error(error);
@@ -443,6 +447,13 @@ CREATE TABLE S_Notebook (
 	CreationDate	VARCHAR DEFAULT (datetime('now','localtime'))
 );
 
+CREATE TABLE S_JSNotebook (
+	CellId	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	CellContent	VARCHAR,
+	CreationDate	VARCHAR DEFAULT (datetime('now','localtime'))
+);
+
+
 CREATE VIEW V_TEMPV
 AS SELECT 1;
 
@@ -457,6 +468,7 @@ INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, Col
 INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_DataFiles','Data Files','Input','["FileId","FileName","FileType","Status"]','Active',NULL);
 INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_PackageWheels','PackageWheels','Input','["WheelId","WheelName","Status"]','Active',NULL);
 INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_Notebook','Notebook','Input',null,'Active',NULL);
+INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_JSNotebook','Javascript Notebook','Input',null,'Active',NULL);
 
 INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('ModelIcon', 'fas fa-cube');
 INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('ModelName', 'Sample DB');
@@ -477,6 +489,13 @@ INSERT INTO S_ExecutionFiles VALUES(9,'write_output_file.py',NULL,'write_output_
 INSERT INTO S_ExecutionFiles VALUES(10,'update_sqlite_db.py',NULL,'update_sqlite_db.py',replace('import sqlite3\n\nquery = "INSERT INTO T_SolverLog (LogMessage) Values (''Hello from ComputeLite'')"\n\nwith sqlite3.connect(thisDB) as conn:\n    conn.execute(query)\n  \n# Check solver log table: Log Tables > Solver Logs\n','\n',char(10)),'Active');
 INSERT INTO S_ExecutionFiles VALUES(11,'blending_problem_with_pulp_highs.py',NULL,'blending_problem_with_pulp_highs.py',replace('# Import PuLP modeler functions\nfrom pulp import *\n\n# Create the ''prob'' variable to contain the problem data\nprob = LpProblem("The Whiskas Problem", LpMinimize)\n# The 2 variables Beef and Chicken are created with a lower limit of zero\nx1 = LpVariable("ChickenPercent", 0, None, LpInteger)\nx2 = LpVariable("BeefPercent", 0)\n\n# The objective function is added to ''prob'' first\nprob += 0.013 * x1 + 0.008 * x2, "Total Cost of Ingredients per can"\n\n# The five constraints are entered\nprob += x1 + x2 == 100, "PercentagesSum"\nprob += 0.100 * x1 + 0.200 * x2 >= 8.0, "ProteinRequirement"\nprob += 0.080 * x1 + 0.100 * x2 >= 6.0, "FatRequirement"\nprob += 0.001 * x1 + 0.005 * x2 <= 2.0, "FibreRequirement"\nprob += 0.002 * x1 + 0.005 * x2 <= 0.4, "SaltRequirement"\n\nsolver = HiGHS() #Define HiGHS solver, include highspy in requirement.txt\nprob.writeLP("outputDir/WhiskasModel.lp")\nprob.solve(solver) #Use HiGHS solver\nprint("Status:", LpStatus[prob.status])\n\nfor v in prob.variables():\n    print(v.name, "=", v.varValue)\n\nprint("Total Cost of Ingredients per can = ", value(prob.objective))','\n',char(10)),'Active');
 
+INSERT INTO S_JSNotebook (CellContent) VALUES (REPLACE(
+'// Load external libraries dynamically from a CDN using loadCDNScripts\nawait loadCDNScripts([{ url: "https://cdn.jsdelivr.net/npm/lodash/lodash.min.js", globalVar: "_" },\n    { url: "https://cdn.jsdelivr.net/npm/dayjs/dayjs.min.js", globalVar: "dayjs" },\n    { url: "https://cdn.jsdelivr.net/npm/chart.js", globalVar: "Chart" }\n]);\n\nconsole.log(_.chunk([1, 2, 3, 4], 2));\n\nconsole.log(dayjs().format());\n\nconst canvas = document.createElement("canvas");\nconst ctx = canvas.getContext("2d");\nnew Chart(ctx, {\n    type: "bar",\n    data: {\n        labels: ["Red", "Blue", "Yellow"],\n        datasets: [{ \n            label: "Votes",\n            data: [12, 19, 3],\n            backgroundColor: ["red", "blue", "yellow"] \n        }] \n    } \n});\ncanvas', '\n', CHAR(10)
+));
+INSERT INTO S_JSNotebook (CellContent) VALUES (REPLACE(
+'// Fetch data from the database\n// The executeQuery function executes an SQL query and retrieves data from the database.\n// In this case, we are selecting all records from the ''S_tablegroup'' table.\n\nconst result = await executeQuery("select * from S_tablegroup")\nconsole.log("result", result);', '\n', CHAR(10)
+));
+
 COMMIT TRANSACTION;
 `;
 
@@ -490,4 +509,22 @@ CREATE TABLE S_Notebook (
 INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_Notebook','Notebook','Input',null,'Active',NULL);
 `;
 
-const versions = {"1.0.4":version104}
+const version105 = `
+CREATE TABLE S_JSNotebook (
+	CellId	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	CellContent	VARCHAR,
+	CreationDate	VARCHAR DEFAULT (datetime('now','localtime'))
+);
+
+INSERT INTO S_JSNotebook (CellContent) VALUES (REPLACE(
+'// Load external libraries dynamically from a CDN using loadCDNScripts\nawait loadCDNScripts([{ url: "https://cdn.jsdelivr.net/npm/lodash/lodash.min.js", globalVar: "_" },\n    { url: "https://cdn.jsdelivr.net/npm/dayjs/dayjs.min.js", globalVar: "dayjs" },\n    { url: "https://cdn.jsdelivr.net/npm/chart.js", globalVar: "Chart" }\n]);\n\nconsole.log(_.chunk([1, 2, 3, 4], 2));\n\nconsole.log(dayjs().format());\n\nconst canvas = document.createElement("canvas");\nconst ctx = canvas.getContext("2d");\nnew Chart(ctx, {\n    type: "bar",\n    data: {\n        labels: ["Red", "Blue", "Yellow"],\n        datasets: [{ \n            label: "Votes",\n            data: [12, 19, 3],\n            backgroundColor: ["red", "blue", "yellow"] \n        }] \n    } \n});\ncanvas', '\n', CHAR(10)
+));
+INSERT INTO S_JSNotebook (CellContent) VALUES (REPLACE(
+'// Fetch data from the database\n// The executeQuery function executes an SQL query and retrieves data from the database.\n// In this case, we are selecting all records from the ''S_tablegroup'' table.\n\nconst result = await executeQuery("select * from S_tablegroup")\nconsole.log("result", result);', '\n', CHAR(10)
+));
+
+INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_JSNotebook','Javascript Notebook','Input',null,'Active',NULL);
+`;
+
+const versions = {"1.0.4":version104,"1.0.5":version105}
+

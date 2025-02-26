@@ -6,6 +6,7 @@ let selected = []
 let excelUploadInfo = {}
 let selectedFile = null
 let imgBlob = null
+const current_version = "1.0.5"
 
 const params = new URLSearchParams(window.location.search)
 
@@ -91,7 +92,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             confirmBox("Alert!","Please select a model")
             return
         }    
-        window.open(`./playground/client.html?modelName=${selected_model}`);
+        window.open(`/sqlEditor.html?tableName=V_TEMPV&modelName=${selected_model}`);
     }
 
     document.getElementById('availInpFiles').onclick = function(){
@@ -185,8 +186,8 @@ function get_li_element(model_name) {
         if (!this.classList.contains("selectedValue")) {
             // UPGRADE VERSION
             let version = await fetchData('home','getVersion',{ model_name: this.innerText })
-            if (version !== '1.0.4'){
-                await fetchData('home','upgradeVersion',{ modelName: this.innerText,version:'1.0.4' })
+            if (version !== current_version){
+                await fetchData('home','upgradeVersion',{ modelName: this.innerText,db_version:version })
             }
             
             for (let cn of this.parentNode.querySelectorAll("li.selectedValue")) {
@@ -1463,4 +1464,14 @@ document.getElementById("notebookJS").onclick = function(){
     }
     const modelName = selected_model.innerText
     window.open(`/javascriptNB.html?modelName=${modelName}`);
+}
+
+document.getElementById("sqlEditor").onclick = function(){
+    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+    if (!selected_model){
+        confirmBox("Alert!","Please select a model")
+        return
+    }
+    const modelName = selected_model.innerText
+    window.open(`./playground/client.html?modelName=${modelName}`);
 }

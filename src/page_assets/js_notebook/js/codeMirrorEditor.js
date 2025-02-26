@@ -48,7 +48,7 @@ async function executeCode(editor, cell, jsRunner, modelName, CellId) {
 
   toggleRunningState(cell, true);
 
-  await executeQuery("updateData", modelName, `UPDATE S_Notebook SET CellContent = ? WHERE CellId = ?`, [query, CellId]);
+  await executeQuery("updateData", modelName, `UPDATE S_JSNotebook SET CellContent = ? WHERE CellId = ?`, [query, CellId]);
 
   const htmlOutput = get_cl_element("div");
   cell.querySelector(".cell-bottom").appendChild(htmlOutput);
@@ -109,7 +109,7 @@ function renderHtmlOutput(val, intoElement) {
 
 export async function runAllCell(container,modelName){
   container.innerHTML = ""
-  let query = "SELECT CellId,CellContent FROM S_Notebook"
+  let query = "SELECT CellId,CellContent FROM S_JSNotebook"
   const data = await executeQuery('fetchData', modelName, query)
   for (let row of data) {
     const kernel = get_cl_element('computelite-cell','cell-grid cell-container celltype-python');

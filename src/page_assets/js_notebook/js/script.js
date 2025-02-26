@@ -62,7 +62,7 @@ async function populateCells(){
   document.getElementById("loadingOverlay").classList.remove("hidden");
 
   try{
-    let query = "SELECT CellId,CellContent FROM S_Notebook"
+    let query = "SELECT CellId,CellContent FROM S_JSNotebook"
     const data = await executeQuery('fetchData', modelName, query)
     data.forEach(([rowId, content]) => createCodeEditor(rowId, content));
   }catch (error) {
@@ -100,7 +100,7 @@ function createCodeEditor(rowId,content = "") {
   textEditorControls.querySelector('span').style = 'color: #00000066;';
 
   textEditorControls.querySelector('button').onclick = async function(){
-    let query = "DELETE FROM S_Notebook WHERE CellId = ?"
+    let query = "DELETE FROM S_JSNotebook WHERE CellId = ?"
     const res = await executeQuery("deleteData",modelName,query,[rowId])
     if (res){
       kernel.remove()
@@ -135,7 +135,7 @@ document.getElementById("addCell").onclick = async function () {
       return;
   }
   try {
-      let rowId = await executeQuery("insertData", modelName, "INSERT INTO S_Notebook (CellContent) VALUES (?)", ['']);
+      let rowId = await executeQuery("insertData", modelName, "INSERT INTO S_JSNotebook (CellContent) VALUES (?)", ['']);
       createCodeEditor(rowId);
   } catch (error) {
       console.error("Error adding cell:", error);
