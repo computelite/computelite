@@ -1455,3 +1455,12 @@ document.getElementById("notebookBtn").onclick = function(){
     window.open(`./S_Notebook.html?modelName=${modelName}`);
 }
 
+document.getElementById("notebookJS").onclick = function(){
+    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+    if (!selected_model){
+        confirmBox("Alert!","Please select a model")
+        return
+    }
+    const modelName = selected_model.innerText
+    window.open(`/javascriptNB.html?modelName=${modelName}`);
+}

@@ -4,9 +4,7 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/python/python.js';
 import {executePython,consoleNotebookOutput, get_cl_element,executeQuery,drawImageFromPython} from '../../../assets/js/scc'
 
-const isPyProxy = function (jsobj) {
-  return !!jsobj && jsobj.$$ !== undefined && jsobj.$$.type === "PyProxy";
-};
+const isPyProxy = (jsobj) => !!jsobj && jsobj.$$?.type === "PyProxy";
 
 export function createCodeMirrorEditor(kernelId,modelName,CellId,content) {
   const cell = document.getElementById(kernelId);
@@ -14,7 +12,6 @@ export function createCodeMirrorEditor(kernelId,modelName,CellId,content) {
     lineNumbers: true,
     lineWrapping:true,
     mode: "python",
-    // theme:"dracula",
     autoRefresh:true,
     autofocus:true,   
     tabSize:4,
@@ -24,20 +21,13 @@ export function createCodeMirrorEditor(kernelId,modelName,CellId,content) {
         // Custom function triggered by Ctrl+Enter
         cm.getInputField().blur();
         const query = editor.getValue();
-      
-        const cell = document.getElementById(kernelId)
-
-        // Clear the output
-        cell.querySelector('.cell-bottom').innerHTML = '';
-        if (cell.querySelector('.sidebar-inner')){
-          cell.querySelector('.sidebar-inner').innerHTML = '';
-        }
+        cell.querySelector(".cell-bottom").innerHTML = "";
+        cell.querySelector(".sidebar-inner")?.innerHTML = "";
 
         // Show Running
         const btn = cell.querySelector('span.fa-regular')
-        if (btn && btn.classList.contains('fa-play-circle')){
-          btn.classList.remove('fa-play-circle')
-          btn.classList.add('fa-hourglass')
+        if (btn?.classList.contains("fa-play-circle")) {
+          btn.classList.replace("fa-play-circle", "fa-hourglass");
         }
 
         // Update the cell content in the database
@@ -48,15 +38,14 @@ export function createCodeMirrorEditor(kernelId,modelName,CellId,content) {
         let res = await executePython('execute','notebook',query,'Default',modelName,[],null,[],[],kernelId)
 
         // Hide Running
-        if (btn && btn.classList.contains('fa-hourglass')){
-          btn.classList.add('fa-play-circle')
-          btn.classList.remove('fa-hourglass')
+        if (btn?.classList.contains("fa-hourglass")) {
+          btn.classList.replace("fa-hourglass", "fa-play-circle");
         }
 
         const htmlOutput = get_cl_element("div");
         cell.querySelector('.cell-bottom').appendChild(htmlOutput)
 
-        if (res.result != undefined){
+        if (res.result !== undefined){
           // Convert the result to a output element
           let val = await convertResult(res.result.display,res.result.value)
           if (val !== undefined) {      
@@ -130,14 +119,11 @@ export function createCodeMirrorEditor(kernelId,modelName,CellId,content) {
 }
 
 
-async function convertResult(display,value) {
-  if (display === "default") {
-    return value;
-  } else if (display === "html") {
-    let div = get_cl_element("div","rendered_html cell-output-html");
+async function convertResult(display, value) {
+  if (display === "html") {
+    let div = get_cl_element("div", "rendered_html cell-output-html");
     div.appendChild(new DOMParser().parseFromString(value, "text/html").body.firstChild);
     return div;
-  } else {
-    return value;
   }
+  return value;
 }

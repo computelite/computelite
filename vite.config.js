@@ -1,6 +1,7 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite';
 import path from 'path'
+import process from 'process';
 
 export default defineConfig({
   root: resolve(__dirname, 'src'),
@@ -45,6 +46,9 @@ export default defineConfig({
   },
   optimizeDeps:{
     exclude: ['@sqlite.org/sqlite-wasm'],
+  },
+  define:{
+    'process.env': process.env,
   }
 })
 

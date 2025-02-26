@@ -245,7 +245,7 @@ export async function saveAsModel(data) {
 
   let dbPath = `/data/${newProject}/${newModel}.sqlite3`;
   if (newProject in all_projects && Object.keys(all_projects[newProject]['Models']).includes(newModel)){
-    throw new Error("Model Already Exists with the same name");
+    throw new Error("Model Already active with the same name");
   }else {
 
     all_projects[newProject]['Models'][newModel] = {templateName:templateName,status:'Active'}

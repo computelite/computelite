@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!-- Primary Meta Tags -->
+    <title>Compute Lite NoteBook</title>
+    <meta name="viewport" content="width=1024, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Compute Lite">
+    <meta name="author" content="SCL">
+    <meta name="description" content="Compute in Browser">
+    <meta name="keywords" content="compute lite, edge compute, edge data, macro in browser, compute in browser, wasm" />
+    <link rel="canonical" href="https://www.ComputeLite.com">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.ComputeLite.com">
+    <meta property="og:title" content="Compute Lite">
+    <meta property="og:description" content="Compute in Browser">
+    <meta property="og:image" content="assets/img/favicon/summence.svg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.ComputeLite.com">
+    <meta property="twitter:title" content="Compute Lite">
+    <meta property="twitter:description" content="Compute in Browser">
+    <meta property="twitter:image" content="assets/img/favicon/summence.svg">
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon.ico">
+    <link rel="mask-icon" href="favicon.ico" color="#ffffff">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="theme-color" content="#ffffff">
+
+
+    <link type="text/css" href='./scss/pixel.scss' rel="stylesheet">
+    <link type="text/css" href='./scss/scl.css' rel="stylesheet">
+    <link type="text/css" href="./page_assets/privacy-policy/css/style.css" rel="stylesheet">
+    <link type="text/css" href="./page_assets/js_notebook/css/style.css" rel="stylesheet">
+
+</head>
+
+<body class="px-5">
+
+    <header class="navbar navbar-expand-lg">
+        <div class="container" style="max-width: none;">
+            <a class="navbar-logo" href="./homePage.html" style="font-weight: 600;">Compute <b>Lite</b></a>
+            <a class="navbar-el ms-4" href="./homePage.html" style="font-weight: 600;">Playground</a>
+            <a type="button" class="btn btn-sm ms-4" id="hideCode">Hide Code</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="bg-white p-2 font-weight-large" href="#get-started"><span
+                                class="fa-brands fa-github"></span></a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <body>
+        <div id="loadingOverlay" class="loading-overlay hidden">
+            
+            <div class="three-dots-loader">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+        </div>
+        <computelite-notebook>
+            <main id="cellContainer" class="cells-container">                
+            </main>
+        </computelite-notebook>
+        <footer class="computelite-notebook-footer line-grid">
+            <div class="computelite-notebook-footer-content d-flex align-items-center">
+                <span> ComputeLite
+                </span>
+                <button class="btn btn-sm py-0 px-1 ms-2">
+                    <span></span>
+                    Source
+                </button>
+
+                <button id="addCell" class="cell-controls-button" title="Add Cell Here"
+                    style="opacity: 0.7; margin-left: auto; padding: 0px 1px 0px 18px">
+                    Add Cell <span class="bi bi-plus-square ms-2 me-1"></span>
+                </button>
+            </div>
+        </footer>
+    </body>
+
+    <script type="module" src="./page_assets/js_notebook/js/script.js"></script>
+    
+    <script type="module" src="./assets/js/pixel.js"></script>
+
+</body>
+
+</html>
+
+
