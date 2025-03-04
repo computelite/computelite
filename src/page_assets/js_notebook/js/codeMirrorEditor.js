@@ -117,6 +117,7 @@ export async function runAllCell(container,modelName){
 
     const output_container = get_cl_element('div','cell-bottom');  
     const htmlOutput = get_cl_element("div");
+    window.outputArea = htmlOutput;
     output_container.appendChild(htmlOutput)
     kernel.appendChild(output_container);
     container.appendChild(kernel)

@@ -43,7 +43,7 @@ export async function postData(url = '', data = {}) {
             let file_name = response.headers.get('Content-Disposition').split("filename=")[1].slice(0, -1)
             response.blob().then(blob_obj => {
                 if (url === '/home/get-attached-model'){
-                    attachModel(blob_obj, file_name, blobType)
+                    attachModel(blob_obj, file_name, blobType,data.modelId)
                 }else{
                     downloadExcel(blob_obj, file_name, blobType)
                 }
@@ -151,14 +151,14 @@ function downloadExcel(blob, filename, blobType) {
 }
 
 
-async function attachModel(blob, filename, blobType) {
+async function attachModel(blob, filename, blobType,modelId) {
     var newBlob = new Blob([blob], { type: blobType })
     const initialModelName = filename.split('.')[0]
     let modelName = filename.split('.')[0]
     
 
     const projectName = 'Default'
-    const modelTemplate = 'Sample DB'
+    const modelTemplate = 'Sample_DB'
     if (!localStorage.getItem('Projects')) {
         localStorage.setItem('Projects', JSON.stringify({}))
     }
@@ -172,18 +172,26 @@ async function attachModel(blob, filename, blobType) {
     try {
         if (Object.keys(all_projects).includes(projectName)) {
             if (!(modelName in all_projects[projectName]['Models'])) {
-                all_projects[projectName]['Models'][modelName] = { templateName: modelTemplate, status: 'Active' }
+                all_projects[projectName]['Models'][modelName] = { templateName: modelTemplate, status: 'Active',modelId:modelId }
             } else {
-                let count = 0;
-                while (modelName in all_projects[projectName]['Models']) {
-                    modelName = initialModelName
-                    count++;
-                    modelName = `${modelName}_${count}`;
+                const all_models = all_projects[projectName]['Models']
+                if (all_models[modelName]["modelId"] !== modelId){   
+                    let count = 0;
+                    while (modelName in all_models) {
+                        if (all_models[modelName]["modelId"] === modelId){
+                            return msg
+                        }
+                        modelName = initialModelName
+                        count++;
+                        modelName = `${modelName}_${count}`;
+                    }
+                    all_projects[projectName]['Models'][modelName] = { templateName: modelTemplate, status: 'Active',modelId:modelId }
+                }else{
+                    return msg
                 }
-                all_projects[projectName]['Models'][modelName] = { templateName: modelTemplate, status: 'Active' }
             }
         } else {
-            all_projects[projectName] = { 'Models': { [modelName]: { templateName: modelTemplate, status: 'Active' } }, status: 'Active' }
+            all_projects[projectName] = { 'Models': { [modelName]: { templateName: modelTemplate, status: 'Active',modelId:modelId } }, status: 'Active' }
         }
         const res = await executeQuery('attachModel', modelName, null, [newBlob])
         localStorage.setItem('Projects', JSON.stringify(all_projects))
@@ -449,7 +457,7 @@ export async function drawImageFromPython(data) {
 export async function addDefaultModel() {
     let data = {
         model_name: 'Default_DB',
-        model_template: 'Sample DB',
+        model_template: 'Sample_DB',
         project_name: 'Default',
         db_user: '',
         password : '',
@@ -461,7 +469,7 @@ export async function addDefaultModel() {
     const res = await fetchData('home','addNewModel',data)
 
     if (res.msg === 'Success'){
-        return ['Default_DB', 'Sample DB', 'Default','SQLITE']
+        return ['Default_DB', 'Sample_DB', 'Default','SQLITE']
     }
     return []
 }

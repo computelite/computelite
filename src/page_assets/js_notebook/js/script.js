@@ -48,7 +48,8 @@ window.onload = async function () {
       }
     }
     
-    window.executeQuery = async (query, params = []) => executeQuery('fetchData', modelName, query, params);
+    window.getData = async (query, params = []) => executeQuery('fetchData', modelName, query, params);
+    window.executeQuery = async (query, params = []) => executeQuery('updateData', modelName, query, params);
     
     await populateCells()     
   }catch(error){

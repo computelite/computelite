@@ -1,5 +1,7 @@
 import { postData,get_cl_element,confirmBox,executeQuery, fetchData, uploadFile,executePython,addDefaultModel } from "../../../assets/js/scc"
 import {uploadExcel,downloadExcel,get_uploadExcel_info} from "../../../core/gridMethods"
+import sqlScripts from "../../../core/modelSql"
+
 import * as bootstrap from 'bootstrap'
 const scc_one_modal = document.getElementById("scc-one-modal")
 let selected = []
@@ -10,9 +12,9 @@ const current_version = "1.0.5"
 
 const params = new URLSearchParams(window.location.search)
 
-const modelName = params.get('modelName');
+const modelUID = params.get('modelUID');
 
-const icons_class = {'Sample DB': 'fas fa-database','Supply Planning':'fas fa-database'}
+const icons_class = {'Sample_DB': 'fas fa-database','Supply Planning':'fas fa-database'}
 
 
 function get_accordian(group_name, table_list) {
@@ -60,8 +62,8 @@ document.addEventListener("DOMContentLoaded", async function() {
         return
     }
 
-    if (modelName){
-        await postData('/home/get-attached-model',{modelName:modelName})
+    if (modelUID){
+        await postData('/home/get-attached-model',{modelId:`${modelUID}`})
         const url = window.location.origin + window.location.pathname;
         history.replaceState(null, '', url);        
     }
@@ -162,7 +164,7 @@ function populate_models(model_names) {
         model_body.appendChild(get_li_element(model_name))
     }
 
-    if (modelName && model_body.lastChild){
+    if (modelUID && model_body.lastChild){
         model_body.lastChild.click()
     }else if ( model_body.firstChild){
         model_body.firstChild.click()
@@ -187,7 +189,7 @@ function get_li_element(model_name) {
             // UPGRADE VERSION
             let version = await fetchData('home','getVersion',{ model_name: this.innerText })
             if (version !== current_version){
-                await fetchData('home','upgradeVersion',{ modelName: this.innerText,db_version:version })
+                await fetchData('home','upgradeVersion',{ modelName: this.innerText,db_version:version,current_version: current_version})
             }
             
             for (let cn of this.parentNode.querySelectorAll("li.selectedValue")) {
@@ -347,7 +349,7 @@ function get_newModel_modal (header,anotherModal = false) {
     }
     else{
         form_div.appendChild(get_addModel_row('template_div','Model Template','model_template','select',
-            ['Sample DB']))
+            Object.keys(sqlScripts)))
     }       
     
 
