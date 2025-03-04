@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             confirmBox("Alert!","Please select a model")
             return
         }    
-        window.open(`/sqlEditor.html?tableName=V_TEMPV&modelName=${selected_model}`);
+        window.open(`./sqlEditor.html?tableName=V_TEMPV&modelName=${selected_model}`);
     }
 
     document.getElementById('availInpFiles').onclick = function(){
@@ -1465,7 +1465,7 @@ document.getElementById("notebookJS").onclick = function(){
         return
     }
     const modelName = selected_model.innerText
-    window.open(`/javascriptNB.html?modelName=${modelName}`);
+    window.open(`./javascriptNB.html?modelName=${modelName}`);
 }
 
 document.getElementById("sqlEditor").onclick = function(){
