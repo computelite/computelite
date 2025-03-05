@@ -2,21 +2,6 @@
 <html lang="en">
 
 <head>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-                for (const registration of registrations) {
-                    registration.unregister();
-                } 
-            });
-            navigator.serviceWorker.register('./coi-serviceworker.js')
-            .then(function(registration) {
-                console.log('CROSS ORGIN HEADER Service Worker registered with scope:', registration.scope);
-            }).catch(function(error) {
-                console.log('CROSS ORGIN HEADER Service Worker registration failed:', error);
-            });
-        }
-    </script>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!-- Primary Meta Tags -->
     <title>Compute Lite NoteBook</title>
@@ -133,6 +118,16 @@
             </div>
         </footer>
     </body>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./coi-serviceworker.js')
+            .then(function(registration) {
+                console.log('CROSS ORGIN HEADER Service Worker registered with scope:', registration.scope);
+            }).catch(function(error) {
+                console.log('CROSS ORGIN HEADER Service Worker registration failed:', error);
+            });
+        }
+    </script>
 
     <script type="module" src="./page_assets/S_notebook/js/script.js"></script>
     
