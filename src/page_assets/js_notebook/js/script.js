@@ -30,7 +30,21 @@ window.onload = async function () {
       };
   
       return Promise.all(libraries.map(lib => loadScript(lib.url, lib.globalVar)));
-    }  
+    }
+    
+    window.loadCDNStylesheets = async function (stylesheets) {
+      return Promise.all(stylesheets.map(({ url }) => {
+          return new Promise((resolve, reject) => {
+              const link = document.createElement("link");
+              link.rel = "stylesheet";
+              link.href = url;
+              link.onload = () => resolve(url);
+              link.onerror = () => reject(`Failed to load CSS: ${url}`);
+              document.head.appendChild(link);
+          });
+      }));
+  }
+  
   
     let result = await executeQuery('init')
     if (!result || result.msg != 'Success') {
@@ -63,7 +77,7 @@ async function populateCells(){
   document.getElementById("loadingOverlay").classList.remove("hidden");
 
   try{
-    let query = "SELECT CellId,CellContent FROM S_JSNotebook"
+    let query = "SELECT CellId,CellContent FROM S_JsNotebook"
     const data = await executeQuery('fetchData', modelName, query)
     data.forEach(([rowId, content]) => createCodeEditor(rowId, content));
   }catch (error) {
@@ -101,7 +115,7 @@ function createCodeEditor(rowId,content = "") {
   textEditorControls.querySelector('span').style = 'color: #00000066;';
 
   textEditorControls.querySelector('button').onclick = async function(){
-    let query = "DELETE FROM S_JSNotebook WHERE CellId = ?"
+    let query = "DELETE FROM S_JsNotebook WHERE CellId = ?"
     const res = await executeQuery("deleteData",modelName,query,[rowId])
     if (res){
       kernel.remove()
@@ -136,7 +150,7 @@ document.getElementById("addCell").onclick = async function () {
       return;
   }
   try {
-      let rowId = await executeQuery("insertData", modelName, "INSERT INTO S_JSNotebook (CellContent) VALUES (?)", ['']);
+      let rowId = await executeQuery("insertData", modelName, "INSERT INTO S_JsNotebook (CellContent) VALUES (?)", ['']);
       createCodeEditor(rowId);
   } catch (error) {
       console.error("Error adding cell:", error);

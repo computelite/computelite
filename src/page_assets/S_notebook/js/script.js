@@ -31,7 +31,7 @@ window.onload = async function () {
       }
     }
   }
-  let query = "SELECT CellId,CellContent FROM S_Notebook"
+  let query = "SELECT CellId,CellContent FROM S_PyNotebook"
   const data = await executeQuery('fetchData', modelName, query)
   for (let row of data) {
     createCodeEditor(row[0], row[1])
@@ -80,7 +80,7 @@ function createCodeEditor(rowId,content = "") {
   textEditorControls.querySelector('span').style = 'color: #00000066;';
 
   textEditorControls.querySelector('button').onclick = async function(){
-    let query = "DELETE FROM S_Notebook WHERE CellId = ?"
+    let query = "DELETE FROM S_PyNotebook WHERE CellId = ?"
     const res = await executeQuery("deleteData",modelName,query,[rowId])
     if (res){
       kernel.remove()
@@ -114,7 +114,7 @@ document.getElementById("addCell").onclick = async function(){
     confirmBox('Alert!','Model Name not found in the URL.')
     return
   }
-  let query = "INSERT INTO S_Notebook (CellContent) VALUES (?)"
+  let query = "INSERT INTO S_PyNotebook (CellContent) VALUES (?)"
   const rowId = await executeQuery("insertData",modelName,query,[''])
   createCodeEditor(rowId)
   

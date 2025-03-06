@@ -1,4 +1,4 @@
-var server_url = "http://127.0.0.1:5900";
+var server_url = "https://hub.computelite.com";
 var backend_opt = false
 import Swal from "sweetalert2"
 import * as gm from '../../core/gridMethods'

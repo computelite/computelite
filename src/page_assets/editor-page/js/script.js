@@ -5,6 +5,7 @@ import 'codemirror/mode/python/python.js';
 import { confirmBox, executePython,executeQuery, get_cl_element,fetchData,addDefaultModel } from "../../../assets/js/scc"
 const params = new URLSearchParams(window.location.search)
 import * as bootstrap from 'bootstrap'
+import JSZip from "jszip";
 
 let modelName = params.get('modelName');
 let projectName = params.get('projectName');

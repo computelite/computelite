@@ -33,7 +33,7 @@ export function createCodeMirrorEditor(kernelId,modelName,CellId,content) {
         }
 
         // Update the cell content in the database
-        const updateQuery = `UPDATE S_Notebook SET CellContent = ? WHERE CellId = ?`
+        const updateQuery = `UPDATE S_PyNotebook SET CellContent = ? WHERE CellId = ?`
         await executeQuery('updateData',modelName,updateQuery,[query,CellId])
 
         // Execute the Code

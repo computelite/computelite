@@ -1,14 +1,15 @@
 import { postData,get_cl_element,confirmBox,executeQuery, fetchData, uploadFile,executePython,addDefaultModel } from "../../../assets/js/scc"
 import {uploadExcel,downloadExcel,get_uploadExcel_info} from "../../../core/gridMethods"
 import sqlScripts from "../../../core/modelSql"
-
 import * as bootstrap from 'bootstrap'
+import JSZip from "jszip"
+
 const scc_one_modal = document.getElementById("scc-one-modal")
 let selected = []
 let excelUploadInfo = {}
 let selectedFile = null
 let imgBlob = null
-const current_version = "1.0.5"
+const current_version = "1.0.0"
 
 const params = new URLSearchParams(window.location.search)
 
@@ -1455,7 +1456,7 @@ document.getElementById("notebookBtn").onclick = function(){
         return
     }
     const modelName = selected_model.innerText
-    window.open(`./S_Notebook.html?modelName=${modelName}`);
+    window.open(`./PyNotebook.html?modelName=${modelName}`);
 }
 
 document.getElementById("notebookJS").onclick = function(){
@@ -1465,7 +1466,7 @@ document.getElementById("notebookJS").onclick = function(){
         return
     }
     const modelName = selected_model.innerText
-    window.open(`./javascriptNB.html?modelName=${modelName}`);
+    window.open(`./JsNotebook.html?modelName=${modelName}`);
 }
 
 document.getElementById("sqlEditor").onclick = function(){

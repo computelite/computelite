@@ -375,32 +375,5 @@ function isUpdateNeeded(currentVersion, requestedVersion) {
   return false; // Versions are the same
 }
 
-const version104 = `
-CREATE TABLE S_Notebook (
-	CellId	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	CellContent	VARCHAR,
-	CreationDate	VARCHAR DEFAULT (datetime('now','localtime'))
-);
-
-INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_Notebook','Notebook','Input',null,'Active',NULL);
-`;
-
-const version105 = `
-CREATE TABLE S_JSNotebook (
-	CellId	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	CellContent	VARCHAR,
-	CreationDate	VARCHAR DEFAULT (datetime('now','localtime'))
-);
-
-INSERT INTO S_JSNotebook (CellContent) VALUES (REPLACE(
-'// Load external libraries dynamically from a CDN using loadCDNScripts\nawait loadCDNScripts([{ url: "https://cdn.jsdelivr.net/npm/lodash/lodash.min.js", globalVar: "_" },\n    { url: "https://cdn.jsdelivr.net/npm/dayjs/dayjs.min.js", globalVar: "dayjs" },\n    { url: "https://cdn.jsdelivr.net/npm/chart.js", globalVar: "Chart" }\n]);\n\nconsole.log(_.chunk([1, 2, 3, 4], 2));\n\nconsole.log(dayjs().format());\n\nconst canvas = document.createElement("canvas");\nconst ctx = canvas.getContext("2d");\nnew Chart(ctx, {\n    type: "bar",\n    data: {\n        labels: ["Red", "Blue", "Yellow"],\n        datasets: [{ \n            label: "Votes",\n            data: [12, 19, 3],\n            backgroundColor: ["red", "blue", "yellow"] \n        }] \n    } \n});\ncanvas', '\n', CHAR(10)
-));
-INSERT INTO S_JSNotebook (CellContent) VALUES (REPLACE(
-'// Fetch data from the database\n// The executeQuery function executes an SQL query and retrieves data from the database.\n// In this case, we are selecting all records from the ''S_tablegroup'' table.\n\nconst result = await executeQuery("select * from S_tablegroup")\nconsole.log("result", result);', '\n', CHAR(10)
-));
-
-INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_JSNotebook','Javascript Notebook','Input',null,'Active',NULL);
-`;
-
-const versions = {"1.0.4":version104,"1.0.5":version105}
+const versions = {}
 

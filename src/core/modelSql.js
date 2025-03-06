@@ -84,16 +84,28 @@ CREATE TABLE S_PackageWheels (
 	Status	            VARCHAR DEFAULT ('Active')	
 );
 
-CREATE TABLE S_Notebook (
+CREATE TABLE S_PyNotebook (
+    Name            VARCHAR,
 	CellId	        INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	CellContent	    VARCHAR,
-	CreationDate	VARCHAR DEFAULT (datetime('now','localtime'))
+	CreationDate	VARCHAR DEFAULT (datetime('now','localtime')),
+	LastUpdateDate	VARCHAR DEFAULT (datetime('now','localtime'))
 );
 
-CREATE TABLE S_JSNotebook (
-	CellId	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	CellContent	VARCHAR,
-	CreationDate	VARCHAR DEFAULT (datetime('now','localtime'))
+CREATE TABLE S_JsNotebook (
+	Name            VARCHAR,
+	CellId	        INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	CellContent	    VARCHAR,
+	CreationDate	VARCHAR DEFAULT (datetime('now','localtime')),
+	LastUpdateDate	VARCHAR DEFAULT (datetime('now','localtime'))
+);
+
+CREATE TABLE S_RNotebook (
+	Name            VARCHAR,
+	CellId	        INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	CellContent	    VARCHAR,
+	CreationDate	VARCHAR DEFAULT (datetime('now','localtime')),
+	LastUpdateDate	VARCHAR DEFAULT (datetime('now','localtime'))
 );
 
 
@@ -110,12 +122,13 @@ INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, Col
 INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES ('All Other', 'V_TEMPV', 'Temp View', 'Output', NULL, 'Active', NULL);
 INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_DataFiles','Data Files','Input','["FileId","FileName","FileType","Status"]','Active',NULL);
 INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_PackageWheels','PackageWheels','Input','["WheelId","WheelName","Status"]','Active',NULL);
-INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_Notebook','Notebook','Input',null,'Active',NULL);
-INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_JSNotebook','Javascript Notebook','Input',null,'Active',NULL);
+INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_PyNotebook','Python Notebook','Input',null,'Active',NULL);
+INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_JsNotebook','Javascript Notebook','Input',null,'Active',NULL);
+INSERT INTO S_TableGroup (GroupName, TableName, TableDisplayName, TableType, ColumnOrder, Table_Status, Freeze_Col_Num) VALUES('All Other','S_RNotebook','R Notebook','Input',null,'Active',NULL);
 
 INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('ModelIcon', 'fas fa-cube');
 INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('ModelName', 'Sample DB');
-INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('DBVersion', '1.0.5');
+INSERT INTO S_ModelParams (ParamName, ParamValue) VALUES ('DBVersion', '1.0.0');
 
 INSERT INTO S_TaskMaster(TaskId, TaskName, TaskDisplayName) VALUES(1,'cats.py','Download Cats');
 INSERT INTO S_TaskMaster(TaskId, TaskName, TaskDisplayName) VALUES(2,'dogs.py','Show Dog');
@@ -132,11 +145,14 @@ INSERT INTO S_ExecutionFiles VALUES(9,'write_output_file.py',NULL,'write_output_
 INSERT INTO S_ExecutionFiles VALUES(10,'update_sqlite_db.py',NULL,'update_sqlite_db.py',replace('import sqlite3\n\nquery = "INSERT INTO T_SolverLog (LogMessage) Values (''Hello from ComputeLite'')"\n\nwith sqlite3.connect(thisDB) as conn:\n    conn.execute(query)\n  \n# Check solver log table: Log Tables > Solver Logs\n','\n',char(10)),'Active');
 INSERT INTO S_ExecutionFiles VALUES(11,'blending_problem_with_pulp_highs.py',NULL,'blending_problem_with_pulp_highs.py',replace('# Import PuLP modeler functions\nfrom pulp import *\n\n# Create the ''prob'' variable to contain the problem data\nprob = LpProblem("The Whiskas Problem", LpMinimize)\n# The 2 variables Beef and Chicken are created with a lower limit of zero\nx1 = LpVariable("ChickenPercent", 0, None, LpInteger)\nx2 = LpVariable("BeefPercent", 0)\n\n# The objective function is added to ''prob'' first\nprob += 0.013 * x1 + 0.008 * x2, "Total Cost of Ingredients per can"\n\n# The five constraints are entered\nprob += x1 + x2 == 100, "PercentagesSum"\nprob += 0.100 * x1 + 0.200 * x2 >= 8.0, "ProteinRequirement"\nprob += 0.080 * x1 + 0.100 * x2 >= 6.0, "FatRequirement"\nprob += 0.001 * x1 + 0.005 * x2 <= 2.0, "FibreRequirement"\nprob += 0.002 * x1 + 0.005 * x2 <= 0.4, "SaltRequirement"\n\nsolver = HiGHS() #Define HiGHS solver, include highspy in requirement.txt\nprob.writeLP("outputDir/WhiskasModel.lp")\nprob.solve(solver) #Use HiGHS solver\nprint("Status:", LpStatus[prob.status])\n\nfor v in prob.variables():\n    print(v.name, "=", v.varValue)\n\nprint("Total Cost of Ingredients per can = ", value(prob.objective))','\n',char(10)),'Active');
 
-INSERT INTO S_JSNotebook (CellContent) VALUES (REPLACE(
+INSERT INTO S_JsNotebook (CellContent) VALUES (REPLACE(
 '// Load external libraries dynamically from a CDN using loadCDNScripts\nawait loadCDNScripts([{ url: "https://cdn.jsdelivr.net/npm/lodash/lodash.min.js", globalVar: "_" },\n    { url: "https://cdn.jsdelivr.net/npm/dayjs/dayjs.min.js", globalVar: "dayjs" },\n    { url: "https://cdn.jsdelivr.net/npm/chart.js", globalVar: "Chart" }\n]);\n\nconsole.log(_.chunk([1, 2, 3, 4], 2));\n\nconsole.log(dayjs().format());\n\nconst canvas = document.createElement("canvas");\nconst ctx = canvas.getContext("2d");\nnew Chart(ctx, {\n    type: "bar",\n    data: {\n        labels: ["Red", "Blue", "Yellow"],\n        datasets: [{ \n            label: "Votes",\n            data: [12, 19, 3],\n            backgroundColor: ["red", "blue", "yellow"] \n        }] \n    } \n});\ncanvas', '\n', CHAR(10)
 ));
-INSERT INTO S_JSNotebook (CellContent) VALUES (REPLACE(
+INSERT INTO S_JsNotebook (CellContent) VALUES (REPLACE(
 '// Fetch data from the database\n// The executeQuery function executes an SQL query and retrieves data from the database.\n// In this case, we are selecting all records from the ''S_tablegroup'' table.\n\nconst result = await executeQuery("select * from S_tablegroup")\nconsole.log("result", result);', '\n', CHAR(10)
+));
+INSERT INTO S_JsNotebook (CellContent) VALUES (REPLACE(
+'// Load external CSS dynamically from a CDN using loadCDNStylesheets\n\nawait loadCDNStylesheets([\n    { url: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" }\n]);', '\n', CHAR(10)
 ));
 
 COMMIT TRANSACTION;

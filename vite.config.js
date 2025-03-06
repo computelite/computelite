@@ -17,8 +17,8 @@ export default defineConfig({
         sqlEditor: path.resolve(__dirname, 'src/sqlEditor.html'),
         home: path.resolve(__dirname, 'src/homePage.html'),
         policy: path.resolve(__dirname, 'src/privacyPolicy.html'),
-        notebook: path.resolve(__dirname, 'src/S_Notebook.html'),
-        notebookJS: path.resolve(__dirname, 'src/javascriptNB.html'),
+        notebook: path.resolve(__dirname, 'src/PyNotebook.html'),
+        notebookJS: path.resolve(__dirname, 'src/JsNotebook.html'),
       },
       output: {
         assetFileNames: 'assets/[name].[hash].[ext]',
@@ -52,24 +52,3 @@ export default defineConfig({
     'process.env': process.env,
   }
 })
-
-
-// import { defineConfig } from 'vite';
-
-// export default ({
-//   root: resolve(__dirname, 'src'),
-//     build: {
-//       outDir: '../dist',
-//     },
-//   server: {
-//     port:8080,
-//     cors:true,
-//     headers: {
-//       'Cross-Origin-Opener-Policy': 'same-origin',
-//       'Cross-Origin-Embedder-Policy': 'require-corp',
-//     },
-//   },
-//   optimizeDeps: {
-//     exclude: ['@sqlite.org/sqlite-wasm'],
-//   },
-// });
