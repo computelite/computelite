@@ -1475,5 +1475,5 @@ document.getElementById("sqlEditor").onclick = function(){
         return
     }
     const modelName = selected_model.innerText
-    window.open(`./playground/client.html?modelName=${modelName}`);
+    window.open(`./SQLiteStudio/playground/client.html?modelName=${modelName}`);
 }
