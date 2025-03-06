@@ -94,6 +94,7 @@ async function initializePyodide(eventData) {
 
   try{
     await self.micropip.install('https://cdn.jsdelivr.net/gh/computelite/computelite.github.io@main/wheels/highspy-1.9.0-cp312-cp312-pyodide_2024_0_wasm32.whl');
+    await self.micropip.install('https://cdn.jsdelivr.net/gh/computelite/computelite.github.io@main/wheels/PuLP-3.0.2-py3-none-any.whl');
   }
   catch {
     console.log("HiGHS package not loaded")
