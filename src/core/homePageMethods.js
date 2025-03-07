@@ -1,5 +1,5 @@
 import { executeQuery,checkTableExists } from "../assets/js/scc"
-import sqlScripts from "./modelSql"
+import schema from "../public/model_schema.json"
 
 //  -----------------------  ADD NEW MODEL -------------------------------------------------------------
 export async function addNewModel(data){
@@ -7,7 +7,7 @@ export async function addNewModel(data){
   const projectName = data.project_name
   const modelTemplate = data.model_template
   
-  if (!(Object.keys(sqlScripts).includes(modelTemplate))){
+  if (!(Object.keys(schema).includes(modelTemplate))){
     return {msg:"Invalid Model Template Selected"}
   }
 
@@ -27,7 +27,7 @@ export async function addNewModel(data){
   let msg = 'Success'
   try {
       
-      const sqlScript = sqlScripts[modelTemplate];
+      const sqlScript = schema[modelTemplate];
       
       try {
         await executeQuery('executeQuery',modelName,sqlScript,['script'])
