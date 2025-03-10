@@ -1,26 +1,14 @@
-const cacheName = 'v8';
-const dynamicCacheName = 'd8';
+const dynamicCacheName = 'd03';
 
-const cachedFiles = [
-    './',
-    './homePage.html',
-    './privacyPolicy.html',
-    './sqlEditor.html',
-    './tableDisplay.html'
-];
   
 // Install event - Cache files
 self.addEventListener('install', event => {
-    event.waitUntil(
-      caches.open(cacheName).then(cache => {
-        return cache.addAll(cachedFiles);
-      })
-    );
+    self.skipWaiting();
 });
   
 // Activate event - Clean old caches
 self.addEventListener('activate', event => {
-    const cacheWhitelist = [cacheName];
+    const cacheWhitelist = [dynamicCacheName];
     event.waitUntil(
       Promise.all([
       self.clients.claim(),
