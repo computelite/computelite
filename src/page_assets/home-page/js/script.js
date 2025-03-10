@@ -1,6 +1,6 @@
 import { postData,get_cl_element,confirmBox,executeQuery, fetchData, uploadFile,executePython,addDefaultModel } from "../../../assets/js/scc"
 import {uploadExcel,downloadExcel,get_uploadExcel_info} from "../../../core/gridMethods"
-import sqlScripts from "../../../core/modelSql"
+import schema from "../../../public/model_schema.json"
 import * as bootstrap from 'bootstrap'
 import JSZip from "jszip"
 
@@ -350,7 +350,7 @@ function get_newModel_modal (header,anotherModal = false) {
     }
     else{
         form_div.appendChild(get_addModel_row('template_div','Model Template','model_template','select',
-            Object.keys(sqlScripts)))
+            Object.keys(schema)))
     }       
     
 

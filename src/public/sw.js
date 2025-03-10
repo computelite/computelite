@@ -60,6 +60,9 @@ self.addEventListener('fetch', event => {
             });
         }
         return fetch(event.request).then(networkResponse => {
+          if (event.request.url.endsWith('.json')) {
+            return networkResponse; // Do not cache JSON
+          }
             return caches.open(dynamicCacheName).then(cache => {
                 if (event.request.method === "GET" && event.request.url.indexOf('https') === 0 && 
                 event.request.url.indexOf(hostDomain) > -1){

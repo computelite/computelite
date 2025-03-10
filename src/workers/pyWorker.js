@@ -217,7 +217,7 @@ async function executePythonCode(eventData) {
 
     const updatedFile = self.pyodide.FS.readFile(fsModelPath);
     await saveSQLiteToOPFS(modelName, projectName, updatedFile);
-    console.log('executed',result);
+    
     postMessage({ id, success: true, result:{display:displayType,value:result},stdout:output,stderr:'',blob, outputFiles });
     
   } catch (error) {

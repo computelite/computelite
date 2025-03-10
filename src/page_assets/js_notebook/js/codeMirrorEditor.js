@@ -34,6 +34,10 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content) {
     editor.setValue(content);
   }, 10);
 
+  cell.querySelector("button.cell-controls-button").onclick = function(){
+    executeCode(editor, cell, jsRunner, modelName, CellId)
+  }
+
   return editor;
 }
 
