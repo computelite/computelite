@@ -7,7 +7,7 @@ import { JavascriptEvaluator } from "./eval";
 
 
 
-export function createCodeMirrorEditor(kernelId, modelName, CellId, content) {
+export function createCodeMirrorEditor(kernelId, modelName, CellId, content, NotebookId) {
   const cell = document.getElementById(kernelId);
   const jsRunner = new JavascriptEvaluator();
   const editor = CodeMirror(cell.querySelector("div.computelite-text-editor"), {
@@ -19,7 +19,7 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content) {
     tabSize: 4,
     indentUnit: 4,
     extraKeys: {
-      "Ctrl-Enter": async (cm) => executeCode(editor, cell, jsRunner, modelName, CellId),
+      "Ctrl-Enter": async (cm) => executeCode(editor, cell, jsRunner, modelName, CellId, NotebookId),
     },
   });
 
@@ -31,7 +31,9 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content) {
 
   setTimeout(() => {
     editor.refresh();
-    editor.setValue(content);
+    if (content) {
+      editor.setValue(content);
+    }
   }, 10);
 
   cell.querySelector("button.cell-controls-button").onclick = function(){
@@ -42,7 +44,7 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content) {
 }
 
 
-async function executeCode(editor, cell, jsRunner, modelName, CellId) {
+async function executeCode(editor, cell, jsRunner, modelName, CellId, NotebookId) {
   editor.getInputField().blur();
   const query = editor.getValue();
   cell.querySelector(".cell-bottom").innerHTML = "";
@@ -52,7 +54,7 @@ async function executeCode(editor, cell, jsRunner, modelName, CellId) {
 
   toggleRunningState(cell, true);
 
-  await executeQuery("updateData", modelName, `UPDATE S_JsNotebook SET CellContent = ? WHERE CellId = ?`, [query, CellId]);
+  await executeQuery("updateData", modelName, `UPDATE S_NotebookContent SET CellContent = ? WHERE CellId = ? AND CellType = ? AND NotebookId = ?`, [query,CellId,'javascript',NotebookId]);
 
   const htmlOutput = get_cl_element("div");
   cell.querySelector(".cell-bottom").appendChild(htmlOutput);
@@ -111,10 +113,11 @@ function renderHtmlOutput(val, intoElement) {
   return false;
 }
 
-export async function runAllCell(container,modelName){
-  container.innerHTML = ""
-  let query = "SELECT CellId,CellContent FROM S_JsNotebook"
-  const data = await executeQuery('fetchData', modelName, query)
+export async function runAllCell(container, modelName, noteBookNm) {
+  container.innerHTML = "";
+  let query = "SELECT CellId,CellContent FROM S_NotebookContent WHERE Name = ? AND CellType = ?";
+  const data = await executeQuery("fetchData", modelName, query, [noteBookNm, 'javascript']);
+  
   for (let row of data) {
     const kernel = get_cl_element('computelite-cell','cell-grid cell-container celltype-python');
     kernel.setAttribute('tabindex', '0');

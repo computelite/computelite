@@ -71,7 +71,7 @@
 
 computelite-notebook {
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     min-height: 100%;
     font-family: var(--font-sans);
 }
@@ -814,4 +814,39 @@ computelite-notebook {
 
 .loading-overlay.hidden {
   display: none;
+}
+
+.small-input {
+  height: 25px;
+  margin-top: 1rem;
+}
+
+.tree li.selectedValue{
+  background-color:#1c2540;
+  color: #eeecec;
+}
+
+.CodeMirror-lines {
+  width: 50rem;
+}
+
+/* li::before {
+  content: "📄";
+  margin-right: 5px;
+} */
+
+.checkBox-label{
+width: 100%;
+display: block;
+position: relative;
+cursor: pointer;
+font-size: 14px;
+font-weight: 400;
+margin-bottom: 0;
+position: relative;
+bottom: 3px;
+right: 5px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
 }

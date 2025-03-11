@@ -42,9 +42,9 @@
 
 </head>
 
-<body class="px-5">
+<body>
 
-    <header class="navbar navbar-expand-lg">
+    <header class="navbar navbar-expand-lg px-5">
         <div class="container" style="max-width: none;">
             <a class="navbar-logo" href="./homePage.html" style="font-weight: 600;">Compute <b>Lite</b></a>
             <a class="navbar-el ms-4" href="./homePage.html" style="font-weight: 600;">Playground</a>
@@ -71,7 +71,19 @@
             </div>
         </div>
         <computelite-notebook>
-            <main id="cellContainer" class="cells-container">                
+            <div class="tree ps-3 col-2">
+                <div>
+                    <span id="addNotebook" class="fa-solid fa-file-circle-plus pe-2 float-end" title="Add NoteBook"></span>
+                    <span id="deleteNotebook" class="fa fa-trash pe-3 float-end" title="Delete NoteBook"></span>
+                </div>
+                <div id="inputDiv" class="input-group d-none">
+                    <input id="notebookName" type="text" class="form-control small-input" placeholder="NoteBook Name" autocomplete="off">
+                </div>
+                <div id="jsListDiv" class="list-group mt-4 gap-2">
+
+                </div>
+            </div>
+            <main id="cellContainer" class="cells-container" >                
             </main>
         </computelite-notebook>
         <footer class="computelite-notebook-footer line-grid">
