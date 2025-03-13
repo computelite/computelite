@@ -6,7 +6,7 @@ import {executePython,consoleNotebookOutput, get_cl_element,executeQuery,drawIma
 
 const isPyProxy = (jsobj) => !!jsobj && jsobj.$$?.type === "PyProxy";
 
-export function createCodeMirrorEditor(kernelId,modelName,CellId,content) {
+export function createCodeMirrorEditor(kernelId,modelName,CellId,content,notebookId) {
   const cell = document.getElementById(kernelId);
   var editor = CodeMirror(cell.querySelector("div.computelite-text-editor"), {
     lineNumbers: true,
@@ -17,7 +17,7 @@ export function createCodeMirrorEditor(kernelId,modelName,CellId,content) {
     tabSize:4,
     indentUnit:4,
     extraKeys: {
-      'Ctrl-Enter': async (cm) => executeCode(editor, cell, modelName, CellId,kernelId),
+      'Ctrl-Enter': async (cm) => executeCode(editor, cell, modelName, CellId,kernelId,notebookId),
     },
   });
   
@@ -42,12 +42,14 @@ export function createCodeMirrorEditor(kernelId,modelName,CellId,content) {
 
   setTimeout(() => {
     editor.refresh();
-    editor.setValue(content)
+    if (content){
+      editor.setValue(content)
+    }
   }, 10);
   return editor
 }
 
-async function executeCode(editor, cell, modelName, CellId,kernelId) {  
+async function executeCode(editor, cell, modelName, CellId,kernelId,notebookId) {  
   // Custom function triggered by Ctrl+Enter
   editor.getInputField().blur();
   const query = editor.getValue();
@@ -63,8 +65,8 @@ async function executeCode(editor, cell, modelName, CellId,kernelId) {
   }
 
   // Update the cell content in the database
-  const updateQuery = `UPDATE S_PyNotebook SET CellContent = ? WHERE CellId = ?`
-  await executeQuery('updateData',modelName,updateQuery,[query,CellId])
+  const updateQuery = `UPDATE S_NotebookContent SET CellContent = ? WHERE CellId = ? AND CellType = ? AND NotebookId = ?`
+  await executeQuery('updateData',modelName,updateQuery,[query,CellId,'python',notebookId])
 
   // Execute the Code
   let res = await executePython('execute','notebook',query,'Default',modelName,[],null,[],[],kernelId)

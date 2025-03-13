@@ -192,9 +192,13 @@ async function fetchNotebookName() {
       for (let data of rw) { 
         if (data[0] && !seen.has(data[0])) {
           seen.add(data[0]);
-  
-          let jsData = get_cl_element('li', 'checkBox-label border-bottom py-0 ps-1', data[1], null);
-          jsData.innerText = data[0];
+
+          let jsData = get_cl_element('li', 'py-0 ps-1', data[1], null);
+          let label = get_cl_element("label", "checkBox-label", null, 
+            get_cl_element("span", "fas fa-file-alt" ), null);
+        
+          label.appendChild(document.createTextNode(data[0]));
+          jsData.appendChild(label);
           jsList.appendChild(jsData);
           jsData.onclick = async function(e) {
             for (let cn of document.getElementById('jsListDiv').querySelectorAll("li.selectedValue")) {
@@ -216,8 +220,12 @@ async function fetchNotebookName() {
       let query = `INSERT INTO S_NotebookContent (Name,CellContent,CellType,NotebookId) VALUES (?, ?, ?, ?)`;
       await executeQuery("insertData", modelName, query, ['Default','','javascript',notebookId]);
 
-      let jsData = get_cl_element('li', 'checkBox-label py-0 ps-1', notebookId, null);
-      jsData.innerText = 'Default';
+      let jsData = get_cl_element('li', 'py-0 ps-1', notebookId, null);
+      let label = get_cl_element("label", "checkBox-label", null, 
+        get_cl_element("span", "fas fa-file-alt" ), null);
+    
+      label.appendChild(document.createTextNode('Default'));
+      jsData.appendChild(label);
       jsList.appendChild(jsData);
       jsData.classList.add("selectedValue");
       container.innerHTML = "";
@@ -280,8 +288,12 @@ document.getElementById("notebookName").onkeydown = async function (e) {
       document.getElementById("inputDiv").classList.add("d-none");
 
       let jsList = document.getElementById('jsListDiv');
-      let jsData = get_cl_element('li', 'checkBox-label py-0 ps-1', notebookId, null);
-      jsData.innerText = inp_val;
+      let jsData = get_cl_element('li', 'py-0 ps-1', notebookId, null);
+      let label = get_cl_element("label", "checkBox-label", null, 
+        get_cl_element("span", "fas fa-file-alt" ), null);
+    
+      label.appendChild(document.createTextNode(inp_val));
+      jsData.appendChild(label);
       jsList.appendChild(jsData);
       for (let cn of jsList.querySelectorAll("li.selectedValue")) {
         cn.classList.remove("selectedValue");
@@ -336,3 +348,10 @@ async function deleteNoteBookLi(selected_li){
   let selected_notebook = document.getElementById('jsListDiv').querySelector("li.selectedValue")
   await populateCells(selected_notebook.innerText)
 }
+
+document.getElementById('toggleSidebar').onclick = function () {
+  let sidebar = document.getElementById('sidebarMenu');
+  sidebar.classList.toggle("contracted");
+  container.classList.toggle("cell-position")
+  document.getElementById("inputDiv").classList.add("d-none");
+};

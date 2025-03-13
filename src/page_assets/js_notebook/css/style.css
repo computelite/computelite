@@ -79,6 +79,7 @@ computelite-notebook {
 .cells-container {
     background-color: var(--background-color);
     padding-bottom: 0.5em;
+    width: 80%;
 }
 
 .computelite-notebook-footer {
@@ -816,6 +817,10 @@ computelite-notebook {
   display: none;
 }
 
+.mainDiv{
+  width: 80%;
+}
+
 .small-input {
   height: 25px;
   margin-top: 1rem;
@@ -826,27 +831,86 @@ computelite-notebook {
   color: #eeecec;
 }
 
-.CodeMirror-lines {
-  width: 50rem;
+.checkBox-label{
+  width: 100%;
+  display: block;
+  position: relative;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 0;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* li::before {
-  content: "📄";
-  margin-right: 5px;
-} */
+.tree li {
+  list-style-type: none;
+  margin: 0px;
+  position: relative;
+  line-height: 24px;
+}
 
-.checkBox-label{
-width: 100%;
-display: block;
-position: relative;
-cursor: pointer;
-font-size: 14px;
-font-weight: 400;
-margin-bottom: 0;
-position: relative;
-bottom: 3px;
-right: 5px;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
+.checkBox-label span {
+  padding-right: 0.25rem;
+}
+
+#sidebarMenu {
+  width: 20%;
+  height: 100vh;
+  overflow-y: auto; /* Enables vertical scrolling */
+  overflow-x: hidden; /* Prevents horizontal scrolling */
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  background-color: #f2f2f2;
+}
+
+/* Contracted sidebar */
+#sidebarMenu.contracted {
+  width: 0px;
+  padding: 0px !important;
+  overflow: hidden; /* Prevents any scrolling when contracted */
+}
+
+#sidebarMenu.contracted > *:not(div:first-child) {
+  display: none;
+}
+
+/* Ensure only icons remain visible */
+#sidebarMenu.contracted #addNotebook,
+#sidebarMenu.contracted #deleteNotebook {
+  display: none;
+}
+
+/* Align icons properly */
+.fa-square-caret-left {
+  transition: transform 0.3s ease;
+}
+
+.cell-position {
+  margin-left: 5rem;
+}
+
+.sidebar-toggler {
+  padding: 0.4rem 0.6rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: rgba(23,31,56,0.9);
+  background-color: transparent;
+  border: 0.0625rem solid rgba(23,31,56,0.1);
+  border-radius: 0.45rem;
+  transition: box-shadow 0.15sease-in-out;
+}
+
+.tree li::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -23px;
+  border-left: 1px solid #ccc;
+  border-bottom:1px solid #ccc;
+  border-radius:0 0 0 0px;
+  width:20px;
+  height:15px;
 }
