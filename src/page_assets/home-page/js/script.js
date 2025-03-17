@@ -15,7 +15,7 @@ const params = new URLSearchParams(window.location.search)
 const modelUID = params.get('modelUID');
 let schema = {}
 
-const icons_class = {'Sample_DB': 'fas fa-database','Supply Planning':'fas fa-database'}
+const icons_class = {'DB_Icon': 'fas fa-database'}
 
 
 function get_accordian(group_name, table_list) {
@@ -198,7 +198,7 @@ function get_li_element(model_name) {
     let el = get_cl_element("li", "nav-item mb-0", null,null)
     let el_child = get_cl_element("a","nav-link p-2 rounded-0")
     el_child.appendChild(get_cl_element("span","d-block text-left",null,null))
-    el_child.firstChild.appendChild(get_cl_element("span",`${icons_class[model_name[1]]} pe-2`))
+    el_child.firstChild.appendChild(get_cl_element("span",`${icons_class['DB_Icon']} pe-2`))
     el_child.firstChild.appendChild(document.createTextNode(model_name[0]))
     el.appendChild(el_child)
     el.setAttribute("project", model_name[2])
@@ -266,7 +266,7 @@ function get_scc_tree(model_dict,parent_icon = "fa-server",project = null) {
         }
         tree.appendChild(get_cl_element("ul", "childList TreeMembers"))
         for (let model_name of model_dict[project_name]) {
-            let el = get_tree_li_element(model_name[0], icons_class[model_name[1]])
+            let el = get_tree_li_element(model_name[0], icons_class['DB_Icon'])
             if (!project){
                 el.onclick = function (e) {
                     if (el.firstChild.checked) {
