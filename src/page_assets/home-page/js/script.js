@@ -1,6 +1,5 @@
 import { postData,get_cl_element,confirmBox,executeQuery, fetchData, uploadFile,executePython,addDefaultModel } from "../../../assets/js/scc"
 import {uploadExcel,downloadExcel,get_uploadExcel_info} from "../../../core/gridMethods"
-import schema from "../../../public/model_schema.json"
 import * as bootstrap from 'bootstrap'
 import JSZip from "jszip"
 
@@ -14,6 +13,7 @@ const current_version = "1.0.0"
 const params = new URLSearchParams(window.location.search)
 
 const modelUID = params.get('modelUID');
+let schema = {}
 
 const icons_class = {'Sample_DB': 'fas fa-database','Supply Planning':'fas fa-database'}
 
@@ -54,8 +54,30 @@ function get_accordian(group_name, table_list) {
     return card_border
 }
 
-document.addEventListener("DOMContentLoaded", async function() {
+const fetchSchema = async () => {
+    try {
+        const response = await fetch("/model_schema.json",{
+          cache:"reload",
+        });
+  
+        if (!response.ok) {
+            throw new Error(`Failed to load schema: ${response.status} ${response.statusText}`);
+        }
+  
+        const data = await response.json();
+  
+        return data;  // Return data for further usage
+    } catch (error) {
+        console.error("Error fetching schema:", error);
+        return null;
+    }
+  };
+  
 
+document.addEventListener("DOMContentLoaded", async function() {
+    
+    schema = await fetchSchema()
+    
     // Initialize the SQLite3 module
     let result = await executeQuery('init')
     if (!result || result.msg != 'Success'){
@@ -388,6 +410,7 @@ function get_newModel_modal (header,anotherModal = false) {
             model_name: model_name,
             model_template: model_template,
             project_name: project_name,
+            schemas:schema,
             db_user: '',
             password : '',
             host:'',

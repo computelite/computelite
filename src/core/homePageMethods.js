@@ -1,11 +1,11 @@
 import { executeQuery,checkTableExists } from "../assets/js/scc"
-import schema from "../public/model_schema.json"
 
 //  -----------------------  ADD NEW MODEL -------------------------------------------------------------
 export async function addNewModel(data){
   const modelName = data.model_name
   const projectName = data.project_name
   const modelTemplate = data.model_template
+  const schema = data.schemas
   
   if (!(Object.keys(schema).includes(modelTemplate))){
     return {msg:"Invalid Model Template Selected"}
@@ -324,6 +324,7 @@ export async function getUserModels() {
           }
       }
   }
+  console.log('all models',all_models)
   return all_models
 }
 
