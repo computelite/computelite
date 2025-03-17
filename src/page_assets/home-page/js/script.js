@@ -56,7 +56,7 @@ function get_accordian(group_name, table_list) {
 
 const fetchSchema = async () => {
     try {
-        const response = await fetch("/model_schema.json",{
+        const response = await fetch("./model_schema.json",{
           cache:"reload",
         });
   
