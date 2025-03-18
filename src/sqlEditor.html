@@ -423,16 +423,7 @@
 
         
     </main>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js', {updateViaCache: 'none'})
-                .then(function(registration) {
-                    console.log('Service Worker registered with scope:', registration.scope);
-                }).catch(function(error) {
-                    console.log('Service Worker registration failed:', error);
-                });
-        }
-    </script>
+    <script src="./coi-serviceworker.js"></script>
     <script type="module" src="./page_assets/sqlEditor/js/script.js"></script>
     <script type="module" src="./assets/js/pixel.js"></script>
 </body>

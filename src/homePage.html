@@ -451,31 +451,7 @@
         </div>
     </div>
 </footer>
-<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js', {updateViaCache: 'none'})
-            .then(function(registration) {
-                console.log('Service Worker registered with scope:', registration.scope);
-            }).catch(function(error) {
-                console.log('Service Worker registration failed:', error);
-            });
-    }
-    if (typeof SharedArrayBuffer === "undefined") {
-      console.log("SharedArrayBuffer not supported");
-      const reloadedBySelf = window.sessionStorage.getItem("coiReloadedBySelf");
-      if(reloadedBySelf){
-        console.log("Cannot support SharedArrayBuffer, even after reload");
-      }
-      else{
-        console.log("SharedArrayBuffer not supported, reloading...");
-        window.sessionStorage.setItem("computeLiteReloaded", "true");
-        window.location.reload();
-      }
-    } else{
-      window.sessionStorage.removeItem("computeLiteReloaded");
-      console.log("SharedArrayBuffer supported, no reload");
-    }
-</script>
+<script src="./coi-serviceworker.js"></script>
 <script src="./page_assets/home-page/js/script.js" type="module"></script>
 <script type="module" src="./assets/js/pixel.js"></script>
 
