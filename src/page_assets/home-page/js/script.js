@@ -1,4 +1,4 @@
-import { postData,get_cl_element,confirmBox,executeQuery, fetchData, uploadFile,executePython,addDefaultModel } from "../../../assets/js/scc"
+import { postData,get_cl_element,confirmBox,executeQuery, fetchData, uploadFile,executePython,addDefaultModel,fetchSchema } from "../../../assets/js/scc"
 import {uploadExcel,downloadExcel,get_uploadExcel_info} from "../../../core/gridMethods"
 import * as bootstrap from 'bootstrap'
 import JSZip from "jszip"
@@ -54,24 +54,6 @@ function get_accordian(group_name, table_list) {
     return card_border
 }
 
-const fetchSchema = async () => {
-    try {
-        const response = await fetch("./model_schema.json",{
-          cache:"reload",
-        });
-  
-        if (!response.ok) {
-            throw new Error(`Failed to load schema: ${response.status} ${response.statusText}`);
-        }
-  
-        const data = await response.json();
-  
-        return data;  // Return data for further usage
-    } catch (error) {
-        console.error("Error fetching schema:", error);
-        return null;
-    }
-  };
   
 
 document.addEventListener("DOMContentLoaded", async function() {
@@ -171,7 +153,7 @@ async function get_user_models() {
     document.getElementById("tableGroup").innerHTML = ""
     let all_models = await fetchData('home','getUserModels')
     if (all_models.length == 0){
-        let model = await addDefaultModel()
+        let model = await addDefaultModel(schema)
         if ((model).length > 0){
             all_models.push(model)
         }

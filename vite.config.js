@@ -19,6 +19,7 @@ export default defineConfig({
         policy: path.resolve(__dirname, 'src/privacyPolicy.html'),
         notebook: path.resolve(__dirname, 'src/PyNotebook.html'),
         notebookJS: path.resolve(__dirname, 'src/JsNotebook.html'),
+        notebookR: path.resolve(__dirname, 'src/RNotebook.html'),
       },
       output: {
         assetFileNames: 'assets/[name].[hash].[ext]',

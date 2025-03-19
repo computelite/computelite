@@ -2,7 +2,7 @@ import CodeMirror from "codemirror";
 import 'codemirror/theme/dracula.css';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/python/python.js';
-import { confirmBox, executePython,executeQuery, get_cl_element,fetchData,addDefaultModel } from "../../../assets/js/scc"
+import { confirmBox, executePython,executeQuery, get_cl_element,fetchData,addDefaultModel,fetchSchema } from "../../../assets/js/scc"
 const params = new URLSearchParams(window.location.search)
 import * as bootstrap from 'bootstrap'
 import JSZip from "jszip";
@@ -13,6 +13,7 @@ var editor = null
 let selected_li_el = null
 let selected_folder_el = null
 let imgBlob = null
+let schema = {}
 
     
 window.onload = async function () {  
@@ -22,6 +23,7 @@ window.onload = async function () {
       new bootstrap.Modal(modalElement);
     }
   });
+  schema = await fetchSchema()
 
   editor = CodeMirror.fromTextArea(document.getElementById("editorText"), {
       lineNumbers: true,
@@ -63,7 +65,7 @@ window.onload = async function () {
     const defaultDbExists = all_models.some(subArr => subArr[0] === 'Default_DB');
 
     if ( !defaultDbExists) {
-      let model = await addDefaultModel()
+      let model = await addDefaultModel(schema)
       if (model.length > 0) {
         modelName = model[0]
         projectName = 'Default'

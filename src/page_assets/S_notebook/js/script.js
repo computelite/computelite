@@ -1,14 +1,16 @@
 import { get_cl_element } from '../../../assets/js/scc';
 import {createCodeMirrorEditor} from './codemirrorEditor'
-import {executePython,executeQuery,confirmBox,addDefaultModel,fetchData} from '../../../assets/js/scc'
+import {executePython,executeQuery,confirmBox,addDefaultModel,fetchData,fetchSchema} from '../../../assets/js/scc'
 import {nanoid} from 'nanoid'
 
+
+let schema = {}
 const params = new URLSearchParams(window.location.search)
 let modelName = params.get('modelName');
 
 const container = document.getElementById("cellContainer");
 window.onload = async function () {
-
+  schema = await fetchSchema()
   let result = await executeQuery('init')
   if (!result || result.msg != 'Success') {
     confirmBox('Alert!', 'Some error occured while initializing sqlite.')
@@ -19,7 +21,7 @@ window.onload = async function () {
       const defaultDbExists = all_models.some(subArr => subArr[0] === 'Default_DB');
   
       if ( !defaultDbExists) {
-        let model = await addDefaultModel()
+        let model = await addDefaultModel(schema)
         if (model.length > 0) {
           modelName = model[0]
         } else {

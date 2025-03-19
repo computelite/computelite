@@ -388,6 +388,7 @@ export function consoleNotebookOutput(cell,Lines,type = 'output') {
                 lineElement.classList.add('text-danger')
             }
             lineElement.textContent = line;
+            lineElement.style.whiteSpace = "pre";
             outputContainer.appendChild(lineElement);
         }
     });
@@ -454,11 +455,12 @@ export async function drawImageFromPython(data) {
     };
 }
 
-export async function addDefaultModel() {
+export async function addDefaultModel(schema) {
     let data = {
         model_name: 'Default_DB',
         model_template: 'Sample_DB',
         project_name: 'Default',
+        schemas:schema,
         db_user: '',
         password : '',
         host:'',
@@ -473,6 +475,25 @@ export async function addDefaultModel() {
     }
     return []
 }
+
+export async function fetchSchema (){
+    try {
+        const response = await fetch("./model_schema.json",{
+          cache:"reload",
+        });
+  
+        if (!response.ok) {
+            throw new Error(`Failed to load schema: ${response.status} ${response.statusText}`);
+        }
+  
+        const data = await response.json();
+  
+        return data;  // Return data for further usage
+    } catch (error) {
+        console.error("Error fetching schema:", error);
+        return null;
+    }
+};
 
 
 py_worker.onmessage = function (event) {

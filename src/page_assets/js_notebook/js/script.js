@@ -1,14 +1,16 @@
 import { get_cl_element } from '../../../assets/js/scc';
 import { createCodeMirrorEditor , runAllCell} from "./codeMirrorEditor"
-import {executeQuery ,confirmBox,addDefaultModel,fetchData} from '../../../assets/js/scc'
+import {executeQuery ,confirmBox,addDefaultModel,fetchData,fetchSchema} from '../../../assets/js/scc'
 import {nanoid} from 'nanoid'
 
 const params = new URLSearchParams(window.location.search)
 let modelName = params.get('modelName');
 let runcells = false
 const container = document.getElementById("cellContainer");
+let schema = {}
 
 window.onload = async function () {
+  schema = await fetchSchema()
   try{
 
     window.loadCDNScripts = async function (libraries) {
@@ -54,7 +56,7 @@ window.onload = async function () {
   
     if (!modelName) {
       let all_models = await fetchData('home', 'getUserModels')
-      const modelName = all_models.some(subArr => subArr[0] === 'Default_DB') ? 'Default_DB' : (await addDefaultModel())[0] || null;
+      const modelName = all_models.some(subArr => subArr[0] === 'Default_DB') ? 'Default_DB' : (await addDefaultModel(schema))[0] || null;
   
       if (!modelName) {
         confirmBox('Alert!', 'Model Name not found in the URL.');
