@@ -7,7 +7,7 @@ import { consoleNotebookOutput, get_cl_element, executeQuery } from '../../../as
 
 let canvas = null
 
-export function createCodeMirrorEditor(kernelId, modelName, CellId, content) {
+export function createCodeMirrorEditor(kernelId, modelName, CellId, content,blobFiles = []) {
     const cell = document.getElementById(kernelId);
     var editor = CodeMirror(cell.querySelector("div.computelite-text-editor"), {
         lineNumbers: true,
@@ -18,7 +18,7 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content) {
         tabSize: 4,
         indentUnit: 4,
         extraKeys: {
-            'Ctrl-Enter': async (cm) => executeCode(editor, cell, modelName, CellId, kernelId),
+            'Ctrl-Enter': async (cm) => executeCode(editor, cell, modelName, CellId,blobFiles),
         },
     });
 
@@ -38,7 +38,7 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content) {
         },
     });
     cell.querySelector("button.cell-controls-button").onclick = function () {
-        executeCode(editor, cell, modelName, CellId, kernelId)
+        executeCode(editor, cell, modelName, CellId,blobFiles)
     };
 
     setTimeout(() => {
@@ -49,14 +49,16 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content) {
 }
 
 // Initialize WebR
-async function initializeWebR() {
+async function initializeWebR(blobFiles) {
     if (!window.webr || window.webr.terminated) {
         window.webr = new WebR();
         await window.webr.init();
+        await setupFileSystem()
+        await writeInputFiles(blobFiles)
     }
 }
 
-async function executeCode(editor, cell, modelName, CellId) {
+async function executeCode(editor, cell, modelName, CellId,blobFiles) {
     // Custom function triggered by Ctrl+Enter
     editor.getInputField().blur();
     const query = editor.getValue();
@@ -80,32 +82,50 @@ async function executeCode(editor, cell, modelName, CellId) {
 
     try {
 
-        await initializeWebR();
+        await initializeWebR(blobFiles);
+
+        // Extract required packages
+        const requiredPackages = extractRequiredPackages(query);
+        await installMissingPackages(requiredPackages);
+
+        const fsModelPath = `/home/web_user/data/${modelName}.sqlite3`;
+
+        // Loading Database from OPFS
+        await loadSQLiteFromOPFS(fsModelPath,modelName,'Default')
+        await window.webr.evalR(`thisDB <- "${fsModelPath}"`);
 
         const shelter = await new window.webr.Shelter();
         const result = await shelter.captureR(query);
-        console.log('result for test', result)
         shelter.purge();
+
+        const updatedFile = await window.webr.FS.readFile(fsModelPath);
+        await saveSQLiteToOPFS(modelName, 'Default', updatedFile);
 
         // Hide Running
         if (btn?.classList.contains("fa-hourglass")) {
             btn.classList.replace("fa-hourglass", "fa-play-circle");
         }
 
-        console.log('result', result)
+    
         // Process the result
         if (result !== undefined) {
             let output = result.output
             if (output.length > 0) {
                 for (const item of output) {
-                    if (isHTML(item.data)) { // If it's an HTML element
-                        let val = await convertResult('html', item.data)
-                        console.log('html value', val)
-                        htmlOutput.appendChild(val);
-                        val.querySelectorAll('script[type|="text/javascript"]').forEach(e => {
-                            if (e.textContent !== null) eval(e.textContent);
-                        });
-                    } else {
+                    if (item.type == "stdout"){
+                        if (isHTML(item.data)) { // If it's an HTML element
+                            let val = await convertResult('html', item.data)
+                            console.log('html value', val)
+                            htmlOutput.appendChild(val);
+                            val.querySelectorAll('script[type|="text/javascript"]').forEach(e => {
+                                if (e.textContent !== null) eval(e.textContent);
+                            });
+                        } else {
+                            consoleROutput(cell, item.data)
+                        }
+                    }else if (item.type == "stderr"){
+                        consoleNotebookOutput(cell, [`Execution Error: ${item.data}`], 'error');
+                    }else{
                         consoleROutput(cell, item.data)
                     }
                 };
@@ -171,3 +191,101 @@ function consoleROutput(cell, line) {
     }
 
 }
+
+
+function extractRequiredPackages(code) {
+    const libraryRegex = /library\(["']?([\w\.]+)["']?\)/g;
+    const requireRegex = /require\(["']?([\w\.]+)["']?\)/g;
+    const doubleColonRegex = /([\w\.]+)::[\w\.]+/g;
+
+    let packages = new Set();
+
+    // Extract from library()
+    let match;
+    while ((match = libraryRegex.exec(code)) !== null) {
+        packages.add(match[1]);
+    }
+    // Extract from require()
+    while ((match = requireRegex.exec(code)) !== null) {
+        packages.add(match[1]);
+    }
+    // Extract from ::
+    while ((match = doubleColonRegex.exec(code)) !== null) {
+        packages.add(match[1]);
+    }
+
+    return Array.from(packages);
+}
+
+
+async function installMissingPackages(packages) {
+    let missingPackages = [];
+    for (const pkg of packages) {
+        const checkPkgCmd = `if (!requireNamespace("${pkg}", quietly = TRUE)) { cat("${pkg}") }`;
+        const shelter = await new window.webr.Shelter();
+        const result = await shelter.captureR(checkPkgCmd);
+        shelter.purge();
+
+        if (result?.output?.length > 0) {
+            missingPackages.push(pkg);
+        }
+    }
+
+    if (missingPackages.length > 0) {
+        console.log("Installing missing packages:", missingPackages);
+        const installCmd = `
+            webr::shim_install()
+            install.packages(c(${missingPackages.map(p => `"${p}"`).join(", ")}))
+        `;
+        const installShelter = await new window.webr.Shelter();
+        await installShelter.captureR(installCmd);
+        installShelter.purge();
+    }
+}
+
+
+// -------------------------------------- 20 March Changes ---------------------------------------
+
+
+async function loadSQLiteFromOPFS(modelPath,modelName,projectName) {
+ 
+    let root = await navigator.storage.getDirectory();
+    const dataFolder = await root.getDirectoryHandle('data', { create: true });
+    const projectFolder = await dataFolder.getDirectoryHandle(projectName, { create: false });
+    const fileHandle = await projectFolder.getFileHandle(`${modelName}.sqlite3`)
+    const file = await fileHandle.getFile();
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    
+    window.webr.FS.writeFile(modelPath, uint8Array);
+  }
+  
+  async function saveSQLiteToOPFS(modelName,projectName,file) {
+    let root = await navigator.storage.getDirectory();
+    const dataFolder = await root.getDirectoryHandle('data', { create: true });
+    const projectFolder = await dataFolder.getDirectoryHandle(projectName, { create: false });
+    const fileHandle = await projectFolder.getFileHandle(`${modelName}.sqlite3`,{ create: false })
+    const writable = await fileHandle.createWritable();
+  
+    await writable.write(file);
+    await writable.close();
+  }
+  
+  async function setupFileSystem() {
+    const inpDirPath = '/home/web_user/inputDir';
+    const outDirPath = '/home/web_user/outputDir';
+    const dataDirPath = '/home/web_user/data';
+    await window.webr.evalR('inputDir <- "/home/web_user/inputDir"');
+    await window.webr.evalR('outputDir <- "/home/web_user/outputDir"');
+    await window.webr.FS.mkdir(inpDirPath);
+    await window.webr.FS.mkdir(outDirPath);
+    await window.webr.FS.mkdir(dataDirPath);
+  }
+  
+  async function writeInputFiles(blobFiles) {
+    for (let file of blobFiles) {
+      await window.webr.FS.writeFile(`inputDir/${file[0]}`, file[1]);
+    }
+  } 
+  
+  // -----------------------------------------------------------------------------------------------

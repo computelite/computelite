@@ -32,28 +32,21 @@ window.onload = async function () {
       }
     }
   }
-  let query = "SELECT CellId,CellContent FROM S_RNotebook"
-  const data = await executeQuery('fetchData', modelName, query)
-  for (let row of data) {
-    createCodeEditor(row[0], row[1])
-  }
-
-  let filesQuery = `SELECT FilePath,FileData FROM S_ExecutionFiles WHERE Filename is NOT NULL AND Status = 'Active' `
-  const exec_files = await executeQuery("fetchData", modelName, filesQuery)
-
 
   const blobQuery = `SELECT FileName,FileBlob FROM S_DataFiles WHERE FileType = 'Input'`
   const blobFiles = await executeQuery("fetchData", modelName, blobQuery)
 
-  const wheelQuery = `SELECT WheelName,WheelBlob FROM S_PackageWheels`
-  const wheelFiles = await executeQuery("fetchData", modelName, wheelQuery)
-
+  let query = "SELECT CellId,CellContent FROM S_RNotebook"
+  const data = await executeQuery('fetchData', modelName, query)
+  for (let row of data) {
+    createCodeEditor(row[0], row[1],blobFiles)
+  }
   
 }
 
 
 
-function createCodeEditor(rowId,content = "") {
+function createCodeEditor(rowId,content = "",blobFiles) {
   const kernelId = nanoid();
   const kernel = get_cl_element('computelite-cell','cell-grid cell-container celltype-python',kernelId);
   kernel.setAttribute('tabindex', '0');
@@ -105,7 +98,7 @@ function createCodeEditor(rowId,content = "") {
 
   container.appendChild(kernel);
   
-  createCodeMirrorEditor(kernelId,modelName,rowId,content)
+  createCodeMirrorEditor(kernelId,modelName,rowId,content,blobFiles)
 }
 
 document.getElementById("addCell").onclick = async function(){
