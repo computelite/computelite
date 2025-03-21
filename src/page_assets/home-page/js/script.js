@@ -1483,3 +1483,17 @@ document.getElementById("sqlEditor").onclick = function(){
     const modelName = selected_model.innerText
     window.open(`./SQLiteStudio/playground/client.html?modelName=${modelName}`);
 }
+
+// ------------------------ Updated By Vishal -----------------------------------------------------
+
+document.getElementById("notebookRBtn").onclick = function(){
+    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+    if (!selected_model){
+        confirmBox("Alert!","Please select a model")
+        return
+    }
+    const modelName = selected_model.innerText
+    window.open(`./RNotebook.html?modelName=${modelName}`);
+}
+
+// -------------------------------------------------------------------------------------------------

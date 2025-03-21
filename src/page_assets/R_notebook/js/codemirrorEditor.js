@@ -7,7 +7,7 @@ import { consoleNotebookOutput, get_cl_element, executeQuery } from '../../../as
 
 let canvas = null
 
-export function createCodeMirrorEditor(kernelId, modelName, CellId, content,blobFiles = []) {
+export function createCodeMirrorEditor(kernelId, modelName, CellId, content,notebookId,blobFiles = []) {
     const cell = document.getElementById(kernelId);
     var editor = CodeMirror(cell.querySelector("div.computelite-text-editor"), {
         lineNumbers: true,
@@ -18,7 +18,7 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content,blob
         tabSize: 4,
         indentUnit: 4,
         extraKeys: {
-            'Ctrl-Enter': async (cm) => executeCode(editor, cell, modelName, CellId,blobFiles),
+            'Ctrl-Enter': async (cm) => executeCode(editor, cell, modelName, CellId,notebookId,blobFiles),
         },
     });
 
@@ -38,12 +38,14 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content,blob
         },
     });
     cell.querySelector("button.cell-controls-button").onclick = function () {
-        executeCode(editor, cell, modelName, CellId,blobFiles)
+        executeCode(editor, cell, modelName, CellId,notebookId,blobFiles)
     };
 
     setTimeout(() => {
         editor.refresh();
-        editor.setValue(content)
+        if (content){
+            editor.setValue(content)
+        }
     }, 10);
     return editor
 }
@@ -58,7 +60,7 @@ async function initializeWebR(blobFiles) {
     }
 }
 
-async function executeCode(editor, cell, modelName, CellId,blobFiles) {
+async function executeCode(editor, cell, modelName, CellId,notebookId,blobFiles) {
     // Custom function triggered by Ctrl+Enter
     editor.getInputField().blur();
     const query = editor.getValue();
@@ -74,8 +76,8 @@ async function executeCode(editor, cell, modelName, CellId,blobFiles) {
     }
 
     // Update the cell content in the database
-    const updateQuery = `UPDATE S_RNotebook SET CellContent = ? WHERE CellId = ?`
-    await executeQuery('updateData', modelName, updateQuery, [query, CellId])
+    const updateQuery = `UPDATE S_NotebookContent SET CellContent = ? WHERE CellId = ? AND lower(CellType) = ? AND NotebookId = ?`
+    await executeQuery('updateData', modelName, updateQuery, [query, CellId,'r',notebookId])
 
     const htmlOutput = get_cl_element("div");
     cell.querySelector('.cell-bottom').appendChild(htmlOutput);
@@ -115,7 +117,6 @@ async function executeCode(editor, cell, modelName, CellId,blobFiles) {
                     if (item.type == "stdout"){
                         if (isHTML(item.data)) { // If it's an HTML element
                             let val = await convertResult('html', item.data)
-                            console.log('html value', val)
                             htmlOutput.appendChild(val);
                             val.querySelectorAll('script[type|="text/javascript"]').forEach(e => {
                                 if (e.textContent !== null) eval(e.textContent);
@@ -141,11 +142,13 @@ async function executeCode(editor, cell, modelName, CellId,blobFiles) {
                 
                 canvas.getContext('2d').drawImage(img, 0, 0);
                 htmlOutput.appendChild(canvas);
-                console.log("Plot image drawn on canvas");
+            }
+            const outputFiles = await readDir('/home/web_user/outputDir');
+            if (outputFiles.length > 0){
+                await saveOutputFiles(modelName,outputFiles)
             }
         }
     } catch (error) {
-        console.log('error', error)
         // Hide Running
         if (btn?.classList.contains("fa-hourglass")) {
             btn.classList.replace("fa-hourglass", "fa-play-circle");
@@ -287,5 +290,36 @@ async function loadSQLiteFromOPFS(modelPath,modelName,projectName) {
       await window.webr.FS.writeFile(`inputDir/${file[0]}`, file[1]);
     }
   } 
+
+  async function readDir(dirPath) {
+    let outputFiles = []
+    try{
+        const dir = await window.webr.FS.lookupPath(dirPath)
+        for (const file in dir.contents){
+            const filePath = `${dirPath}/${file}`
+            let Path = await window.webr.FS.lookupPath(filePath)            
+            if (!Path.isFolder){
+                const fileData = await window.webr.FS.readFile(filePath)    
+                const blob = await new Blob([fileData]).arrayBuffer();
+                const uint8Array = new Uint8Array(blob);
+                outputFiles.push([file,uint8Array])  
+            }
+        }        
+    }catch{
+        console.error('Some error occured while reading output file')
+    }
+    return outputFiles;
+  }
+
+  async function saveOutputFiles(modelName,outputFiles){
+    const delQuery = `DELETE FROM S_DataFiles WHERE FileType = 'Output'`
+    await executeQuery('deleteData',modelName,delQuery)
+
+    outputFiles.forEach(async ([filename, fileBlob]) => {
+    let query = `INSERT INTO S_DataFiles (FileName,FileType,FileBlob) 
+                            VALUES (?, ?, ?) ON CONFLICT (FileName,FileType) DO UPDATE SET FileBlob = ? `
+    await executeQuery('insertData',modelName,query,[filename,'Output',fileBlob,fileBlob])
+    });
+  }
   
   // -----------------------------------------------------------------------------------------------

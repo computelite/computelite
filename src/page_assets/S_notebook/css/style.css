@@ -911,3 +911,11 @@ text-overflow: ellipsis;
   width:20px;
   height:15px;
 }
+
+.addCell{
+  opacity: 1.2;
+  margin-left: auto;
+  padding: 0px 1px 0px 18px;
+  font-size: 12px !important;
+  font-weight: bold;
+}

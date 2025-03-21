@@ -42,11 +42,14 @@
 
 </head>
 
-<body class="px-5">
+<body>
 
-    <header class="navbar navbar-expand-lg">
+    <header class="navbar navbar-expand-lg px-5">
         <div class="container" style="max-width: none;">
-            <a class="navbar-logo" href="./homePage.html" style="font-weight: 600;">Compute <b>Lite</b></a>
+            <button id="toggleSidebar" class="sidebar-toggler collapsed" type="button">
+                <span id="toggleSidebarIcon" class="fa-solid fa-bars"></span>
+            </button>
+            <a class="navbar-logo ms-4" href="./homePage.html" style="font-weight: 600;">Compute <b>Lite</b></a>
             <a class="navbar-el ms-4" href="./homePage.html" style="font-weight: 600;">Playground</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -70,25 +73,64 @@
             </div>
         </div>
         <computelite-notebook>
-            <main id="cellContainer" class="cells-container">
+            <aside id="sidebarMenu" class="tree p-3 col-3 ps-3 contracted" style="z-index: 1030;">
+                <div class="d-flex justify-content-end p-1">
+                    <div>
+                        <span id="addNotebook" class="fa-solid fa-file-circle-plus pe-2 float-end" title="Add NoteBook"></span>
+                        <span id="deleteNotebook" class="fa fa-trash pe-3 float-end" title="Delete NoteBook"></span>
+                    </div>
+                </div>
+                <div id="inputDiv" class="input-group d-none mb-3">
+                    <input id="notebookName" type="text" class="form-control small-input" placeholder="NoteBook Name" autocomplete="off">
+                </div>
+                <div id="jsListDiv" class="list-group mt-2 gap-2">
+                    
+                </div>
+            </aside>
+            <div class="mainDiv">
+                <main id="cellContainer" class="cells-container cell-position">
+                    
+                    <!-- <computelite-cell tabindex="0" class="cell-grid cell-container celltype-python">
+                        <div class="cell-controls cell-controls-left cell-controls-left-top">
+                            
+                            <button class="btn cell-controls-button py-1" title="Run Cell">
+                                <span class="fa-regular fa-play-circle" style="font-size: 16px"></span>
+                            </button>
+                        </div>
+                        <div class="cell-top flush">
+                            <computelite-text-editor>
+                                
+                                <div id="sampleId3" class="computelite-text-editor">
+                                    
+                                </div>
+                            </computelite-text-editor>
+                        </div>
+                        <div class="cell-bottom">
+                            <computelite-output>
+                                <div id="outputTxt" class="sidebar-inner px-4 py-2">
+                                    <div>anc ssm sksn sksm ams</div>
+                                    <div>anc ssm sksn sksm ams</div>
+                                    <div>anc ssm sksn sksm ams</div>
+                                </div>
+                            </computelite-output>
+    
+                        </div>
+                        
+                    </computelite-cell>  -->
+                    
+                </main>
+                <footer class="computelite-notebook-footer line-grid">
+                    <div class="computelite-notebook-footer-content d-flex align-items-center">
                 
-            </main>
-        </computelite-notebook>
-        <footer class="computelite-notebook-footer line-grid">
-            <div class="computelite-notebook-footer-content d-flex align-items-center">
-                <span> ComputeLite
-                </span>
-                <button class="btn btn-sm py-0 px-1 ms-2">
-                    <span></span>
-                    Source
-                </button>
-
-                <button id="addCell" class="cell-controls-button" title="Add Cell Here"
-                    style="opacity: 0.7; margin-left: auto; padding: 0px 1px 0px 18px">
-                    Add Cell <span class="bi bi-plus-square ms-2 me-1"></span>
-                </button>
+        
+                        <button id="addCell" class="cell-controls-button addCell" title="Add Cell Here">
+                            Add Cell <span class="fa-solid fa-square-plus ms-2 me-1"></span>
+                        </button>
+                    </div>
+                </footer>
             </div>
-        </footer>
+        </computelite-notebook>
+        
     </body>
     <script src="./coi-serviceworker.js"></script>
     <script type="module" src="./page_assets/R_notebook/js/script.js"></script>
