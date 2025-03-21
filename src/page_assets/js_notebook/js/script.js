@@ -64,7 +64,7 @@ window.onload = async function () {
       }
     }
     
-    window.getData = async (query, params = []) => executeQuery('fetchData', modelName, query, params);
+    window.getData = async (query, params = []) => executeQuery('getData', modelName, query, params);
     window.executeQuery = async (query, params = []) => executeQuery('updateData', modelName, query, params);
     await fetchNotebookName()
 
@@ -174,6 +174,11 @@ document.getElementById("hideCode").onclick = async function () {
       } else {
         this.innerText = "Hide Code"
         container.innerHTML = "";
+        container.style = "width:80% !important"
+        container.parentNode.style = "width:80% !important"
+        if (! container.classList.contains("cell-position")){
+          container.classList.add("cell-position")
+        }
         await populateCells(selected_li_el.innerText);
       }
       runcells = !runcells;

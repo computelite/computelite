@@ -73,9 +73,17 @@ const handleDatabaseOperations = async (action,dbname,projName,query = null,para
         result = await attachModel(params[0],dbname,projName)
   
       }else if(action === 'executeMany'){
+
         result = executeMany(db,query,params)
+
       }else if(action === 'tableData'){
+
         result = get_table_data(db)
+
+      }else if (action === 'getData'){  
+
+        result = getData(db,query,params);  
+
       } else{
   
         throw new Error('Unknown action type');
@@ -208,6 +216,21 @@ const get_table_data = (db) =>{
   return result
 }
 
+const getData = (db,query,params) => {
+  const columnnames = []
+
+  // Execute the SQL query using the provided database instance (db)
+  let result = db.exec({
+      sql: query,  // SQL query to be executed
+      bind:params, // Parameters to be bound to the SQL query
+      rowMode:'array', // Specifies that each row in the result should be returned as an array or object
+      returnValue:'resultRows', // Return the result rows from the query execution
+      columnNames:columnnames  // This array will be populated with the column names from the query result
+    });
+  return [columnnames,...result]
+
+};
+
 // Function to replace the in-memory database with the uploaded file
 const uploadModel = async (file, dbname,projectName) => {
   return new Promise(async (resolve, reject) => {
@@ -248,7 +271,6 @@ const uploadModel = async (file, dbname,projectName) => {
         } catch (error) {
             console.error('Error executing SQL script:', error);
         }
-    
       
 
         resolve(true);

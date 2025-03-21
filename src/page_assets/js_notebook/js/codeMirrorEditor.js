@@ -58,7 +58,10 @@ async function executeCode(editor, cell, jsRunner, modelName, CellId, NotebookId
 
   const htmlOutput = get_cl_element("div");
   cell.querySelector(".cell-bottom").appendChild(htmlOutput);
-  window.outputArea = htmlOutput;
+  window.thisDiv = htmlOutput;
+  window.applyCss = function (css_content) {
+    apply_css(css_content,htmlOutput)
+  } 
 
   // Capture console output
   const originalConsoleLog = console.log;
@@ -115,22 +118,36 @@ function renderHtmlOutput(val, intoElement) {
 
 export async function runAllCell(container, modelName, noteBookNm) {
   container.innerHTML = "";
+  container.style = "width:100% !important"
+  container.parentNode.style = "width:100% !important"
+  container.classList.remove("cell-position")
   let query = "SELECT CellId,CellContent FROM S_NotebookContent WHERE Name = ? AND CellType = ?";
   const data = await executeQuery("fetchData", modelName, query, [noteBookNm, 'javascript']);
-  
+  document.getElementById
   for (let row of data) {
-    const kernel = get_cl_element('computelite-cell','cell-grid cell-container celltype-python');
+    // const kernel = get_cl_element('computelite-cell','cell-grid cell-container celltype-python');
+    const kernel = get_cl_element('computelite-cell');
     kernel.setAttribute('tabindex', '0');
 
     const output_container = get_cl_element('div','cell-bottom');  
     const htmlOutput = get_cl_element("div");
-    window.outputArea = htmlOutput;
+    window.thisDiv = htmlOutput;
+    window.applyStyle = async function(css_content){
+      apply_css(css_content,htmlOutput)
+    }
     output_container.appendChild(htmlOutput)
     kernel.appendChild(output_container);
     container.appendChild(kernel)
 
     await runCode(row[1],htmlOutput)    
   } 
+}
+
+function apply_css (css_content,el){
+  // el.style = css_content
+  let style = document.createElement("style");
+  style.innerHTML = css_content;
+  document.head.appendChild(style);
 }
 
 
