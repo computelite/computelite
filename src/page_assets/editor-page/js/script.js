@@ -91,6 +91,7 @@ window.onload = async function () {
 
   let spinnerEl = document.getElementById('packageIndicator')
   displayOutput(py_result.stderr)
+  document.getElementById("loadingPackage").classList.add("hidden");
   spinnerEl.classList.remove('spinner-loading');
   spinnerEl.classList.add('spinner-complete');
 
@@ -201,12 +202,19 @@ async function saveFileContent(){
     const fileName = selected_el.innerText
     const FileData = editor.getValue()
 
-    if (fileName === 'requirements.txt'){
-      const res = await executePython('loadPackages','editor',FileData)
-      if (res.stderr){
-        displayOutput(res.stderr)
+    if (fileName === 'requirements.txt') {
+      try {
+        const res = await executePython('loadPackages', 'editor', FileData);
+        
+        if (res.stderr) {
+          displayOutput(res.stderr);
+        }
+      } catch (error) {
+        console.error('Error loading packages',error.stderr);
+        displayOutput(error.stderr);
+        return;
       }
-    }
+    } 
   
     let query = `INSERT INTO S_ExecutionFiles (FileName,FilePath,FileData) VALUES (?, ?, ?) ON CONFLICT (FilePath)
                   DO UPDATE SET FileData = ? `

@@ -364,7 +364,7 @@ export function executePython(action,type,code,projectName,modelName,files,fileN
                 if (event.data.success) {
                     resolve(event.data);
                 } else {
-                    reject(event.data.error);
+                    reject(event.data);
                 }
             }
         };
