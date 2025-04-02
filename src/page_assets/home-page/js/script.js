@@ -1,4 +1,4 @@
-import { postData,get_cl_element,confirmBox,executeQuery, fetchData, uploadFile,executePython,addDefaultModel,fetchSchema } from "../../../assets/js/scc"
+import { postData,get_cl_element,confirmBox,executeQuery, fetchData, uploadFile,executePython,executeJavascript,executeR,addDefaultModel,fetchSchema } from "../../../assets/js/scc"
 import {uploadExcel,downloadExcel,get_uploadExcel_info} from "../../../core/gridMethods"
 import * as bootstrap from 'bootstrap'
 import JSZip from "jszip"
@@ -1061,31 +1061,98 @@ function displayOutput(stderr) {
 async function populateExecutableFiles(modelName){
     const fileDiv = document.getElementById('taskDiv')
     fileDiv.innerHTML = ""
-    let query = `SELECT TaskId,TaskName,TaskDisplayName FROM S_TaskMaster`
+    let query = `SELECT TaskId,TaskName,TaskDisplayName,TaskType FROM S_TaskMaster`
     const files = await executeQuery('fetchData',modelName,query)
-    for (const [TaskId,TaskName,TaskDisplayName] of files){
+    for (let [TaskId,TaskName,TaskDisplayName,TaskType] of files){
 
-        const li_el  =get_cl_element('li',null,null,get_cl_element('a','dropdown-item',null,document.createTextNode(TaskDisplayName)))
+        const li_el = get_cl_element('li',null,null,get_cl_element('a','dropdown-item',null,document.createTextNode(TaskDisplayName)))
 
         li_el.onclick =async function(){
             const canvas = document.getElementById('myCanvas');
+            if(canvas.style.display == "none"){
+                canvas.style.display = ""
+            }
             document.getElementById("loadingOverlay").classList.remove("hidden");
             document.getElementById("outputDiv").style.display = ""
             document.getElementById('outputTxt').innerHTML = ""
+            if(document.getElementById('downloadOutput').hasAttribute("disabled")){
+                document.getElementById('downloadOutput').removeAttribute("disabled")
+            }
+            const cellBottom = document.getElementById('currCell').querySelector('.cell-bottom');
+
+            if (cellBottom && cellBottom.innerHTML.trim() !== "") {
+                cellBottom.innerHTML = "";
+            }
+
             imgBlob = null
             
             const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
             const proj_name = selected_model.getAttribute('project')
 
-            let filesQuery = `SELECT FilePath,FileData,FileName FROM S_ExecutionFiles WHERE FileName IS NOT NULL AND Status = 'Active' `
-            const execFiles = await executeQuery("fetchData",selected_model.innerText, filesQuery)
+            let execFiles
+            let filesQuery
+            if(TaskType === 'PythonScript'){
+                filesQuery = `SELECT FilePath,FileData,FileName FROM S_ExecutionFiles WHERE FileName IS NOT NULL AND Status = 'Active' `
+                execFiles = await executeQuery("fetchData",selected_model.innerText, filesQuery);
+                
+            }else{
+                if(TaskType == 'JSNotebook'){
+                    TaskType = 'JavascriptNotebook'
+                    window.loadCDNScripts = async function (libraries) {
+                        const loadScript = (url, globalVar) => {
+                          return new Promise((resolve, reject) => {
+                              if (globalVar && window[globalVar]) {
+                                  resolve(window[globalVar]);
+                                  return;
+                              }
+                    
+                              const script = document.createElement("script");
+                              script.src = url;
+                              script.async = true;
+                              script.onload = () => resolve(window[globalVar] || true);
+                              script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+                    
+                              document.head.appendChild(script);
+                          });
+                        };
+                    
+                        return Promise.all(libraries.map(lib => loadScript(lib.url, lib.globalVar)));
+                    }
+                    window.loadCDNStylesheets = async function (stylesheets) {
+                        return Promise.all(stylesheets.map(({ url }) => {
+                            return new Promise((resolve, reject) => {
+                                const link = document.createElement("link");
+                                link.rel = "stylesheet";
+                                link.href = url;
+                                link.onload = () => resolve(url);
+                                link.onerror = () => reject(`Failed to load CSS: ${url}`);
+                                document.head.appendChild(link);
+                            });
+                        }));
+                    }
+                    window.getData = async (query, params = []) => executeQuery('getData', modelName, query, params);
+                    window.executeQuery = async (query, params = []) => executeQuery('updateData', modelName, query, params);
+                }
+
+                filesQuery = `SELECT Name,CellContent,Name FROM S_NotebookContent WHERE Name = ? AND CellType = ?`
+                const fileCont = await executeQuery('fetchData',selected_model.innerText,filesQuery,[TaskName,TaskType.replace("Notebook", "").toLowerCase()])
+                // Merge the second elements of each sub-array
+                let mergedContent = []
+                for (const file of fileCont){
+                    mergedContent.push(file[1])
+                }
+                
+                // Create the merged array
+                execFiles = [[fileCont[0][0], mergedContent, fileCont[0][0]]];
+            }
+            
             let fileContent = null
             execFiles.forEach(rw => {
                 if (rw[0] === TaskName) {
                     fileContent = rw[1]
                 }
             });
-
+            
             const blobQuery = `SELECT FileName,FileBlob FROM S_DataFiles WHERE FileType = 'Input'`
             const blobFiles = await executeQuery("fetchData",selected_model.innerText, blobQuery)
 
@@ -1096,8 +1163,28 @@ async function populateExecutableFiles(modelName){
             const result = await executeQuery('updateData',selected_model.innerText,query,[get_current_datetime(),TaskId]);
 
             const task_id = await update_task(TaskName,'Started',null,null,TaskId)
-            let res = await executePython('executeScript','editor',fileContent,proj_name,selected_model.innerText,execFiles,null,blobFiles,wheelFiles)
-            
+
+            let res
+            if(TaskType == 'PythonScript'){
+                let value = ''
+                for (let content of fileContent){
+                    value += content
+                }
+                res = await executePython('executeScript','editor',value,proj_name,selected_model.innerText,execFiles,null,blobFiles,wheelFiles)
+            }else if (TaskType == 'PythonNotebook'){
+                for (let content of fileContent){
+                    res = await executePython('execute','notebook',content,proj_name,selected_model.innerText,execFiles,null,blobFiles,wheelFiles,'currCell')
+                }
+            }else if (TaskType == 'JavascriptNotebook'){
+                for (let content of fileContent){
+                    res = await executeJavascript('currCell', content)
+                }
+            }else if (TaskType == 'RNotebook'){
+                for (let content of fileContent){
+                    res = await executeR('currCell', content, selected_model.innerText, blobFiles)
+                }
+            }
+
             if (res.stderr){
                 update_task(TaskName,'Errored',res.stderr,task_id)
             }else{
@@ -1115,7 +1202,7 @@ async function populateExecutableFiles(modelName){
                 
                     ctx.drawImage(imageBitmap, x, y,imageBitmap.width * scale, imageBitmap.height * scale);
                     new bootstrap.Modal(document.getElementById('modal-show-output')).show()
-                  }
+                }
                 update_task(TaskName,'Completed',null,task_id)
                 if (res.outputFiles && res.outputFiles.length > 0){
                     const delQuery = `DELETE FROM S_DataFiles WHERE FileType = 'Output'`
@@ -1127,6 +1214,11 @@ async function populateExecutableFiles(modelName){
                       await executeQuery('insertData',selected_model.innerText,query,[filename,'Output',fileBlob,fileBlob])
                     });
                 }
+            }
+            if(res.success && TaskType != 'PythonScript'){
+                new bootstrap.Modal(document.getElementById('modal-show-output')).show()
+                canvas.style.display = "none"
+                document.getElementById('downloadOutput').setAttribute("disabled", "true");
             }
             document.getElementById("loadingOverlay").classList.add("hidden");
             
@@ -1497,3 +1589,83 @@ document.getElementById("notebookRBtn").onclick = function(){
 }
 
 // -------------------------------------------------------------------------------------------------
+
+// ------------------------ Updated By Ayush -----------------------------------------------------
+
+document.getElementById("scType").onchange = async function(){
+    const scriptType = document.getElementById("scType").value
+    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+    const scriptName = document.getElementById("scName")
+    scriptName.innerHTML = ""
+    if (!selected_model){
+        confirmBox("Alert!","Please select a model")
+        return;
+    }
+    let query
+    let result
+    if(scriptType === 'PScript'){
+        query = `SELECT FileName FROM S_ExecutionFiles WHERE FileName IS NOT NULL AND Status = ?`;
+        result = await executeQuery('fetchData',selected_model.innerText, query, ['Active']);
+    }else{
+        query = `SELECT Name FROM S_Notebooks WHERE Status = ? AND Type = ?`;
+        result = await executeQuery('fetchData',selected_model.innerText, query, ['Active', scriptType]);
+    }
+    
+    for (const ntNm of result){
+        const li_el  = get_cl_element('option',null,null,document.createTextNode(ntNm))
+        li_el.setAttribute('value',ntNm)
+        scriptName.appendChild(li_el)
+    }
+    
+}
+
+document.getElementById("ok-script").onclick = async function(){
+    const displayName = document.getElementById("dsName").value
+    const scriptType = document.getElementById("scType").value
+    const scriptName = document.getElementById("scName").value
+    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+    
+    if(displayName.trim() === ''){
+        confirmBox("Alert!","Please Enter a display ame")
+        return;
+    }
+
+    if(scriptType === '0'){
+        confirmBox("Alert!","Please select a script language")
+        return;
+    }
+    if(scriptName === '0'){
+        confirmBox("Alert!","Please select a notebook")
+        return;
+    }
+
+    let tsktype
+    if (scriptType === 'Python'){
+        tsktype = 'PythonNotebook'
+    }else if (scriptType === 'R'){
+        tsktype = 'RNotebook'
+    }else if (scriptType === 'Javascript'){
+        tsktype = 'JSNotebook'
+    }else if (scriptType === 'PScript'){
+        tsktype = 'PythonScript'
+    }
+
+    let sel_query = `SELECT TaskName, TaskDisplayName FROM S_TaskMaster WHERE TaskName = ? AND TaskType = ?`
+    const task = await executeQuery('fetchData',selected_model.innerText,sel_query,[scriptName,tsktype])
+    
+    if (task.length > 0){
+        confirmBox("Alert!","Script with this name already exists")
+        return;
+    }
+
+    let query = `INSERT INTO S_TaskMaster (TaskName,TaskDisplayName,TaskType) VALUES (?, ?, ?)`
+    await executeQuery('insertData',selected_model.innerText,query,[scriptName,displayName,tsktype])
+
+    await populateExecutableFiles(selected_model.innerText)
+    const bs_modal = bootstrap.Modal.getInstance(document.getElementById("modal-addScript"))
+    bs_modal.hide()
+    document.getElementById("dsName").value = ''
+    document.getElementById("scType").value = '0'
+    document.getElementById("scName").innerHTML = ''
+    confirmBox("Success","Script created successfully.")
+}

@@ -4,6 +4,8 @@ import Swal from "sweetalert2"
 import * as gm from '../../core/gridMethods'
 import * as hm from '../../core/homePageMethods'
 const pageAlias = {'home':hm,'grid':gm}
+import { JavascriptEvaluator } from "../../page_assets/js_notebook/js/eval";
+import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
 
 const btn_class =   { 
                         customClass:    {
@@ -503,3 +505,332 @@ py_worker.onmessage = function (event) {
 }
 
 
+export async function executeJavascript(kernelId, fileContent) {
+    const cell = document.getElementById(kernelId)
+    const output_container = cell.querySelector('.cell-bottom')
+    const htmlOutput = get_cl_element("div");
+    window.thisDiv = htmlOutput;
+    window.applyStyle = async function(css_content){
+        apply_css(css_content,htmlOutput)
+    }
+    output_container.appendChild(htmlOutput)
+
+    return await runCode(fileContent,htmlOutput,cell) 
+}
+
+async function runCode(content, htmlOutput, cell) {
+    return new Promise(async (resolve, reject) => {
+      const jsRunner = new JavascriptEvaluator();
+      const id = Date.now() + Math.random(); // Generate a unique ID for this execution
+  
+      function onMessageHandler(event) {
+        if (event.data.id === id) {
+          window.removeEventListener('message', onMessageHandler);
+          if (event.data.success) {
+            resolve(event.data);
+          } else {
+            reject(event.data);
+          }
+        }
+      }
+  
+        window.addEventListener('message', onMessageHandler);
+
+        jsRunner.run(content).then(outVal => {
+            if (!renderHtmlOutput(outVal.value, htmlOutput) && outVal.error) {
+                window.dispatchEvent(new MessageEvent('message', { data: { id, success: false, stdout: '', stderr: outVal.value } }));
+            } else {            
+                window.dispatchEvent(new MessageEvent('message', { data: { id, success: true, stdout: outVal.value, stderr: '' } }));
+                handleExecutionOutput(cell, outVal, htmlOutput);
+            }
+        }).catch(err => {
+            window.dispatchEvent(new MessageEvent('message', { data: { id, success: false, stdout: '', stderr: err  } }));
+        });
+    });
+}
+  
+
+function apply_css (css_content,el){
+    // el.style = css_content
+    let style = document.createElement("style");
+    style.innerHTML = css_content;
+    document.head.appendChild(style);
+}
+
+function handleExecutionOutput(cell, outVal, htmlOutput) {
+    const { value, error } = outVal;
+    if (!renderHtmlOutput(value, htmlOutput) && value !== undefined) {
+      consoleNotebookOutput(cell, [value], error ? "error" : undefined);
+    }
+    if (error) throw value;
+}
+  
+function renderHtmlOutput(val, intoElement) {
+    if (val instanceof HTMLElement) {
+        intoElement.appendChild(val);
+        return true;
+    }
+    return false;
+}
+
+
+export async function executeR(kernelId, fileContent, modelName, blobFiles) {
+    const cell = document.getElementById(kernelId);
+    const output_container = cell.querySelector('.cell-bottom');
+    const htmlOutput = get_cl_element("div");
+    output_container.appendChild(htmlOutput);
+
+    return await runRCode(fileContent, htmlOutput, cell, modelName, blobFiles);
+}
+
+async function runRCode(query, htmlOutput, cell, modelName, blobFiles) {
+    return new Promise(async (resolve, reject) => {
+        const id = Date.now() + Math.random(); // Unique execution ID
+        
+        function onMessageHandler(event) {
+            if (event.data.id === id) {
+                window.removeEventListener('message', onMessageHandler);
+                if (event.data.success) {
+                    resolve(event.data);
+                } else {
+                    reject(event.data);
+                }
+            }
+        }
+        
+        window.addEventListener('message', onMessageHandler);
+        
+        try {
+            await initializeWebR(blobFiles);
+            const requiredPackages = extractRequiredPackages(query);
+            await installMissingPackages(requiredPackages);
+
+            const fsModelPath = `/home/web_user/data/${modelName}.sqlite3`;
+            await loadSQLiteFromOPFS(fsModelPath, modelName, 'Default');
+            await window.webr.evalR(`thisDB <- "${fsModelPath}"`);
+
+            const shelter = await new window.webr.Shelter();
+            const result = await shelter.captureR(query);
+            shelter.purge();
+
+            const updatedFile = await window.webr.FS.readFile(fsModelPath);
+            await saveSQLiteToOPFS(modelName, 'Default', updatedFile);
+
+            processROutput(result, htmlOutput, cell);
+
+            window.dispatchEvent(new MessageEvent('message', { data: { id, success: true, stdout: result, stderr: '' } }));
+        } catch (error) {
+            window.dispatchEvent(new MessageEvent('message', { data: { id, success: false, stdout: '', stderr: error.message } }));
+        }
+    });
+}
+
+function processROutput(result, htmlOutput, cell) {
+    if (!result) return;
+
+    if (result.output.length > 0) {
+        for (const item of result.output) {
+            if (item.type === "stdout") {
+                if (isHTML(item.data)) {
+                    let val = convertResult('html', item.data);
+                    htmlOutput.appendChild(val);
+                    val.querySelectorAll('script[type|="text/javascript"]').forEach(e => {
+                        if (e.textContent !== null) eval(e.textContent);
+                    });
+                } else {
+                    consoleROutput(cell, item.data);
+                }
+            } else if (item.type === "stderr") {
+                consoleNotebookOutput(cell, [`Execution Error: ${item.data}`], 'error');
+            } else {
+                consoleROutput(cell, item.data);
+            }
+        }
+    }
+
+    if (result.images.length > 0) {
+        const img = result.images[0];
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.style.width = "100%";
+        canvas.style.height = "auto";
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        htmlOutput.appendChild(canvas);
+    }
+
+    readDir('/home/web_user/outputDir').then(outputFiles => {
+        if (outputFiles.length > 0) {
+            saveOutputFiles(modelName, outputFiles);
+        }
+    });
+}
+
+// Initialize WebR
+async function initializeWebR(blobFiles) {
+    if (!window.webr || window.webr.terminated) {
+        window.webr = new WebR();
+        await window.webr.init();
+        await setupFileSystem()
+        await writeInputFiles(blobFiles)
+    }
+}
+
+
+// Function to check if a string is HTML
+function isHTML(str) {
+    const doc = new DOMParser().parseFromString(str, "text/html");
+    return Array.from(doc.body.childNodes).some(node => node.nodeType === 1); // Checks if any element node exists
+}
+
+
+async function convertResult(display, value) {
+    if (display === "html") {
+        let div = get_cl_element("div", "rendered_html cell-output-html");
+        div.appendChild(new DOMParser().parseFromString(value, "text/html").body.firstChild);
+        return div;
+    }
+    return value;
+}
+
+function consoleROutput(cell, line) {
+    let outputContainer = cell.querySelector('div.sidebar-inner');
+    if (!outputContainer) {
+        const outputInner = get_cl_element('computelite-output', null, null, get_cl_element('div', 'sidebar-inner px-4 py-2'))
+        cell.querySelector('.cell-bottom').appendChild(outputInner);
+        outputContainer = cell.querySelector('div.sidebar-inner');
+    }
+
+    if (line) {
+        const lineElement = document.createElement('div');
+        lineElement.textContent = line;
+        lineElement.style.whiteSpace = "pre";
+        outputContainer.appendChild(lineElement);
+    }
+
+}
+
+
+function extractRequiredPackages(code) {
+    const libraryRegex = /library\(["']?([\w\.]+)["']?\)/g;
+    const requireRegex = /require\(["']?([\w\.]+)["']?\)/g;
+    const doubleColonRegex = /([\w\.]+)::[\w\.]+/g;
+
+    let packages = new Set();
+
+    // Extract from library()
+    let match;
+    while ((match = libraryRegex.exec(code)) !== null) {
+        packages.add(match[1]);
+    }
+    // Extract from require()
+    while ((match = requireRegex.exec(code)) !== null) {
+        packages.add(match[1]);
+    }
+    // Extract from ::
+    while ((match = doubleColonRegex.exec(code)) !== null) {
+        packages.add(match[1]);
+    }
+
+    return Array.from(packages);
+}
+
+
+async function installMissingPackages(packages) {
+    let missingPackages = [];
+    for (const pkg of packages) {
+        const checkPkgCmd = `if (!requireNamespace("${pkg}", quietly = TRUE)) { cat("${pkg}") }`;
+        const shelter = await new window.webr.Shelter();
+        const result = await shelter.captureR(checkPkgCmd);
+        shelter.purge();
+
+        if (result?.output?.length > 0) {
+            missingPackages.push(pkg);
+        }
+    }
+
+    if (missingPackages.length > 0) {
+        console.log("Installing missing packages:", missingPackages);
+        const installCmd = `
+            webr::shim_install()
+            install.packages(c(${missingPackages.map(p => `"${p}"`).join(", ")}))
+        `;
+        const installShelter = await new window.webr.Shelter();
+        await installShelter.captureR(installCmd);
+        installShelter.purge();
+    }
+}
+
+
+
+async function loadSQLiteFromOPFS(modelPath,modelName,projectName) {
+
+    let root = await navigator.storage.getDirectory();
+    const dataFolder = await root.getDirectoryHandle('data', { create: true });
+    const projectFolder = await dataFolder.getDirectoryHandle(projectName, { create: false });
+    const fileHandle = await projectFolder.getFileHandle(`${modelName}.sqlite3`)
+    const file = await fileHandle.getFile();
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    
+    window.webr.FS.writeFile(modelPath, uint8Array);
+}
+  
+async function saveSQLiteToOPFS(modelName,projectName,file) {
+    let root = await navigator.storage.getDirectory();
+    const dataFolder = await root.getDirectoryHandle('data', { create: true });
+    const projectFolder = await dataFolder.getDirectoryHandle(projectName, { create: false });
+    const fileHandle = await projectFolder.getFileHandle(`${modelName}.sqlite3`,{ create: false })
+    const writable = await fileHandle.createWritable();
+
+    await writable.write(file);
+    await writable.close();
+}
+  
+async function setupFileSystem() {
+    const inpDirPath = '/home/web_user/inputDir';
+    const outDirPath = '/home/web_user/outputDir';
+    const dataDirPath = '/home/web_user/data';
+    await window.webr.evalR('inputDir <- "/home/web_user/inputDir"');
+    await window.webr.evalR('outputDir <- "/home/web_user/outputDir"');
+    await window.webr.FS.mkdir(inpDirPath);
+    await window.webr.FS.mkdir(outDirPath);
+    await window.webr.FS.mkdir(dataDirPath);
+}
+
+async function writeInputFiles(blobFiles) {
+    for (let file of blobFiles) {
+    await window.webr.FS.writeFile(`inputDir/${file[0]}`, file[1]);
+    }
+} 
+
+async function readDir(dirPath) {
+    let outputFiles = []
+    try{
+        const dir = await window.webr.FS.lookupPath(dirPath)
+        for (const file in dir.contents){
+            const filePath = `${dirPath}/${file}`
+            let Path = await window.webr.FS.lookupPath(filePath)            
+            if (!Path.isFolder){
+                const fileData = await window.webr.FS.readFile(filePath)    
+                const blob = await new Blob([fileData]).arrayBuffer();
+                const uint8Array = new Uint8Array(blob);
+                outputFiles.push([file,uint8Array])  
+            }
+        }        
+    }catch{
+        console.error('Some error occured while reading output file')
+    }
+    return outputFiles;
+}
+
+async function saveOutputFiles(modelName,outputFiles){
+    const delQuery = `DELETE FROM S_DataFiles WHERE FileType = 'Output'`
+    await executeQuery('deleteData',modelName,delQuery)
+
+    outputFiles.forEach(async ([filename, fileBlob]) => {
+    let query = `INSERT INTO S_DataFiles (FileName,FileType,FileBlob) 
+                            VALUES (?, ?, ?) ON CONFLICT (FileName,FileType) DO UPDATE SET FileBlob = ? `
+    await executeQuery('insertData',modelName,query,[filename,'Output',fileBlob,fileBlob])
+    });
+}

@@ -154,10 +154,13 @@
                         </a>
                         <ul id="runMethods" class="dropdown-menu dropdown-menu-lg dropdown"
                             aria-labelledby="runDropdown">
-                            <div class="col pl-0 py-3">                                
+                            <div class="col pl-0 py-2">                                
                                 <ul id="taskDiv" class="list-style-none">
                                     <li id="solve"><a class="dropdown-item">main.py</a></li>
                                 </ul>                                
+                            </div>
+                            <div class="pe-3">                                
+                                <button id="addScriptBtn" type="button" class="btn btn-primary btn-sm float-end" data-bs-target="#modal-addScript" data-bs-toggle="modal">Add</button>                                
                             </div>
                         </ul>
                     </li>
@@ -224,12 +227,13 @@
     </div>
 </div>
 <div class="modal fade" id="modal-show-output" tabindex="-1" role="dialog" aria-labelledby="modal-show-output">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="container">
+            <div id="currCell" class="modal-body">
+                <div class="cell-bottom"></div>
                 <canvas id="myCanvas" class="w-100 h-100">
                 </canvas>
             </div>
@@ -341,6 +345,46 @@
             <div class="modal-footer">
                 <button id="cancel-view" type="button" class="btn btn-tertiary ml-1" data-bs-dismiss="modal">Cancel</button>
                 <button id="ok-view" type="button" class="btn btn-primary ml-auto">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-addScript" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="h5 modal-title">Add New Script</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="form-group mb-4">
+                        <label class="col" for="dsName">Display Name</label>
+                        <input type="text" class="form-control" id="dsName" placeholder="Enter Display Name">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="col" for="scType">Script Type</label>
+                        <select class="form-select" id="scType">
+                            <option value="0" selected>Select a Type</option>
+                            <option value="Javascript">JS Notebook</option>
+                            <option value="Python">Python Notebook</option>
+                            <option value="R">R Notebook</option>
+                            <option value="PScript">Python Script</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="col" for="scName">Script Name</label>
+                        <select class="form-select" id="scName">
+                            <option value="0" selected>Select a Name</option>
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-tertiary ml-1" data-bs-dismiss="modal">Cancel</button>
+                <button id="ok-script" type="button" class="btn btn-primary ml-auto">Ok</button>
             </div>
         </div>
     </div>
