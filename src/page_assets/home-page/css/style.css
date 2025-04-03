@@ -233,7 +233,7 @@ body {
 
 
 .lower-sidebar {
-  z-index: 1030;
+  z-index: 99;
   position: relative;
   align-content: flex-start;
   width: 100%;
@@ -339,4 +339,15 @@ body {
 
 .loading-overlay.hidden {
   display: none;
+}
+li button.del-btn:hover {
+  background-color: #F3F4F6; 
+}
+
+.del-btn span {
+  color: #00000066; /* Default color */
+}
+
+.del-btn:hover span {
+  color: black; /* Color on hover */
 }

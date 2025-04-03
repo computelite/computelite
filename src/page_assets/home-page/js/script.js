@@ -205,7 +205,41 @@ function get_li_element(model_name) {
             this.classList.add("selectedValue")
             e.preventDefault();
         }
-        
+
+        // Add TaskType column if not exists in S_TaskMaster table
+
+        const db_name = this.innerText
+        const column_info = await executeQuery('fetchData', db_name, "PRAGMA table_info(S_TaskMaster)");
+        const column_names = column_info.map(col => col[1]);
+        if (!column_names.includes("TaskType")) {
+            await executeQuery('executeQuery', db_name, 
+                "ALTER TABLE S_TaskMaster ADD COLUMN TaskType VARCHAR DEFAULT 'PythonScript'"
+            );
+        }
+
+        // Add S_Notebooks and S_NotebookContent Table if not exists
+
+        await executeQuery('executeQuery', db_name,
+            `CREATE TABLE IF NOT EXISTS S_Notebooks (
+                NotebookId	    INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                Name            VARCHAR,
+                Type			VARCHAR,
+                Status	    	VARCHAR DEFAULT 'Active',
+                CreationDate	VARCHAR DEFAULT (datetime('now','localtime')),
+                LastUpdateDate	VARCHAR DEFAULT (datetime('now','localtime'))
+            )`
+        )
+        await executeQuery('executeQuery', db_name,
+            `CREATE TABLE IF NOT EXISTS S_NotebookContent (
+                CellId	        INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                Name            VARCHAR,
+                NotebookId      INTEGER NOT NULL,    
+                CellContent	    VARCHAR,
+                CellType        VARCHAR,
+                CreationDate	VARCHAR DEFAULT (datetime('now','localtime')),
+                LastUpdateDate	VARCHAR DEFAULT (datetime('now','localtime'))
+            )`
+        )
         await populateExecutableFiles(this.innerText)
     }
     return el
@@ -1065,7 +1099,26 @@ async function populateExecutableFiles(modelName){
     const files = await executeQuery('fetchData',modelName,query)
     for (let [TaskId,TaskName,TaskDisplayName,TaskType] of files){
 
-        const li_el = get_cl_element('li',null,null,get_cl_element('a','dropdown-item',null,document.createTextNode(TaskDisplayName)))
+        const li_el = get_cl_element('li', 'd-flex', null); // Create <li> first
+        const a_el = get_cl_element('a', 'dropdown-item', null, document.createTextNode(TaskDisplayName));
+        const button_el = get_cl_element('button', 'btn btn-small del-btn transparent p-2 me-1', null, 
+            get_cl_element('span', 'fa-solid fa-trash-alt')
+        );
+        li_el.appendChild(a_el);
+        li_el.appendChild(button_el);
+        li_el.querySelector('button').title = 'Delete Task';
+        li_el.querySelector('button').onclick = async function(e){
+            e.stopPropagation()
+            confirmBox('Alert!',`Are you sure you want to delete ${TaskDisplayName}?`,async function(){
+                let task_type = TaskType
+                if(task_type === 'JavascriptNotebook'){
+                    task_type = 'JSNotebook'
+                }
+                let query = "DELETE FROM S_TaskMaster WHERE TaskId = ? AND TaskType = ? AND TaskName = ?"
+                await executeQuery("deleteData",modelName,query,[TaskId,task_type,TaskName])
+                populateExecutableFiles(modelName)
+            }, 1, 'Yes', 'No')
+        }
 
         li_el.onclick =async function(){
             const canvas = document.getElementById('myCanvas');
@@ -1102,9 +1155,9 @@ async function populateExecutableFiles(modelName){
                         const loadScript = (url, globalVar) => {
                           return new Promise((resolve, reject) => {
                               if (globalVar && window[globalVar]) {
-                                  resolve(window[globalVar]);
-                                  return;
-                              }
+                                    resolve(window[globalVar]);
+                                    return;
+                                }
                     
                               const script = document.createElement("script");
                               script.src = url;
@@ -1113,7 +1166,7 @@ async function populateExecutableFiles(modelName){
                               script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
                     
                               document.head.appendChild(script);
-                          });
+                            });
                         };
                     
                         return Promise.all(libraries.map(lib => loadScript(lib.url, lib.globalVar)));
