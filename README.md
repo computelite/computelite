@@ -9,9 +9,8 @@ ComputeLite leverages the capabilities of WASM (Web Assembly) and SQLite OPFS to
 ### Key Features:
 
 - Secure, serverless operations entirely in the browser.
-- Advanced data analysis powered by `Python` (via Pyodide) and `SQL` (via SQLite).
+- Advanced data analysis powered by `Python` (via Pyodide), `R` (viar WebR), JavaScript and `SQL` (via SQLite).
 - Fully user-controlled with no external dependencies.
-- Future support planned for `JavaScript` and `R`.
 
 ---
 
@@ -20,12 +19,9 @@ ComputeLite leverages the capabilities of WASM (Web Assembly) and SQLite OPFS to
 Currently, ComputeLite supports the following languages:
 - **Python**: Powered by Pyodide, enabling advanced scripting and analysis.
 - **SQL**: Powered by SQLite, perfect for working with structured data.
+- **R**: Powered by WebR, perfect for statistical and analytical computation
+- **JavaScript**: Runs natively in the browser, ideal for building interactive UIs, data visualizations, and DOM manipulation in real time
 
-### 🌟 What's Next?
-
-We are actively working to expand ComputeLite's capabilities to include:
-- **JavaScript**: Bringing native browser scripting capabilities.
-- **R**: Enhancing statistical and analytical computation.
 
 ## 🌐 Try ComputeLite Now
 
