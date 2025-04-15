@@ -16,6 +16,7 @@ const modelUID = params.get('modelUID');
 let schema = {}
 
 const icons_class = {'DB_Icon': 'fas fa-database'}
+let tsk_id
 
 
 function get_accordian(group_name, table_list) {
@@ -1101,13 +1102,65 @@ async function populateExecutableFiles(modelName){
 
         const li_el = get_cl_element('li', 'd-flex', null); // Create <li> first
         const a_el = get_cl_element('a', 'dropdown-item', null, document.createTextNode(TaskDisplayName));
+        const btn_edit = get_cl_element('button', 'btn btn-small edit-btn transparent p-2 me-1', null, 
+            get_cl_element('span', 'fa-solid fa-pencil')
+        );
         const button_el = get_cl_element('button', 'btn btn-small del-btn transparent p-2 me-1', null, 
             get_cl_element('span', 'fa-solid fa-trash-alt')
         );
         li_el.appendChild(a_el);
+        li_el.appendChild(btn_edit)
         li_el.appendChild(button_el);
-        li_el.querySelector('button').title = 'Delete Task';
-        li_el.querySelector('button').onclick = async function(e){
+        li_el.querySelector('button.edit-btn').title = 'Edit Task';
+        li_el.querySelector('button.del-btn').title = 'Delete Task';
+
+        li_el.querySelector('button.edit-btn').onclick = async function(e){
+            e.stopPropagation()
+            const scriptName = document.getElementById("upScName")
+            let tskDisNm = li_el.innerText.trim()
+            scriptName.innerHTML = ""
+            
+            let sel_query = `SELECT TaskDisplayName, TaskType, TaskName, TaskId FROM S_TaskMaster WHERE TaskDisplayName = ?`
+            let result = await executeQuery('fetchData',modelName, sel_query, [tskDisNm]);
+            tsk_id = result[0][3]
+            
+            let tsktype = result[0][1]
+            if (tsktype == 'PythonScript'){
+                tsktype = 'PScript'
+            }
+            else if (tsktype === 'PythonNotebook'){
+                tsktype = 'Python'
+            }else if (tsktype === 'RNotebook'){
+                tsktype = 'R'
+            }else if (tsktype === 'JSNotebook'){
+                tsktype = 'Javascript'
+            }
+            if (result && result.length > 0) {
+                document.getElementById('upDsName').value = result[0][0];  // TaskDisplayName
+                document.getElementById('upScType').value = tsktype //TaskType
+
+                let query
+                let res
+                if(tsktype === 'PScript'){
+                    query = `SELECT FileName FROM S_ExecutionFiles WHERE FileName IS NOT NULL AND FileName LIKE '%.py' AND FilePath NOT LIKE '%/%' AND Status = ?`;
+                    res = await executeQuery('fetchData',modelName, query, ['Active']);
+                }else{
+                    query = `SELECT Name FROM S_Notebooks WHERE Status = ? AND Type = ?`;
+                    res = await executeQuery('fetchData',modelName, query, ['Active', tsktype]);
+                }
+                
+                for (const ntNm of res){
+                    const li_el  = get_cl_element('option',null,null,document.createTextNode(ntNm))
+                    li_el.setAttribute('value',ntNm)
+                    scriptName.appendChild(li_el)
+                }
+
+                document.getElementById('upScName').value = result[0][2];  // TaskName
+
+                new bootstrap.Modal(document.getElementById('modal-updateScript')).show();
+            }
+        }
+        li_el.querySelector('button.del-btn').onclick = async function(e){
             e.stopPropagation()
             confirmBox('Alert!',`Are you sure you want to delete ${TaskDisplayName}?`,async function(){
                 let task_type = TaskType
@@ -1116,6 +1169,7 @@ async function populateExecutableFiles(modelName){
                 }
                 let query = "DELETE FROM S_TaskMaster WHERE TaskId = ? AND TaskType = ? AND TaskName = ?"
                 await executeQuery("deleteData",modelName,query,[TaskId,task_type,TaskName])
+                confirmBox('Success','Script Deleted Successfully')
                 populateExecutableFiles(modelName)
             }, 1, 'Yes', 'No')
         }
@@ -1201,7 +1255,7 @@ async function populateExecutableFiles(modelName){
             
             let fileContent = null
             execFiles.forEach(rw => {
-                if (rw[0] === TaskName) {
+                if (rw[2] === TaskName) {
                     fileContent = rw[1]
                 }
             });
@@ -1657,7 +1711,7 @@ document.getElementById("scType").onchange = async function(){
     let query
     let result
     if(scriptType === 'PScript'){
-        query = `SELECT FileName FROM S_ExecutionFiles WHERE FileName IS NOT NULL AND Status = ?`;
+        query = `SELECT FileName FROM S_ExecutionFiles WHERE FileName IS NOT NULL AND FileName LIKE '%.py' AND FilePath NOT LIKE '%/%' AND Status = ?`;
         result = await executeQuery('fetchData',selected_model.innerText, query, ['Active']);
     }else{
         query = `SELECT Name FROM S_Notebooks WHERE Status = ? AND Type = ?`;
@@ -1703,6 +1757,14 @@ document.getElementById("ok-script").onclick = async function(){
         tsktype = 'PythonScript'
     }
 
+    let dis_query = `SELECT TaskDisplayName FROM S_TaskMaster WHERE TaskDisplayName = ?`
+    const taskDisName = await executeQuery('fetchData',selected_model.innerText,dis_query,[displayName])
+    
+    if (taskDisName.length > 0){
+        confirmBox("Alert!","Display name already exists")
+        return;
+    }
+
     let sel_query = `SELECT TaskName, TaskDisplayName FROM S_TaskMaster WHERE TaskName = ? AND TaskType = ?`
     const task = await executeQuery('fetchData',selected_model.innerText,sel_query,[scriptName,tsktype])
     
@@ -1721,4 +1783,90 @@ document.getElementById("ok-script").onclick = async function(){
     document.getElementById("scType").value = '0'
     document.getElementById("scName").innerHTML = ''
     confirmBox("Success","Script created successfully.")
+}
+
+document.getElementById("upScType").onchange = async function(){
+    const scriptType = document.getElementById("upScType").value
+    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+    const scriptName = document.getElementById("upScName")
+    scriptName.innerHTML = ""
+    if (!selected_model){
+        confirmBox("Alert!","Please select a model")
+        return;
+    }
+    let query
+    let result
+    if(scriptType === 'PScript'){
+        query = `SELECT FileName FROM S_ExecutionFiles WHERE FileName IS NOT NULL AND FileName LIKE '%.py' AND FilePath NOT LIKE '%/%' AND Status = ?`;
+        result = await executeQuery('fetchData',selected_model.innerText, query, ['Active']);
+    }else{
+        query = `SELECT Name FROM S_Notebooks WHERE Status = ? AND Type = ?`;
+        result = await executeQuery('fetchData',selected_model.innerText, query, ['Active', scriptType]);
+    }
+    
+    for (const ntNm of result){
+        const li_el  = get_cl_element('option',null,null,document.createTextNode(ntNm))
+        li_el.setAttribute('value',ntNm)
+        scriptName.appendChild(li_el)
+    }
+    
+}
+
+document.getElementById("update-script").onclick = async function(){
+    const displayName = document.getElementById("upDsName").value
+    const scriptType = document.getElementById("upScType").value
+    const scriptName = document.getElementById("upScName").value
+    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+    
+    if(displayName.trim() === ''){
+        confirmBox("Alert!","Please Enter a display ame")
+        return;
+    }
+
+    if(scriptType === '0'){
+        confirmBox("Alert!","Please select a script language")
+        return;
+    }
+    if(scriptName === '0'){
+        confirmBox("Alert!","Please select a notebook")
+        return;
+    }
+
+    let tsktype
+    if (scriptType === 'Python'){
+        tsktype = 'PythonNotebook'
+    }else if (scriptType === 'R'){
+        tsktype = 'RNotebook'
+    }else if (scriptType === 'Javascript'){
+        tsktype = 'JSNotebook'
+    }else if (scriptType === 'PScript'){
+        tsktype = 'PythonScript'
+    }
+
+    let dis_query = `SELECT TaskDisplayName FROM S_TaskMaster WHERE TaskDisplayName = ? AND TaskId != ?`
+    const taskDisName = await executeQuery('fetchData',selected_model.innerText,dis_query,[displayName,tsk_id])
+    
+    if (taskDisName.length > 0){
+        confirmBox("Alert!","Display name already exists")
+        return;
+    }
+
+    let sel_query = `SELECT TaskName, TaskDisplayName FROM S_TaskMaster WHERE TaskName = ? AND TaskType = ? AND TaskId != ?`
+    const task = await executeQuery('fetchData',selected_model.innerText,sel_query,[scriptName,tsktype,tsk_id])
+    
+    if (task.length > 0){
+        confirmBox("Alert!","Script with this name already exists")
+        return;
+    }
+
+    let query = `UPDATE S_TaskMaster SET TaskName = ?, TaskDisplayName = ?,TaskType = ? WHERE TaskId = ?`
+    await executeQuery('updateData',selected_model.innerText,query,[scriptName,displayName,tsktype,tsk_id])
+
+    await populateExecutableFiles(selected_model.innerText)
+    const bs_modal = bootstrap.Modal.getInstance(document.getElementById("modal-updateScript"))
+    bs_modal.hide()
+    document.getElementById("upDsName").value = ''
+    document.getElementById("upScType").value = '0'
+    document.getElementById("upScName").innerHTML = ''
+    confirmBox("Success","Script updated successfully.")
 }

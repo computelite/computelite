@@ -351,3 +351,15 @@ li button.del-btn:hover {
 .del-btn:hover span {
   color: black; /* Color on hover */
 }
+
+li button.edit-btn:hover {
+  background-color: #F3F4F6; 
+}
+
+.edit-btn span {
+  color: #00000066; /* Default color */
+}
+
+.edit-btn:hover span {
+  color: black; /* Color on hover */
+}

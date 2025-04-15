@@ -390,6 +390,46 @@
     </div>
 </div>
 
+<div class="modal fade" id="modal-updateScript" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="h5 modal-title">Update Script</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="form-group mb-4">
+                        <label class="col" for="upDsName">Display Name</label>
+                        <input type="text" class="form-control" id="upDsName" placeholder="Enter Display Name">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="col" for="upScType">Script Type</label>
+                        <select class="form-select" id="upScType">
+                            <option value="0" selected>Select a Type</option>
+                            <option value="Javascript">JS Notebook</option>
+                            <option value="Python">Python Notebook</option>
+                            <option value="R">R Notebook</option>
+                            <option value="PScript">Python Script</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="col" for="upScName">Script Name</label>
+                        <select class="form-select" id="upScName">
+                            <option value="0" selected>Select a Name</option>
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-tertiary ml-1" data-bs-dismiss="modal">Cancel</button>
+                <button id="update-script" type="button" class="btn btn-primary ml-auto">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <main class="d-flex flex-column " style = "flex: 1 0 auto;">
 
     <div class="preloader bg-dark flex-column justify-content-center align-items-center">

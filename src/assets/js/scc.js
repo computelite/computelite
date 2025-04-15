@@ -10,7 +10,7 @@ import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
 const btn_class =   { 
                         customClass:    {
                                             confirmButton: 'btn btn-primary',
-                                            cancelButton: 'btn btn-tertiary mst-3'
+                                            cancelButton: 'btn btn-tertiary ms-3'
                                         },
                         buttonsStyling: false,
                         reverseButtons: true,

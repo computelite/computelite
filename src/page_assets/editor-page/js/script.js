@@ -103,8 +103,8 @@ window.onload = async function () {
   document.getElementById("addFile").onclick = createNewFile
   document.getElementById("addFolder").onclick = createNewFolder
   document.getElementById("deleteFile").onclick = deleteFile
-  document.getElementById('addToHome').onclick = showFileModal
-  document.getElementById('saveFileName').onclick = addFileToHome
+  // document.getElementById('addToHome').onclick = showFileModal
+  // document.getElementById('saveFileName').onclick = addFileToHome
 }
 
 function set_editor_value(text){
@@ -640,37 +640,37 @@ async function fetchFilesAndDownloadZip() {
   }
 }
 
-async function showFileModal(){
-  document.getElementById('fileName').value = ''
-  if (!selected_li_el){
-    confirmBox('Alert!','No file selected')
-    return
-  }
-  const bs_modal = new bootstrap.Modal(document.getElementById('modal-fileDisplayName'))
-  bs_modal.show()
-}
+// async function showFileModal(){
+//   document.getElementById('fileName').value = ''
+//   if (!selected_li_el){
+//     confirmBox('Alert!','No file selected')
+//     return
+//   }
+//   const bs_modal = new bootstrap.Modal(document.getElementById('modal-fileDisplayName'))
+//   bs_modal.show()
+// }
 
-async function addFileToHome(){
-  const filePath = selected_li_el.getAttribute('filepath')
-  const taskName = document.getElementById('fileName').value
+// async function addFileToHome(){
+//   const filePath = selected_li_el.getAttribute('filepath')
+//   const taskName = document.getElementById('fileName').value
 
-  if (taskName.trim() == ''){
-    confirmBox('Alert','Please enter File Display Name')
-    return
-  }
+//   if (taskName.trim() == ''){
+//     confirmBox('Alert','Please enter File Display Name')
+//     return
+//   }
 
-  let query = `INSERT INTO S_TaskMaster (TaskName,TaskDisplayName) VALUES (?, ?)`
-  try{
-    const result = await executeQuery('insertData',modelName,query,[filePath,taskName])
-    const bs_modal = bootstrap.Modal.getInstance(document.getElementById('modal-fileDisplayName'))
-    bs_modal.hide()
+//   let query = `INSERT INTO S_TaskMaster (TaskName,TaskDisplayName) VALUES (?, ?)`
+//   try{
+//     const result = await executeQuery('insertData',modelName,query,[filePath,taskName])
+//     const bs_modal = bootstrap.Modal.getInstance(document.getElementById('modal-fileDisplayName'))
+//     bs_modal.hide()
 
-    confirmBox('Success','File added to Home Page Successfully')
-  }catch{
-    confirmBox('Alert!','This File Name is already exists')
-  } 
+//     confirmBox('Success','File added to Home Page Successfully')
+//   }catch{
+//     confirmBox('Alert!','This File Name is already exists')
+//   } 
 
-}
+// }
 
 async function downloadOutput() {
   const downloadLink = document.createElement("a");
