@@ -171,12 +171,15 @@ document.getElementById("hideCode").onclick = async function () {
       if (!runcells) {
         await runAllCell(container, modelName,selected_li_el.innerText);
         this.innerText = "Show Code"
+        document.getElementById("addCell").style.display = 'none'
       } else {
+        document.getElementById("addCell").style.display = ''
         this.innerText = "Hide Code"
         container.innerHTML = "";
         container.style = "width:80% !important"
         container.parentNode.style = "width:80% !important"
-        if (! container.classList.contains("cell-position")){
+        let sideber = document.getElementById('sidebarMenu')
+        if (sideber.classList.contains("contracted")){
           container.classList.add("cell-position")
         }
         await populateCells(selected_li_el.innerText);
@@ -212,9 +215,16 @@ async function fetchNotebookName() {
               cn.classList.remove("selectedValue");
             }
             this.classList.add("selectedValue");
-            document.getElementById('hideCode').innerText = "Hide Code"
-            runcells = false
+            // document.getElementById('hideCode').innerText = "Hide Code"
+            // runcells = false
+            
             container.innerHTML = "";
+            let hideCodeButton = document.getElementById('hideCode');
+            if (runcells) {
+              runcells = false
+              await hideCodeButton.onclick();
+              return;
+            }
             await populateCells(this.innerText);
           }
         }
@@ -241,9 +251,13 @@ async function fetchNotebookName() {
           cn.classList.remove("selectedValue");
         }
         this.classList.add("selectedValue");
-        document.getElementById('hideCode').innerText = "Hide Code"
-        runcells = false
         container.innerHTML = "";
+        let hideCodeButton = document.getElementById('hideCode');
+        if (runcells) {
+          runcells = false
+          await hideCodeButton.onclick();
+          return;
+        }
         await populateCells(this.innerText);
       }
     }
@@ -313,9 +327,13 @@ document.getElementById("notebookName").onkeydown = async function (e) {
           cn.classList.remove("selectedValue");
         }
         this.classList.add("selectedValue");
-        document.getElementById('hideCode').innerText = "Hide Code"
-        runcells = false
         container.innerHTML = "";
+        let hideCodeButton = document.getElementById('hideCode');
+        if (runcells) {
+          runcells = false
+          await hideCodeButton.onclick();
+          return;
+        }
         await populateCells(this.innerText);
       }
     }

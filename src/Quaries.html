@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!-- Primary Meta Tags -->
+    <title>Compute Lite Quaries</title>
+    <meta name="viewport" content="width=1024, initial-scale=1, shrink-to-fit=no">
+    <meta name="title" content="Compute Lite">
+    <meta name="author" content="SCL">
+    <meta name="description" content="Compute in Browser">
+    <meta name="keywords" content="compute lite, edge compute, edge data, macro in browser, compute in browser, wasm" />
+    <link rel="canonical" href="https://www.ComputeLite.com">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.ComputeLite.com">
+    <meta property="og:title" content="Compute Lite">
+    <meta property="og:description" content="Compute in Browser">
+    <meta property="og:image" content="assets/img/favicon/summence.svg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.ComputeLite.com">
+    <meta property="twitter:title" content="Compute Lite">
+    <meta property="twitter:description" content="Compute in Browser">
+    <meta property="twitter:image" content="assets/img/favicon/summence.svg">
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon.ico">
+    <link rel="mask-icon" href="favicon.ico" color="#ffffff">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Styles -->
+    <link type="text/css" href="./scss/pixel.scss" rel="stylesheet">
+    <link type="text/css" href="./scss/scl.css" rel="stylesheet">
+    <link type="text/css" href="./page_assets/privacy-policy/css/style.css" rel="stylesheet">
+    <link type="text/css" href="./page_assets/quaries/css/style.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-md-none">
+        <a class="navbar-brand mr-lg-5" href="#">
+            <img class="navbar-brand-dark" src="assets/img/favicon/summence.svg" alt="Summence logo" /> 
+            <img class="navbar-brand-light" src="assets/img/favicon/summence.svg" alt="Summence logo" />
+        </a>
+        <div class="d-flex align-items-center">
+            <button class="navbar-toggler d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenuQue" aria-controls="sidebarMenuQue" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebarMenuQue" class="sidebar d-md-block bg-primary text-white collapse contracted" data-simplebar style="z-index: 1030;">
+        <div class="sidebar-inner px-4 pt-3" style="overflow-x: hidden;">
+            <div class="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
+                <div class="collapse-close d-md-none">
+                    <a href="#sidebarMenuQue" class="fas fa-times" data-bs-toggle="collapse" data-bs-target="#sidebarMenuQue" aria-controls="sidebarMenuQue" aria-expanded="true" aria-label="Toggle navigation"></a>
+                </div>
+            </div>
+            <ul class="nav flex-column pt-3 pt-md-0" id="sidebar-div">
+
+                <!-- Home -->
+                <li class="nav-item">
+                    <a href="/homePage.html" class="nav-link d-flex align-items-center">
+                        <span class="sidebar-icon">
+                            <img src="assets/img/favicon/summence.svg" style="opacity: 1;" height="30" width="30" alt="Home">
+                        </span>
+                        <span class="mt-1 sidebar-text">Home</span>
+                    </a>
+                </li>
+
+                <li role="separator" class="dropdown-divider mt-3 mb-3 border-black"></li>
+                <!-- File Menu -->
+                <li class="nav-item">
+                    <span class="nav-link collapsed d-flex justify-content-between align-items-center" 
+                        data-bs-toggle="collapse" data-bs-target="#submenu-app" aria-expanded="false" aria-controls="submenu-app">
+                        <span>
+                            <span class="sidebar-icon">
+                                <span class="fas fa-folder"></span>
+                            </span> 
+                            <span class="sidebar-text">File</span>
+                        </span>
+                        <span class="link-arrow">
+                            <span class="fas fa-chevron-right"></span>
+                        </span> 
+                    </span>
+                    <div class="multi-level collapse" role="list" id="submenu-app" aria-expanded="false" data-bs-parent="#sidebar-div">
+                        <ul class="flex-column nav" aria-labelledby="navbarDropdownMenuLink1">
+                            <li class="nav-item" id="newWorksheetBtn">
+                                <a class="nav-link py-1" data-bs-toggle="modal" data-bs-target="#modal-select-column" href="#">
+                                    <span class="sidebar-text-contracted fas fa-file"></span>
+                                    <span class="sidebar-text">New</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" id="openModuleBtn">
+                                <a class="nav-link py-1" data-bs-target="#open-worksheet" data-bs-toggle="modal" href="#">
+                                    <span class="sidebar-text-contracted fas fa-folder-open"></span>
+                                    <span class="sidebar-text">Open</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" id="closeWorksheetBtn">
+                                <a class="nav-link py-1" href="#">
+                                    <span class="sidebar-text-contracted fa-solid fa-pencil"></span>
+                                    <span class="sidebar-text">Edit</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" id="deleteWorksheetBtn">
+                                <a class="nav-link py-1" href="#">
+                                    <span class="sidebar-text-contracted fas fa-trash-alt"></span>
+                                    <span class="sidebar-text">Delete</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Quaries Menu -->
+                <li class="nav-item">
+                    <span class="nav-link collapsed d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#submenu-pages" id="worksheet-span">
+                        <span>
+                            <span class="sidebar-icon"><span class="fas fa-file-alt"></span></span>
+                            <span class="sidebar-text">Queries</span>
+                        </span>
+                        <span class="link-arrow"><span class="fas fa-chevron-right"></span></span>
+                    </span>
+                    <div class="multi-level collapse" role="list" id="submenu-pages" aria-expanded="false" data-bs-parent="#sidebar-div">
+                        <ul id="displayModel" class="flex-column nav">
+                            <li class="nav-item ">
+                                <a class="nav-link qr-link py-1" data-bs-toggle="modal" href="#" data-bs-target="#modal-select-column">
+                                    <span class="sidebar-text-contracted fas fa-laptop"></span>
+                                    <span class="sidebar-text">Display</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" id="time-side-nav">
+                                <a class="nav-link qr-link py-1" data-bs-toggle="modal" href="#" data-bs-target="#modal-select-column">
+                                    <span class="sidebar-text-contracted fas fa-columns"></span>
+                                    <span class="sidebar-text">Series</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link qr-link py-1" data-bs-toggle="modal" href="#" data-bs-target="#modal-select-column">
+                                    <span class="sidebar-text-contracted fa fa-sum"></span>
+                                    <span class="sidebar-text">Aggregation</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link qr-link py-1" data-bs-toggle="modal" href="#" data-bs-target="#modal-select-column">
+                                    <span class="sidebar-text-contracted fa-solid fa-table"></span>
+                                    <span class="sidebar-text">Layout</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link qr-link py-1" data-bs-toggle="modal" href="#" data-bs-target="#modal-select-column">
+                                    <span class="sidebar-text-contracted fa-solid fa-bolt"></span>
+                                    <span class="sidebar-text">Advanced</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+    </nav>
+    <main class="content bg-soft" style="min-height: 100vh;">
+        <nav class="navbar navbar-top navbar-expand navbar-dashboard navbar-dark pl-0 pe-2 pb-0 pt-1">
+            <div class="container-fluid px-0">
+              <div class="d-flex justify-content-between w-100" id="navbarSupportedContent">
+                <div class="d-flex align-items-center">
+                  <button id="sidebar-toggle" style="border-radius: 50%; padding: 0; font-size: 1.3rem;" class="sidebar-toggle mr-2 btn btn-icon-only btn-lg btn-circle d-none d-md-inline-block">
+                    <span class="fa-solid fa-bars"></span>
+                </button>
+                  <button id="refresh_wk" style="border-radius: 50%; padding: 0; font-size: 1.3rem;" class="sidebar-toggle mr-3 btn btn-icon-only btn-lg btn-circle d-none d-md-inline-block">
+                    <span class="fa-solid fa-rotate"></span>
+                </button>
+                </div>
+              </div>
+            </div>
+        </nav>
+    </main>
+    <div class="modal fade" id="modal-select-column" data-bs-backdrop="static" tabindex="-1"
+        aria-labelledby="modal-select-column" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="openedWorksheetTitle" class="h5 modal-title">Query Designer</h2>
+                <button id="closingFile" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="model-body p-3">
+                <div class="container-fluid">
+                <div class="row modelBodycontenier">
+                    <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12">
+                    <nav>
+                        <ul id="queryUl" class="nav nav-pills square nav-fill flex-column vertical-tab" role="tablist">
+                            <li class="nav-item mb-0">
+                                <a id="display-new" class="nav-link p-2 rounded-0 active" data-bs-toggle="tab" href="#DisplayNewC"
+                                role="tab">
+                                <span class="d-block text-left">
+                                    <span class="fas fa-laptop pe-2"></span>Display</span>
+                                </a>
+                            </li>
+                            <li class="nav-item mb-0">
+                                <a id="column-new" class="nav-link p-2 rounded-0" data-bs-toggle="tab" href="#ColumnNewC" role="tab">
+                                  <span class="d-block text-left">
+                                    <span class="fas fa-columns pe-2"></span>Series</span>
+                                </a>
+                            </li>
+                            <li class="nav-item mb-0">
+                                <a id="aggregation-new" class="nav-link p-2 rounded-0" data-bs-toggle="tab" href="#AggregationNewC"
+                                role="tab">
+                                <span class="d-block text-left">
+                                    <span class="fas fa-sum pe-2"></span>Aggregation</span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item mb-0">
+                                <a id="layout-new" class="nav-link p-2 rounded-0" data-bs-toggle="tab" href="#LayoutNewC" role="tab">
+                                <span class="d-block text-left">
+                                    <span class="fas fa-table pe-2"></span>Layout</span>
+                                </a>
+                            </li>
+                            <li class="nav-item mb-0">
+                                <a id="layout-new" class="nav-link p-2 rounded-0" data-bs-toggle="tab" href="#AdvanceNewC" role="tab">
+                                <span class="d-block text-left">
+                                    <span class="fa-solid fa-bolt pe-2"></span>Advanced</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    </div>
+
+                    <div class="col-xl-9 col-lg-9 col-md-12 col-sm-12 border-module-column tab-content">
+                    <div id="DisplayNewC" class="h-100 tab-pane fade active show" role="tabpanel">
+                        <div class="row mb-3">
+                        <div class="col-md-3 col-sm-12">
+                            <label class="lablel-fotmTitle">Name</label>
+                        </div>
+                        <div class="col-md-8 col-sm-12">
+                            <div class="form-group">
+                                <input id="QuName" type="text" name="name" value="" class="form-control moduleForm-feild">
+                            </div>
+                        </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-3 col-sm-12">
+                                <label class="lablel-fotmTitle">Query SQL</label>
+                            </div>
+                            <div class="col-md-8 col-sm-12">
+                                <div class="form-group">
+                                    <textarea id="queryInp" class="form-control moduleForm-feild-textarea"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-3 col-sm-12">
+                                <label class="lablel-fotmTitle">Extra</label>
+                            </div>
+                        <div class="col-md-5 col-sm-12">
+                            <input type="checkbox" id="showSummary" name="module-checkbox" value="show sankey">
+                            <label for="showSummary" class="fontSize d-inline-block m-bottom">Show
+                            Summary&nbsp;<i><img
+                                src="./page_assets/quaries/images/showSummary.svg" width="16"
+                                height="16" alt="Summary"></i>
+                            </label>
+                        </div>
+                        <div class="col-md-4 col-sm-12">
+                            <input type="checkbox" id="hideNullRows" name="module-checkbox">
+                            <label for="hideNullRows" class="fontSize d-inline-block m-bottom">Hide Null Rows</label>
+                        </div>
+                        </div>
+                    </div>
+                    <div id="ColumnNewC" class="h-100 tab-pane fade" role="tabpanel">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Series 1">
+                            <button class="btn btn-primary dropdown-toggle" id="sum-series1" data-bs-toggle="dropdown" aria-expanded="false">Sum</button>
+                              <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Sum</a></li>
+                                <li><a class="dropdown-item" href="#">Min</a></li>
+                                <li><a class="dropdown-item" href="#">Max</a></li>
+                                <li><a class="dropdown-item" href="#">Avg</a></li>
+                                <li><a class="dropdown-item" href="#">First</a></li>
+                                <li><a class="dropdown-item" href="#">Last</a></li>
+                              </ul>                            
+                        </div>                              
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Series 2">
+                            <button class="btn btn-primary" id="sum-series2">Sum</button>
+                        </div>                              
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Series 3">
+                            <button class="btn btn-primary" id="sum-series3">Sum</button>
+                        </div>                              
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Series 4">
+                            <button class="btn btn-primary" id="sum-series4">Sum</button>
+                        </div>                              
+                    </div>
+
+                    <div id="AggregationNewC" class="h-100 tab-pane fade" role="tabpanel">
+                        <div class="h-100 d-flex flex-row align-items-stretch justify-content-between">
+                        <div class="card border-light" style="flex: 4;">
+                            <div class="card-header bg-white border-0 text-center py-2">
+                                <h5 class="m-0">Numeric Column</h5>
+                            </div>
+                            <div class="flex-grow-1 scc-box">
+                                <ul id="availableLevel" dest="selectedLevel" class="tree parent-div">
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="align-self-center h-25 d-flex flex-column justify-content-around" style="flex: 1;">
+                            <a id="addAllAggregation" class="text-primary text-center">
+                                <span class="fa fa-angle-double-right"></span>
+                            </a>
+                            <a id="removeAllAggregation" class="text-primary text-center">
+                                <span class="fa fa-angle-double-left"></span>
+                            </a>
+                        </div>
+                        <div class="card border-light" style="flex: 4;">
+                            <div class="card-header bg-white border-0 text-center py-2">
+                                <h5 class="m-0">String Column</h5>
+                            </div>
+                            <div class="flex-grow-1 parent-div scc-box">
+                                <ul id="selectedLevel" dest="availableLevel" class="tree parent-div">
+                                </ul>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div id="LayoutNewC" class="h-100 tab-pane fade" role="tabpanel">
+                        <div class="h-100 w-100 d-flex flex-column align-items-stretch justify-content-between">
+                            <div class="w-100 card border-light rounded-0 d-flex flex-row align-items-stretch p-1">
+                                <div class="page-layout pl-2 pt-2">
+                                    <h6>Page</h6>
+                                </div>
+                                <ul id="layoutZ" class="flex-grow-1 h-100 p-0 m-0">
+                                </ul>
+                            </div>
+
+                            <div class="w-100 card border-light rounded-0 d-flex flex-row align-items-stretch flex-grow-1"
+                                style="border-top: 0;">
+                                <div style="flex: 1; border-right: thin solid #dce6f3;" class="p-1">
+                                    <ul id="layoutY" class="verticle_main w-100 h-100 p-0 m-0"></ul>
+                                </div>
+                                <div style="flex: 3;" class="borderFul-row ml-2 p-1">
+                                <ul id="layoutX" class="w-100 h-100 p-0 m-0">
+                                    <li><span class="fas fa-columns"></span>Series</li>
+                                </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="AdvanceNewC" class="h-100 tab-pane fade" role="tabpanel">
+                        <div class="h-100 w-100 d-flex flex-column align-items-stretch justify-content-between">                        
+                            <div class="container chart-settings">
+                                <h6>Choose the chart type and axis for your data series:</h6>
+                                <div class="table-responsive">
+                                  <table class="table table-bordered align-middle">
+                                    <thead class="table-light">
+                                      <tr>
+                                        <th>Series Name</th>
+                                        <th>Chart Type</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr class="series-row">
+                                        <td class="series-name"><span class="series-color blue"></span> End Inventory</td>
+                                        <td>
+                                            <select id="graphTypeNew" class="form-control form-select moduleForm-feild w-100">
+                                                <option value="LineChart" selected="">Line Chart</option>
+                                                <option value="BarChart">Bar Chart</option>
+                                                <option value="AreaChart">Area chart</option>
+                                                <option value="StackedBarChart">Stacked Bar Chart</option>
+                                          </select>
+                                        </td>
+                                      </tr>
+                                      <tr class="series-row">
+                                        <td class="series-name"><span class="series-color orange"></span> Inventory Max</td>
+                                        <td>
+                                            <select id="graphTypeNew" class="form-control form-select moduleForm-feild w-100">
+                                            <option value="LineChart" selected="">Line Chart</option>
+                                            <option value="BarChart">Bar Chart</option>
+                                            <option value="AreaChart">Area chart</option>
+                                            <option value="StackedBarChart">Stacked Bar Chart</option>
+                                          </select>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                            </div>
+                            <!-- <div class="w-100 card border-light rounded-0 d-flex flex-row align-items-stretch">
+                                <div class="pl-2 pt-2" style="flex: 1;">
+                                    <div class="form-group">
+                                        <label class="lablel-fotmTitle">Series Display</label>
+                                    </div>
+                                </div>
+                                <div style="flex: 3;">
+                                    <div class="m-2">
+                                        <select id="graphTypeNew" class="form-control form-select moduleForm-feild w-100">
+                                            <option value="LineChart" selected="">Line Chart</option>
+                                            <option value="BarChart">Bar Chart</option>
+                                            <option value="AreaChart">Area chart</option>
+                                            <option value="StackedBarChart">Stacked Bar Chart</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="closingFile1" data-bs-dismiss="modal" class="btn btn-tertiary">Cancel</button>
+                <button id="save_wk" type="button" class="ml-auto btn btn-primary">Ok</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="./assets/js/pixel.js"></script>  
+    <script src="./coi-serviceworker.js"></script>
+    <script src="./page_assets/quaries/js/script.js" type="module"></script>
+
+</body>
+</html>

@@ -1199,7 +1199,7 @@ async function populateExecutableFiles(modelName){
             let execFiles
             let filesQuery
             if(TaskType === 'PythonScript'){
-                filesQuery = `SELECT FilePath,FileData,FileName FROM S_ExecutionFiles WHERE FileName IS NOT NULL AND Status = 'Active' `
+                filesQuery = `SELECT FilePath,FileData,FileName FROM S_ExecutionFiles WHERE FileName IS NOT NULL AND Status = 'Active'`;
                 execFiles = await executeQuery("fetchData",selected_model.innerText, filesQuery);
                 
             }else{
@@ -1255,7 +1255,7 @@ async function populateExecutableFiles(modelName){
             
             let fileContent = null
             execFiles.forEach(rw => {
-                if (rw[2] === TaskName) {
+                if (rw[0] === TaskName) {
                     fileContent = rw[1]
                 }
             });
@@ -1693,6 +1693,16 @@ document.getElementById("notebookRBtn").onclick = function(){
     }
     const modelName = selected_model.innerText
     window.open(`./RNotebook.html?modelName=${modelName}`);
+}
+
+document.getElementById("quarieSheet").onclick = function(){
+    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+    if (!selected_model){
+        confirmBox("Alert!","Please select a model")
+        return
+    }
+    const modelName = selected_model.innerText
+    window.open(`./Quaries.html?modelName=${modelName}`);
 }
 
 // -------------------------------------------------------------------------------------------------
