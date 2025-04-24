@@ -1254,12 +1254,14 @@ async function populateExecutableFiles(modelName){
             }
             
             let fileContent = null
+            let fileName = ''
             execFiles.forEach(rw => {
                 if (rw[0] === TaskName) {
                     fileContent = rw[1]
+                    fileName = rw[2]
                 }
             });
-            
+
             const blobQuery = `SELECT FileName,FileBlob FROM S_DataFiles WHERE FileType = 'Input'`
             const blobFiles = await executeQuery("fetchData",selected_model.innerText, blobQuery)
 
@@ -1277,7 +1279,8 @@ async function populateExecutableFiles(modelName){
                 for (let content of fileContent){
                     value += content
                 }
-                res = await executePython('executeScript','editor',value,proj_name,selected_model.innerText,execFiles,null,blobFiles,wheelFiles)
+                
+                res = await executePython('execute','editor',value,proj_name,selected_model.innerText,execFiles,fileName,blobFiles,wheelFiles)
             }else if (TaskType == 'PythonNotebook'){
                 for (let content of fileContent){
                     res = await executePython('execute','notebook',content,proj_name,selected_model.innerText,execFiles,null,blobFiles,wheelFiles,'currCell')
@@ -1695,15 +1698,15 @@ document.getElementById("notebookRBtn").onclick = function(){
     window.open(`./RNotebook.html?modelName=${modelName}`);
 }
 
-document.getElementById("quarieSheet").onclick = function(){
-    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
-    if (!selected_model){
-        confirmBox("Alert!","Please select a model")
-        return
-    }
-    const modelName = selected_model.innerText
-    window.open(`./Quaries.html?modelName=${modelName}`);
-}
+// document.getElementById("querySheet").onclick = function(){
+//     const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+//     if (!selected_model){
+//         confirmBox("Alert!","Please select a model")
+//         return
+//     }
+//     const modelName = selected_model.innerText
+//     window.open(`./Queries.html?modelName=${modelName}`);
+// }
 
 // -------------------------------------------------------------------------------------------------
 

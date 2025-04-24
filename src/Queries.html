@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!-- Primary Meta Tags -->
-    <title>Compute Lite Quaries</title>
+    <title>Compute Lite Queries</title>
     <meta name="viewport" content="width=1024, initial-scale=1, shrink-to-fit=no">
     <meta name="title" content="Compute Lite">
     <meta name="author" content="SCL">
@@ -37,7 +37,7 @@
     <link type="text/css" href="./scss/pixel.scss" rel="stylesheet">
     <link type="text/css" href="./scss/scl.css" rel="stylesheet">
     <link type="text/css" href="./page_assets/privacy-policy/css/style.css" rel="stylesheet">
-    <link type="text/css" href="./page_assets/quaries/css/style.css" rel="stylesheet">
+    <link type="text/css" href="./page_assets/queries/css/style.css" rel="stylesheet">
 </head>
 <body>
 
@@ -119,7 +119,7 @@
                     </div>
                 </li>
 
-                <!-- Quaries Menu -->
+                <!-- Queries Menu -->
                 <li class="nav-item">
                     <span class="nav-link collapsed d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#submenu-pages" id="worksheet-span">
                         <span>
@@ -136,12 +136,12 @@
                                     <span class="sidebar-text">Display</span>
                                 </a>
                             </li>
-                            <li class="nav-item" id="time-side-nav">
+                            <!-- <li class="nav-item" id="time-side-nav">
                                 <a class="nav-link qr-link py-1" data-bs-toggle="modal" href="#" data-bs-target="#modal-select-column">
                                     <span class="sidebar-text-contracted fas fa-columns"></span>
                                     <span class="sidebar-text">Series</span>
                                 </a>
-                            </li>
+                            </li> -->
                             <li class="nav-item">
                                 <a class="nav-link qr-link py-1" data-bs-toggle="modal" href="#" data-bs-target="#modal-select-column">
                                     <span class="sidebar-text-contracted fa fa-sum"></span>
@@ -205,12 +205,12 @@
                                     <span class="fas fa-laptop pe-2"></span>Display</span>
                                 </a>
                             </li>
-                            <li class="nav-item mb-0">
+                            <!-- <li class="nav-item mb-0">
                                 <a id="column-new" class="nav-link p-2 rounded-0" data-bs-toggle="tab" href="#ColumnNewC" role="tab">
                                   <span class="d-block text-left">
                                     <span class="fas fa-columns pe-2"></span>Series</span>
                                 </a>
-                            </li>
+                            </li> -->
                             <li class="nav-item mb-0">
                                 <a id="aggregation-new" class="nav-link p-2 rounded-0" data-bs-toggle="tab" href="#AggregationNewC"
                                 role="tab">
@@ -250,11 +250,14 @@
 
                         <div class="row mb-3">
                             <div class="col-md-3 col-sm-12">
-                                <label class="lablel-fotmTitle">Query SQL</label>
+                                <label class="lablel-fotmTitle">View Table</label>
                             </div>
                             <div class="col-md-8 col-sm-12">
                                 <div class="form-group">
-                                    <textarea id="queryInp" class="form-control moduleForm-feild-textarea"></textarea>
+                                    <select id="queryInp" class="form-control form-select moduleForm-feild w-100">
+                                        <option value="">Select Table</option>
+                                    </select>
+                                    <!-- <textarea id="queryInp" class="form-control moduleForm-feild-textarea"></textarea> -->
                                 </div>
                             </div>
                         </div>
@@ -267,7 +270,7 @@
                             <input type="checkbox" id="showSummary" name="module-checkbox" value="show sankey">
                             <label for="showSummary" class="fontSize d-inline-block m-bottom">Show
                             Summary&nbsp;<i><img
-                                src="./page_assets/quaries/images/showSummary.svg" width="16"
+                                src="./page_assets/queries/images/showSummary.svg" width="16"
                                 height="16" alt="Summary"></i>
                             </label>
                         </div>
@@ -277,7 +280,7 @@
                         </div>
                         </div>
                     </div>
-                    <div id="ColumnNewC" class="h-100 tab-pane fade" role="tabpanel">
+                    <!-- <div id="ColumnNewC" class="h-100 tab-pane fade" role="tabpanel">
                         <div class="input-group mb-3">
                             <input type="text" class="form-control" placeholder="Series 1">
                             <button class="btn btn-primary dropdown-toggle" id="sum-series1" data-bs-toggle="dropdown" aria-expanded="false">Sum</button>
@@ -302,13 +305,13 @@
                             <input type="text" class="form-control" placeholder="Series 4">
                             <button class="btn btn-primary" id="sum-series4">Sum</button>
                         </div>                              
-                    </div>
+                    </div> -->
 
                     <div id="AggregationNewC" class="h-100 tab-pane fade" role="tabpanel">
                         <div class="h-100 d-flex flex-row align-items-stretch justify-content-between">
                         <div class="card border-light" style="flex: 4;">
                             <div class="card-header bg-white border-0 text-center py-2">
-                                <h5 class="m-0">Numeric Column</h5>
+                                <h5 class="m-0">Level</h5>
                             </div>
                             <div class="flex-grow-1 scc-box">
                                 <ul id="availableLevel" dest="selectedLevel" class="tree parent-div">
@@ -325,7 +328,7 @@
                         </div>
                         <div class="card border-light" style="flex: 4;">
                             <div class="card-header bg-white border-0 text-center py-2">
-                                <h5 class="m-0">String Column</h5>
+                                <h5 class="m-0">Series</h5>
                             </div>
                             <div class="flex-grow-1 parent-div scc-box">
                                 <ul id="selectedLevel" dest="availableLevel" class="tree parent-div">
@@ -397,23 +400,6 @@
                                   </table>
                                 </div>
                             </div>
-                            <!-- <div class="w-100 card border-light rounded-0 d-flex flex-row align-items-stretch">
-                                <div class="pl-2 pt-2" style="flex: 1;">
-                                    <div class="form-group">
-                                        <label class="lablel-fotmTitle">Series Display</label>
-                                    </div>
-                                </div>
-                                <div style="flex: 3;">
-                                    <div class="m-2">
-                                        <select id="graphTypeNew" class="form-control form-select moduleForm-feild w-100">
-                                            <option value="LineChart" selected="">Line Chart</option>
-                                            <option value="BarChart">Bar Chart</option>
-                                            <option value="AreaChart">Area chart</option>
-                                            <option value="StackedBarChart">Stacked Bar Chart</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div> -->
                         </div>
                     </div>
                     </div>
@@ -432,7 +418,7 @@
     <!-- Scripts -->
     <script type="module" src="./assets/js/pixel.js"></script>  
     <script src="./coi-serviceworker.js"></script>
-    <script src="./page_assets/quaries/js/script.js" type="module"></script>
+    <script src="./page_assets/queries/js/script.js" type="module"></script>
 
 </body>
 </html>
