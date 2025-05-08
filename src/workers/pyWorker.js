@@ -217,6 +217,7 @@ async function executePythonCode(eventData) {
 
     const updatedFile = self.pyodide.FS.readFile(fsModelPath);
     await saveSQLiteToOPFS(modelName, projectName, updatedFile);
+    await deleteFileSystem(files);
     
     postMessage({ id, success: true, result:{display:displayType,value:result},stdout:output,stderr:'',blob, outputFiles });
     
@@ -224,8 +225,8 @@ async function executePythonCode(eventData) {
     if (extractMissingPackage(error.message)) {
       try{
         await self.micropip.install(extractMissingPackage(error.message));
-        executePythonCode(eventData)
-        return
+        await executePythonCode(eventData);
+        return;
       }catch (error){
         // console.log('weee',error)
       }
@@ -289,3 +290,21 @@ self.onmessage = async (event) => {
       break;
   }
 };
+
+async function deleteFileSystem(files) {
+  try {
+    for (let file of files) {
+      const noExt = file[0].replace(/\.py$/, "").replace(/\//g, ".");
+      const safeModuleName = JSON.stringify(noExt);
+
+      await pyodide.runPythonAsync(`
+        import sys
+        module_name = ${safeModuleName}
+        if module_name in sys.modules:
+          del sys.modules[module_name]
+        `);
+    }
+  } catch (error) {
+    console.error('Error deleting module:', error);
+  }
+}

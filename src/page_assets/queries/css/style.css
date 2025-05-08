@@ -570,7 +570,7 @@ div.scc_element::-webkit-scrollbar {
 /* WK Chat box Ends */
 
 .selectedValue {
-    background-color:#f7f7f7;
+    background-color:#f2f2f2;
 }
 
 
@@ -945,4 +945,13 @@ min-height: 88vh;
 	outline: none;
 	box-shadow: none;
 	background: #ced4da; /* Replace with your $gray-400 value */
+}
+
+
+.aggrigation-point{
+    cursor: move;
+}
+
+.td-size{
+    font-size: 0.8em;
 }

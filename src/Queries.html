@@ -38,6 +38,7 @@
     <link type="text/css" href="./scss/scl.css" rel="stylesheet">
     <link type="text/css" href="./page_assets/privacy-policy/css/style.css" rel="stylesheet">
     <link type="text/css" href="./page_assets/queries/css/style.css" rel="stylesheet">
+    <link type="text/css" href="./page_assets/queries/css/page_css.css" rel="stylesheet">
 </head>
 <body>
 
@@ -97,19 +98,19 @@
                                     <span class="sidebar-text">New</span>
                                 </a>
                             </li>
-                            <li class="nav-item" id="openModuleBtn">
-                                <a class="nav-link py-1" data-bs-target="#open-worksheet" data-bs-toggle="modal" href="#">
+                            <li class="nav-item" id="openModalBtn">
+                                <a class="nav-link py-1" href="#">
                                     <span class="sidebar-text-contracted fas fa-folder-open"></span>
                                     <span class="sidebar-text">Open</span>
                                 </a>
                             </li>
-                            <li class="nav-item" id="closeWorksheetBtn">
+                            <li class="nav-item" id="editQueryBtn">
                                 <a class="nav-link py-1" href="#">
                                     <span class="sidebar-text-contracted fa-solid fa-pencil"></span>
                                     <span class="sidebar-text">Edit</span>
                                 </a>
                             </li>
-                            <li class="nav-item" id="deleteWorksheetBtn">
+                            <li class="nav-item" id="deleteQueryBtn">
                                 <a class="nav-link py-1" href="#">
                                     <span class="sidebar-text-contracted fas fa-trash-alt"></span>
                                     <span class="sidebar-text">Delete</span>
@@ -150,14 +151,14 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link qr-link py-1" data-bs-toggle="modal" href="#" data-bs-target="#modal-select-column">
-                                    <span class="sidebar-text-contracted fa-solid fa-table"></span>
-                                    <span class="sidebar-text">Layout</span>
+                                    <span class="sidebar-text-contracted fas fa-columns"></span>
+                                    <span class="sidebar-text">Series</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link qr-link py-1" data-bs-toggle="modal" href="#" data-bs-target="#modal-select-column">
-                                    <span class="sidebar-text-contracted fa-solid fa-bolt"></span>
-                                    <span class="sidebar-text">Advanced</span>
+                                    <span class="sidebar-text-contracted fa-solid fa-table"></span>
+                                    <span class="sidebar-text">Layout</span>
                                 </a>
                             </li>
                         </ul>
@@ -172,16 +173,59 @@
             <div class="container-fluid px-0">
               <div class="d-flex justify-content-between w-100" id="navbarSupportedContent">
                 <div class="d-flex align-items-center">
-                  <button id="sidebar-toggle" style="border-radius: 50%; padding: 0; font-size: 1.3rem;" class="sidebar-toggle mr-2 btn btn-icon-only btn-lg btn-circle d-none d-md-inline-block">
-                    <span class="fa-solid fa-bars"></span>
-                </button>
-                  <button id="refresh_wk" style="border-radius: 50%; padding: 0; font-size: 1.3rem;" class="sidebar-toggle mr-3 btn btn-icon-only btn-lg btn-circle d-none d-md-inline-block">
-                    <span class="fa-solid fa-rotate"></span>
-                </button>
+                    <button id="sidebar-toggle" style="border-radius: 50%; padding: 0; font-size: 1.3rem;" class="sidebar-toggle me-2 btn btn-icon-only btn-lg btn-circle d-none d-md-inline-block">
+                        <span class="fa-solid fa-bars"></span>
+                    </button>
+                    <button id="refresh_wk" style="border-radius: 50%; padding: 0; font-size: 1.3rem;" class="sidebar-toggle me-3 btn btn-icon-only btn-lg btn-circle d-none d-md-inline-block">
+                        <span class="fa-solid fa-rotate"></span>
+                    </button>
+                    <!-- Search form -->
+                    <div id="zContent" class="scc-shadow" style="display: none;">
+                        <div id="ZLayoutContentDiv" class="d-flex flex-row justify-content-start">
+                            <div class="d-flex justify-content-start flex-column">
+                                <div class="form-group">
+                                    <select class="form-select py-1" id="inlineFormCustomSelectPref" aria-label="Default select example">
+                                        <option selected="selected">Open this select menu</option>
+                                        <option value="1">One</option><option value="2">Two</option>
+                                        <option value="3">Three</option>
+                                    </select>
+                                    <!-- <select class="form-select py-1 moduleForm-feild w-100">
+                                        <option value="1000001:NORTH">NORTH</option>
+                                        <option value="1000002:EAST">EAST</option>
+                                        <option value="1000003:WEST">WEST</option>
+                                        <option value="1000004:SOUTH">SOUTH</option>
+                                        <option value="1000005:CSD">CSD</option>
+                                    </select> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
               </div>
             </div>
         </nav>
+        <div class="preloader bg-dark flex-column justify-content-center align-items-center">
+            <svg id="loader-logo" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 64 78.4">
+              <path fill="#fff" d="M10,0h1.2V11.2H0V10A10,10,0,0,1,10,0Z" />
+              <rect fill="none" stroke="#fff" stroke-width="11.2" x="40" y="17.6" width="0" height="25.6" />
+              <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="11.2" x="23" y="35.2" width="0"
+                height="25.6" />
+              <path fill="#fff" d="M52.8,35.2H64V53.8a7,7,0,0,1-7,7H52.8V35.2Z" />
+              <rect fill="none" stroke="#fff" stroke-width="11.2" x="6" y="52.8" width="0" height="25.6" />
+              <path fill="#fff" d="M52.8,0H57a7,7,0,0,1,7,7h0v4.2H52.8V0Z" />
+              <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="11.2" x="57.8" y="17.6" width="0"
+                height="11.2" />
+              <rect fill="none" stroke="#fff" stroke-width="11.2" x="6" y="35.2" width="0" height="11.2" />
+              <rect fill="none" stroke="#fff" stroke-width="11.2" x="40.2" y="49.6" width="0" height="11.2" />
+              <path fill="#fff" d="M17.6,67.2H28.8v1.2a10,10,0,0,1-10,10H17.6V67.2Z" />
+              <rect fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="28.8" x="31.6" width="0" height="11.2" />
+              <rect fill="none" stroke="#fff" x="14" stroke-width="28.8" y="17.6" width="0" height="11.2" />
+            </svg>
+        </div>
+        <div>
+            <div id="table_container" class="grid-stack w-100 mt-2"></div>
+            <div id='contextmenu'></div>
+        </div>
     </main>
     <div class="modal fade" id="modal-select-column" data-bs-backdrop="static" tabindex="-1"
         aria-labelledby="modal-select-column" style="display: none;" aria-hidden="true">
@@ -220,15 +264,17 @@
                             </li>
 
                             <li class="nav-item mb-0">
-                                <a id="layout-new" class="nav-link p-2 rounded-0" data-bs-toggle="tab" href="#LayoutNewC" role="tab">
-                                <span class="d-block text-left">
-                                    <span class="fas fa-table pe-2"></span>Layout</span>
+                                <a id="series-new" class="nav-link p-2 rounded-0" data-bs-toggle="tab" href="#SeriesNewC" role="tab">
+                                    <span class="d-block text-left">
+                                        <span class="fas fa-columns pe-2"></span>
+                                        Series
+                                    </span>
                                 </a>
                             </li>
                             <li class="nav-item mb-0">
-                                <a id="layout-new" class="nav-link p-2 rounded-0" data-bs-toggle="tab" href="#AdvanceNewC" role="tab">
+                                <a id="layout-new" class="nav-link p-2 rounded-0" data-bs-toggle="tab" href="#LayoutNewC" role="tab">
                                 <span class="d-block text-left">
-                                    <span class="fa-solid fa-bolt pe-2"></span>Advanced</span>
+                                    <span class="fas fa-table pe-2"></span>Layout</span>
                                 </a>
                             </li>
                         </ul>
@@ -243,7 +289,7 @@
                         </div>
                         <div class="col-md-8 col-sm-12">
                             <div class="form-group">
-                                <input id="QuName" type="text" name="name" value="" class="form-control moduleForm-feild">
+                                <input id="queryNm" type="text" name="name" value="" class="form-control moduleForm-feild">
                             </div>
                         </div>
                         </div>
@@ -257,7 +303,6 @@
                                     <select id="queryInp" class="form-control form-select moduleForm-feild w-100">
                                         <option value="">Select Table</option>
                                     </select>
-                                    <!-- <textarea id="queryInp" class="form-control moduleForm-feild-textarea"></textarea> -->
                                 </div>
                             </div>
                         </div>
@@ -280,61 +325,36 @@
                         </div>
                         </div>
                     </div>
-                    <!-- <div id="ColumnNewC" class="h-100 tab-pane fade" role="tabpanel">
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Series 1">
-                            <button class="btn btn-primary dropdown-toggle" id="sum-series1" data-bs-toggle="dropdown" aria-expanded="false">Sum</button>
-                              <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Sum</a></li>
-                                <li><a class="dropdown-item" href="#">Min</a></li>
-                                <li><a class="dropdown-item" href="#">Max</a></li>
-                                <li><a class="dropdown-item" href="#">Avg</a></li>
-                                <li><a class="dropdown-item" href="#">First</a></li>
-                                <li><a class="dropdown-item" href="#">Last</a></li>
-                              </ul>                            
-                        </div>                              
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Series 2">
-                            <button class="btn btn-primary" id="sum-series2">Sum</button>
-                        </div>                              
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Series 3">
-                            <button class="btn btn-primary" id="sum-series3">Sum</button>
-                        </div>                              
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Series 4">
-                            <button class="btn btn-primary" id="sum-series4">Sum</button>
-                        </div>                              
-                    </div> -->
 
                     <div id="AggregationNewC" class="h-100 tab-pane fade" role="tabpanel">
                         <div class="h-100 d-flex flex-row align-items-stretch justify-content-between">
-                        <div class="card border-light" style="flex: 4;">
-                            <div class="card-header bg-white border-0 text-center py-2">
-                                <h5 class="m-0">Level</h5>
+                            <div class="card border-light" style="flex: 4;">
+                                <div class="card-header bg-white border-0 text-center py-2">
+                                    <h5 class="m-0">Level</h5>
+                                </div>
+                                <div class="flex-grow-1 parent-div scc-box">
+                                    <ul id="selectedLevel" dest="availableLevel" class="tree parent-div w-100 h-100 mb-0">
+                                    </ul>
+                                </div>
                             </div>
-                            <div class="flex-grow-1 scc-box">
-                                <ul id="availableLevel" dest="selectedLevel" class="tree parent-div">
-                                </ul>
+                            
+                            <div class="align-self-center h-25 d-flex flex-column justify-content-around" style="flex: 1;">
+                                <a id="addAllAggregation" class="text-primary text-center">
+                                    <span class="fa fa-angle-double-left"></span>
+                                </a>
+                                <a id="removeAllAggregation" class="text-primary text-center">
+                                    <span class="fa fa-angle-double-right"></span>
+                                </a>
                             </div>
-                        </div>
-                        <div class="align-self-center h-25 d-flex flex-column justify-content-around" style="flex: 1;">
-                            <a id="addAllAggregation" class="text-primary text-center">
-                                <span class="fa fa-angle-double-right"></span>
-                            </a>
-                            <a id="removeAllAggregation" class="text-primary text-center">
-                                <span class="fa fa-angle-double-left"></span>
-                            </a>
-                        </div>
-                        <div class="card border-light" style="flex: 4;">
-                            <div class="card-header bg-white border-0 text-center py-2">
-                                <h5 class="m-0">Series</h5>
+                            <div class="card border-light" style="flex: 4;">
+                                <div class="card-header bg-white border-0 text-center py-2">
+                                    <h5 class="m-0">Series</h5>
+                                </div>
+                                <div class="flex-grow-1 scc-box">
+                                    <ul id="availableLevel" dest="selectedLevel" class="tree parent-div w-100 h-100 mb-0">
+                                    </ul>
+                                </div>
                             </div>
-                            <div class="flex-grow-1 parent-div scc-box">
-                                <ul id="selectedLevel" dest="availableLevel" class="tree parent-div">
-                                </ul>
-                            </div>
-                        </div>
                         </div>
                     </div>
 
@@ -355,49 +375,54 @@
                                 </div>
                                 <div style="flex: 3;" class="borderFul-row ml-2 p-1">
                                 <ul id="layoutX" class="w-100 h-100 p-0 m-0">
-                                    <li><span class="fas fa-columns"></span>Series</li>
+                                    
                                 </ul>
+                                </div>
+                            </div>
+                            <div class="w-100 card border-light rounded-0 d-flex flex-row align-items-stretch">
+                                <div class="ps-2 pt-2" style="flex: 1;">
+                                  <div class="form-group">
+                                    <label class="lablel-fotmTitle">Display Type</label>
+                                  </div>
+                                </div>
+                                <div style="flex: 3;">
+                                  <div class="m-2">
+                                    <select id="graphTypeNew" class="form-control form-select moduleForm-feild w-100">
+                                      <option value="TabularData" selected="">Tabular Data</option>
+                                      <option value="CardDisplay">Card Display</option>
+                                      <option value="MapDisplay">Map Display</option>
+                                      <option value="LineChart">Line Chart</option>
+                                      <option value="SankeyChart">Sankey Diagram</option>
+                                      <option value="SunBurst">SunBurst Diagram</option>
+                                      <option value="BarChart">Bar Chart</option>
+                                      <option value="horizontalbar">Horizontal Bar Chart</option>
+                                      <option value="StackedBarChart">Stacked Bar Chart</option>
+                                      <option value="PieChart">Pie Chart</option>
+                                      <option value="donut">Donut Chart</option>
+                                      <option value="gauge">Gauge Chart</option>
+                                      <option value="AreaChart">Area chart</option>
+                                      <option value="StackedAreaChart">Stacked Area chart</option>
+                                      <option value="TreeMap">Tree Map</option>
+                                    </select>
+            
+                                  </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div id="AdvanceNewC" class="h-100 tab-pane fade" role="tabpanel">
+                    <div id="SeriesNewC" class="h-100 tab-pane fade" role="tabpanel">
                         <div class="h-100 w-100 d-flex flex-column align-items-stretch justify-content-between">                        
                             <div class="container chart-settings">
-                                <h6>Choose the chart type and axis for your data series:</h6>
                                 <div class="table-responsive">
-                                  <table class="table table-bordered align-middle">
-                                    <thead class="table-light">
-                                      <tr>
-                                        <th>Series Name</th>
-                                        <th>Chart Type</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      <tr class="series-row">
-                                        <td class="series-name"><span class="series-color blue"></span> End Inventory</td>
-                                        <td>
-                                            <select id="graphTypeNew" class="form-control form-select moduleForm-feild w-100">
-                                                <option value="LineChart" selected="">Line Chart</option>
-                                                <option value="BarChart">Bar Chart</option>
-                                                <option value="AreaChart">Area chart</option>
-                                                <option value="StackedBarChart">Stacked Bar Chart</option>
-                                          </select>
-                                        </td>
-                                      </tr>
-                                      <tr class="series-row">
-                                        <td class="series-name"><span class="series-color orange"></span> Inventory Max</td>
-                                        <td>
-                                            <select id="graphTypeNew" class="form-control form-select moduleForm-feild w-100">
-                                            <option value="LineChart" selected="">Line Chart</option>
-                                            <option value="BarChart">Bar Chart</option>
-                                            <option value="AreaChart">Area chart</option>
-                                            <option value="StackedBarChart">Stacked Bar Chart</option>
-                                          </select>
-                                        </td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
+                                    <table id="advTable" class="table table-bordered align-middle">
+                                        <thead class="table-light">
+                                          <tr>
+                                            <th>SeriesName</th>
+                                            <th>AggregationFunction</th>
+                                            <th>Format</th>
+                                          </tr>
+                                        </thead>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -409,8 +434,49 @@
 
             <div class="modal-footer">
                 <button id="closingFile1" data-bs-dismiss="modal" class="btn btn-tertiary">Cancel</button>
-                <button id="save_wk" type="button" class="ml-auto btn btn-primary">Ok</button>
+                <button id="save_qr" type="button" class="ml-auto btn btn-primary">Ok</button>
             </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="select-querySheet" tabindex="-1" aria-labelledby="modal-select-column"
+        style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="h5 modal-title">Select Queries</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="model-body">
+                    <div class="card border-right m-3">
+                      <div class="card-header bg-white border-0 text-center py-2 px-1 d-flex">
+                        <h5 class="m-0 flex-grow-1">Available Queries<i type="button" id="search_qr" class="fa fa-search" aria-hidden="true" 
+                        style="padding-left: 15px;font-size: 1rem;"></i>
+                        </h5>
+                        <!-- <i type="button" id="favourite_wk" style="font-size: 1rem" 
+                        class="m-0 pt-1 fa-star far"></i> -->
+                      </div>
+                            <div class="flex-grow-1 scc-box px-2" style="height: 400px;">
+                            <div class="pb-2">
+                            <input id="searchQuery" class="form-control" type="search" 
+                                placeholder="Search Available Queries..." style="display:none;">
+                            </div>
+                                <table class="table table-sm">
+                                    <tbody id="selectQueries-table"></tbody>
+                                </table>
+                            </div>
+
+                        <div style="border-top: thin solid #dce6f3; height: 42px;">
+                            <p class="m-0 py-2 pl-2" id="queryTable"></p>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-tertiary" type="button" data-bs-dismiss="modal">Cancel</button>
+                  <button id="selectQuery-ok" class="btn btn-primary ml-auto" type="button">Ok</button>
+                </div>
             </div>
         </div>
     </div>
@@ -419,6 +485,7 @@
     <script type="module" src="./assets/js/pixel.js"></script>  
     <script src="./coi-serviceworker.js"></script>
     <script src="./page_assets/queries/js/script.js" type="module"></script>
+    <script src="./page_assets/queries/js/page_js.js" type="module"></script>
 
 </body>
 </html>
