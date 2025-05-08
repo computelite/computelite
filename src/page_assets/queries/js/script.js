@@ -1,7 +1,7 @@
 import * as bootstrap from 'bootstrap';
 import Sortable from 'sortablejs';
 import { executeQuery, confirmBox, get_cl_element } from '../../../assets/js/scc';
-// import * as dfd from "danfojs";
+import { populate_worksheet_def } from './page_js';
 
 const params = new URLSearchParams(window.location.search);
 const modelName = params.get('modelName');
@@ -16,7 +16,6 @@ let SelectedSeries
 let SelectedLayouts
 let seriesProperties
 let layoutInitialized = false;
-let wk_obj = new Object
 
 document.addEventListener('DOMContentLoaded', async function () {
     // Set button handlers
@@ -165,10 +164,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-});
-
-document.getElementById('modal-select-column').addEventListener('hide.bs.modal', function (e) {
-    populate_worksheet_def()
 });
 
 function get_all_agg(res){
@@ -666,6 +661,7 @@ document.getElementById('save_qr').onclick = async function () {
     const bs_modal = bootstrap.Modal.getInstance(document.getElementById('modal-select-column'));
     bs_modal.hide()
     confirmBox('Success', 'Query saved successfully!');
+    await populate_worksheet_def(new_query)
 }
 
 document.getElementById('deleteQueryBtn').onclick = async function () {
@@ -781,6 +777,20 @@ document.getElementById('editQueryBtn').onclick = async function (e) {
 
 document.getElementById('selectQuery-ok').onclick = async function () {
     sessionStorage.qr_name = document.getElementById('selectQueries-table').querySelector('tr.selectedValue').innerText
+    let query = `SELECT TableName, Layout, Series, SeriesProperties FROM S_Queries WHERE Name = ?`
+    let result = await executeQuery("fetchData", modelName, query,[sessionStorage.qr_name]);
+    let res_query = {}
+    if(result.length > 0){
+        const layoutJSON = JSON.parse(result[0][1])
+        for(let res of result){
+            res_query["tableName"] = res[0]
+            res_query["layoutX"] = layoutJSON.layoutX || []
+            res_query["layoutY"] = layoutJSON.layoutY || []
+            res_query["AvailableLevels"] = JSON.parse(res[2])
+            res_query["SeriesProperties"] = JSON.parse(res[3])
+        }
+    }
+    console.log(res_query);
     
     const bs_modal = bootstrap.Modal.getInstance(document.getElementById('select-querySheet'))
     bs_modal.hide()
@@ -872,150 +882,19 @@ function getFormattedDateTime() {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-function populate_worksheet_def() {
-
-    if (Object.keys(wk_obj).length == 0) {
-        return
-    }
+// document.getElementById("ZLayoutContentDiv").querySelector('select').onchange = function(){
     
-    document.getElementById("wkName").value = wk_obj["Name"]
-    document.getElementById("openedWorksheetTitle").innerText = `Worksheet Designer: ${wk_obj["Name"]}`
-    document.getElementById("wkDisplay").innerText = wk_obj["Name"]
-    document.getElementById("wkName").disabled = true;
-    document.getElementById("wkDescription").value = wk_obj["Description"]
-    if (wk_obj["ShowSummary"] == 1) {
-        document.getElementById("showSummary").checked = true
-    } else {
-        document.getElementById("showSummary").checked = false
-    }
+//     for (let new_el of document.getElementById("ZLayoutContentDiv").childNodes){
+//         new_el.removeAttribute("selected_mem")
+//         let span = new_el.querySelector("button.dropdown-toggle-split")
+//         if(span && span.childNodes[1]){
+//             span.removeChild(span.childNodes[0])
+//             span.firstChild.style = ""
+//         }
 
-    if (wk_obj["hide_nullRows"] == 1) {
-        document.getElementById("hideNullRows").checked = true
-    } else {
-        document.getElementById("hideNullRows").checked = false
-    }
+//     }
 
-    document.getElementById("range_type").value = wk_obj["date_range_type"]
-    if (wk_obj["date_range_type"] == "absolute"){
-        document.getElementById("fromDate").value = wk_obj["from_date"]
-        document.getElementById("toDate").value = wk_obj["to_date"]
-        new Datepicker(document.getElementById("fromDate"), {format: 'yyyy-mm-dd',autohide: true,beforeShowDay:DisableDates})
-        new Datepicker(document.getElementById("toDate"), {format: 'yyyy-mm-dd',autohide: true,beforeShowDay:DisableDates})
-    } else {
-        document.getElementById("fromPeriod").value = wk_obj["from_date"]
-        document.getElementById("toPeriod").value = wk_obj["to_date"]
-        document.getElementById("date_aggregation").value = wk_obj["time_bucket"]
-    }
-    var event = new Event('change');
-    document.getElementById("range_type").dispatchEvent(event);
-
-    remove_series("all")
-    for (let series_id of wk_obj["SelectedSeries"]) {
-        document.getElementById("available-series").
-            querySelector(`li[series-id="${series_id}"]`).classList.add("selectedValue")
-    }
-    select_series("one")
-
-    let selected_el = document.getElementById("selected-series")
-    for (let series_id of wk_obj["SelectedSeries"]) {
-        let el = selected_el.querySelector(`li[series-id="${series_id}"]`)
-        selected_el.appendChild(el)
-    }
-
-    document.getElementById("removeAllAggregation").click()
-    for (let el of document.getElementById("availableLevel")
-        .querySelectorAll("input.inputcheckbox")) {
-        if (wk_obj["SelectedLevels"].indexOf(el.parentNode.innerText) > -1) {
-            select_aggregation_level(el.parentNode)
-        }
-    }
-
-    populate_filters()
-
-    document.getElementById("exception-row").innerHTML = ""
-    for (let rw of wk_obj["ExceptionClause"]) {
-        document.getElementById("addException").click()
-        let el = document.getElementById("exception-row").lastChild
-        el.querySelector(".exception-series select").value = rw[0]
-        el.querySelector(".sign-lov select").value = rw[1]
-        el.querySelector(".exception-value input").value = rw[2]
-        el.querySelector(".exception-condition select").value = rw[3]
-    }
-
-    let all_layout = document.createElement("div")
-    let layout_text = []
-    for (let cn of document.getElementById("LayoutNewC").querySelectorAll("ul li")) {
-        layout_text.push(cn.innerText)
-        all_layout.appendChild(cn)
-    }
-
-    for (let lx of wk_obj["LayoutX"]) {
-        let layout_node = all_layout.childNodes[layout_text.indexOf(lx)].cloneNode(true)
-        document.getElementById("layoutX").appendChild(layout_node)
-    }
-
-    for (let lx of wk_obj["LayoutY"]) {
-        let layout_node = all_layout.childNodes[layout_text.indexOf(lx)].cloneNode(true)
-        document.getElementById("layoutY").appendChild(layout_node)
-    }
-
-    for (let lx of wk_obj["LayoutZ"]) {
-        let layout_node = all_layout.childNodes[layout_text.indexOf(lx)].cloneNode(true)
-        document.getElementById("layoutZ").appendChild(layout_node)
-    }
+//     incremental_load(sessionStorage.wk_name, {})
+// }
 
 
-    document.getElementById("graphTypeNew").value = wk_obj["GraphType"]
-
-    document.getElementById("dp_removeall").click()
-    for (let tr of document.getElementById("available-dependent").querySelectorAll("tr")) {
-        if (tr.innerText == wk_obj["Name"]) {
-            tr.style.display = "none"
-        } else {
-            tr.style.display = ""
-        }
-
-        if (wk_obj["DependentWorksheets"].indexOf(tr.innerText) > -1) {
-            document.getElementById("selected-dependent").appendChild(tr)
-        }
-        if (tr.classList.contains("selectedValue")) {
-            tr.classList.remove("selectedValue")
-        }
-    }
-
-    document.getElementById("idp_removeall").click()
-    for (let tr of document.getElementById("available-independent").querySelectorAll("tr")) {
-        if (tr.innerText == wk_obj["Name"]) {
-            tr.style.display = "none"
-        } else {
-            tr.style.display = ""
-        }
-
-        if (wk_obj["IndependentWorksheets"].indexOf(tr.innerText) > -1) {
-            document.getElementById("selected-independent").appendChild(tr)
-        }
-        if (tr.classList.contains("selectedValue")) {
-            tr.classList.remove("selectedValue")
-        }
-    }
-    // document.getElementById("save_as_wk").style.display = ""
-    if (wk_obj["Overwrite"] == 0) {
-        // document.getElementById("save_wk").style.display = "none"
-        document.getElementById("deleteWorksheetBtn").style.display = "none"
-    } else {
-        // document.getElementById("save_wk").style.display = ""
-        document.getElementById("deleteWorksheetBtn").style.display = ""
-    }
-
-    let fav_el = document.getElementById("addFavourite").querySelector("span.sidebar-text-contracted")
-    let fav_txt = document.getElementById("addFavourite").querySelector("span.sidebar-text")
-    if(wk_obj["Favourites"] == 1){
-        fav_el.classList.remove("fas")
-        fav_el.classList.add("far")
-        fav_txt.innerText = "Remove From Fav."
-    }else{
-        fav_el.classList.remove("far")
-        fav_el.classList.add("fas")
-        fav_txt.innerText = "Add To Favourites"
-    }
-}

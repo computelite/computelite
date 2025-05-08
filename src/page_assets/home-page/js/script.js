@@ -1703,15 +1703,15 @@ document.getElementById("notebookRBtn").onclick = function(){
     window.open(`./RNotebook.html?modelName=${modelName}`);
 }
 
-document.getElementById("querySheet").onclick = function(){
-    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
-    if (!selected_model){
-        confirmBox("Alert!","Please select a model")
-        return
-    }
-    const modelName = selected_model.innerText
-    window.open(`./Queries.html?modelName=${modelName}`);
-}
+// document.getElementById("querySheet").onclick = function(){
+//     const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+//     if (!selected_model){
+//         confirmBox("Alert!","Please select a model")
+//         return
+//     }
+//     const modelName = selected_model.innerText
+//     window.open(`./Queries.html?modelName=${modelName}`);
+// }
 
 // -------------------------------------------------------------------------------------------------
 

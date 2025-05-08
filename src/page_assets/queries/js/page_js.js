@@ -7,8 +7,8 @@ import {wk_obj} from './scl_wk_obj'
 let x_columns = []
 let y_columns = []
 let z_columns = []
-const table_name = 'temp_v'
-const series_list = ['SalesQuantity', 'SalesValue']
+let table_name = ''
+let series_list = ['SalesQuantity', 'SalesValue']
 const series_property = {'SalesQuantity': {'Agg': 'sum', 'Format': '0,0.00'}, 
         'SalesValue': {'Agg': 'sum', 'Format': '$0,0.00'}}
 const worksheet_name =  'another_wk'
@@ -143,20 +143,36 @@ const create_scl_pivot = async (table_name, x_columns, y_columns, series_list, s
 }
 
 const getLayoutFromTable = async () => {
-    const query = `SELECT Layout FROM S_Queries WHERE Name = ?`
+    const query = `SELECT Layout, TableName FROM S_Queries WHERE Name = ?`
     const result = await executeQuery('fetchData', modelName, query,[sessionStorage.qr_name])
     if (result.length > 0) {
         const layoutJSON = JSON.parse(result[0][0])
         x_columns = layoutJSON.layoutX || []
         y_columns = layoutJSON.layoutY || []
         z_columns = layoutJSON.layoutZ || []
+        table_name = result[0][1]
     }
+}
+
+async function check_qr_list(){
+    const sel_query = `SELECT Name FROM S_Queries LIMIT 1`
+    const res = await executeQuery('fetchData', modelName, sel_query)
+
+    if(res.length > 0){
+        sessionStorage.qr_name = res[0]
+    }
+    
 }
 
 window.onload = async function () {
     const result = await executeQuery('init')
     if (!result || result.msg != 'Success') {
         confirmBox('Alert!', 'Some error occured while initializing sqlite.')
+        return
+    }
+    await check_qr_list()
+    if(!sessionStorage.qr_name){
+        confirmBox('Alert!',"First Create new Qr Sheet")
         return
     }
     let tb_container = document.getElementById('table_container')
@@ -176,7 +192,22 @@ window.onload = async function () {
     tb_container.innerHTML = ""
     tb_container.appendChild(tbl)
     
+
+    // document.getElementById("ZLayoutContentDiv").querySelector(`div[level_name="VENDORNAME"]`).onchange = function(){
+    //     for (let new_el of document.getElementById("ZLayoutContentDiv").childNodes){
+    //         new_el.removeAttribute("selected_mem")
+    //         let span = new_el.querySelector("button.dropdown-toggle-split")
+    //         if(span && span.childNodes[1]){
+    //             span.removeChild(span.childNodes[0])
+    //             span.firstChild.style = ""
+    //         }
+        
+    //     }
+    //     incremental_load(sessionStorage.qr_name, {})
+    // }
+    
 }
+
 
 const loader_div = function () {
     let div = get_cl_element("div", "h-100 w-100 d-flex justify-content-center align-items-center")
@@ -186,4 +217,32 @@ const loader_div = function () {
                 </button>`
     div.innerHTML = img
     return div
+}
+
+function incremental_load(qr_name, filter_obj = {}) {
+    if (qr_name == sessionStorage.qr_name) {
+        for (let cn of document.getElementById("ZLayoutContentDiv").querySelectorAll("select")) {
+            filter_obj[cn.parentNode.getAttribute("level_name")] = [cn.value]
+        }
+    }
+    console.log(filter_obj);
+}
+
+export async function populate_worksheet_def(queryDetails){
+    let tb_container = document.getElementById('table_container')
+    tb_container.appendChild(loader_div())
+
+    const table_name = queryDetails["tableName"]
+    const x_columns = queryDetails["layoutX"]
+    const y_columns = queryDetails["layoutY"]
+    const series_list = queryDetails["AvailableLevels"]
+    const series_property = queryDetails["SeriesProperties"]
+
+    const [x_data, y_data, pivot_data] = await create_scl_pivot(table_name, x_columns, y_columns, 
+              series_list, series_property)
+        const wk_obj_instance = new wk_obj(x_columns, x_data, y_columns, y_data, z_columns, [], pivot_data,
+            series_property, table_name, worksheet_name)
+        const tbl = wk_obj_instance.populateTable()
+        tb_container.innerHTML = ""
+        tb_container.appendChild(tbl)
 }
