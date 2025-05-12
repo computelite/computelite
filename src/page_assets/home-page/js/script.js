@@ -904,6 +904,18 @@ function downloadExcelFile(e) {
         modal_body.appendChild(form_div1)
     }
 
+    
+    const empty_input = get_cl_element("input", "form-check-input form-check-sm round-check","emptyCheck");
+    empty_input.type = "checkbox";
+    empty_input.checked = true;
+
+    const empty_label = get_cl_element("label", "form-check-label small text-muted", null ,document.createTextNode("Include Empty Tables"));
+    empty_label.setAttribute("for","emptyCheck")
+    const empty_form_div = get_cl_element("div", "form-check mt-3", null);
+    empty_form_div.appendChild(empty_input);
+    empty_form_div.appendChild(empty_label);
+    modal_body.appendChild(empty_form_div);
+
 
     add_btn.onclick = async function (e) {
         let table_groups = []
@@ -917,8 +929,9 @@ function downloadExcelFile(e) {
 
         loader.querySelector('div').innerText = 'Downloading'
         loader.style.display = ""
+        const empty_check = document.getElementById('emptyCheck').checked
         
-        const x = await downloadExcel(model_name,[], table_groups)
+        const x = await downloadExcel(model_name,[], table_groups, empty_check)
 
         loader.querySelector('div').innerText = 'Running'        
         loader.style.display = "none"
@@ -1703,15 +1716,15 @@ document.getElementById("notebookRBtn").onclick = function(){
     window.open(`./RNotebook.html?modelName=${modelName}`);
 }
 
-// document.getElementById("querySheet").onclick = function(){
-//     const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
-//     if (!selected_model){
-//         confirmBox("Alert!","Please select a model")
-//         return
-//     }
-//     const modelName = selected_model.innerText
-//     window.open(`./Queries.html?modelName=${modelName}`);
-// }
+document.getElementById("querySheet").onclick = function(){
+    const selected_model = document.getElementById("availableModal").querySelector("li.selectedValue")
+    if (!selected_model){
+        confirmBox("Alert!","Please select a model")
+        return
+    }
+    const modelName = selected_model.innerText
+    window.open(`./Queries.html?modelName=${modelName}`);
+}
 
 // -------------------------------------------------------------------------------------------------
 

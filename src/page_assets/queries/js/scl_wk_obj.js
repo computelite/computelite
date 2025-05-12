@@ -40,9 +40,14 @@ wk_obj.prototype.populateTable = function() {
         const [this_x, this_y] = [i - header_rows + 1, j - header_cols + 1];
         var tcell = document.createElement("th");
         if (j < header_cols && i < header_rows) {
-            tcell.textContent = this.y_columns[j];
+            if (i === 0) {
+                tcell.textContent = this.y_columns[j];
+            } else {
+                tcell.textContent = ""; 
+            }
             tcell.classList.add(`STX`, `R${i}C${j}`);
-        } else if (j < header_cols) {
+        }
+         else if (j < header_cols) {
             tcell.textContent = this.y_data[i - header_rows][j];
             tcell.classList.add(`STX`, `C${j}`);
         } else if (i < header_rows) {

@@ -592,25 +592,25 @@ export async function freezeColNum(modelName,tableName,colNum){
 // Generates and downloads an Excel file with data from specified tables, applying formatting based on
 //  table parameters.
 
-export async function downloadExcel(modelName, tableNames = [], tableGroups = [""]) {
+export async function downloadExcel(modelName, tableNames = [], tableGroups = [""], empty_check = false) {
     const maxRowAllow = 1048575;
 
+    // Get tables from the given groups
     const placeholders = tableGroups.map(() => '?').join(',');
-    const query = `SELECT tablename as tablename, LOWER(table_status) as table_status 
-                    FROM S_TableGroup WHERE groupname IN (${placeholders})`;
-    
-    const rows = await executeQuery('fetchData',modelName,query,tableGroups)
+    const query = `SELECT tablename, LOWER(table_status) as table_status 
+                   FROM S_TableGroup WHERE groupname IN (${placeholders})`;
 
-    // Add valid tables to tableNames
-    await Promise.all(
-        rows.map(async row => {
-            if (await checkTableExists(modelName,row[0]) && row[1] === "active") {
-                tableNames.push(row[0]);
-            }
-        })
-    )
+    const rows = await executeQuery('fetchData', modelName, query, tableGroups);
 
-    // Remove duplicates from tableNames
+    // Add valid tables to tableNames (even if empty)
+    for (const row of rows) {
+        const [tableName, status] = row;
+        if (status === 'active' && await checkTableExists(modelName, tableName)) {
+            tableNames.push(tableName);
+        }
+    }
+
+    // Remove duplicates
     tableNames = [...new Set(tableNames)];
 
     const workbook = new ExcelJS.Workbook();
@@ -632,108 +632,92 @@ export async function downloadExcel(modelName, tableNames = [], tableGroups = ["
     };
 
     for (const tableName of tableNames) {
-        const query = `SELECT * FROM [${tableName}] LIMIT ${maxRowAllow}`;
-        const rows = await executeQuery('fetchData',modelName,query);
-        
-        const numFormatQuery = `SELECT columnname, parametertype, parametervalue FROM S_TableParameters WHERE tablename = '${tableName}' AND LOWER(parametertype) IN ('currency', 'decimals', 'comma', 'lov')`;
-        const formatSettings = await executeQuery('fetchData',modelName,numFormatQuery);
+        const dataQuery = `SELECT * FROM [${tableName}] LIMIT ${maxRowAllow}`;
+        const rows = await executeQuery('fetchData', modelName, dataQuery);
+
+        if (!empty_check && rows.length === 0) continue;
+
+        const formatQuery = `SELECT columnname, parametertype, parametervalue 
+                             FROM S_TableParameters 
+                             WHERE tablename = '${tableName}' 
+                             AND LOWER(parametertype) IN ('currency', 'decimals', 'comma', 'lov')`;
+        const formatSettings = await executeQuery('fetchData', modelName, formatQuery);
 
         const newColNames = new Set();
-        const colFormat = {};
-        const decimals = {};
-        const comma = [];
-        const percent = [];
-        const date_numeric_cols = []
-        const datetime_numeric_cols = []
+        const colFormat = {}, decimals = {}, comma = [], percent = [];
+        const dateCols = [], datetimeCols = [];
 
-        formatSettings.forEach(setting => {
-            if (setting[1] === 'Currency' && setting[2] !== '0') {
-                colFormat[setting[0]] = setting[2];
-                newColNames.add(setting[0]);
-
-            } else if (setting[1] === 'Decimals') {
-                decimals[setting[0]] = setting[2];
-                newColNames.add(setting[0]);
-
-            } else if (setting[1] === 'Comma') {
-                if (setting[2] === '2') percent.push(setting[0]);
-                comma.push(setting[0]);
-                newColNames.add(setting[0]);
-            } else if (setting[1] === 'LOV' && setting[2].toLowerCase() === 'date' ){
-                newColNames.add(setting[0]);
-                date_numeric_cols.push(setting[0])
-
-            }else if (setting[1] === 'LOV' && setting[2].toLowerCase() === 'datetime' ){
-                newColNames.add(setting[0]);
-                datetime_numeric_cols.push(setting[0])
-
+        formatSettings.forEach(([col, type, val]) => {
+            const lowerType = type.toLowerCase();
+            if (lowerType === 'currency' && val !== '0') {
+                colFormat[col] = val;
+                newColNames.add(col);
+            } else if (lowerType === 'decimals') {
+                decimals[col] = val;
+                newColNames.add(col);
+            } else if (lowerType === 'comma') {
+                if (val === '2') percent.push(col);
+                comma.push(col);
+                newColNames.add(col);
+            } else if (lowerType === 'lov') {
+                if (val.toLowerCase() === 'date') dateCols.push(col);
+                else if (val.toLowerCase() === 'datetime') datetimeCols.push(col);
+                newColNames.add(col);
             }
         });
 
-        if (tableNames.length === 1 || rows.length) {
-            const worksheet = workbook.addWorksheet(tableName);
-            let worksheet_cols = []
-            const colNames = {};
-            const colIndex = [];
-            const numFormatsList = [];
+        const worksheet = workbook.addWorksheet(tableName);
+        const table_info = await tableInfo(modelName, tableName);
 
-            // Set column headers and styles
-            let table_info = await tableInfo(modelName,tableName)
-            table_info.forEach((info, j) => {
-                const width = Math.ceil(info[0].length * 1.3);
-                worksheet_cols.push({ header: info[0], key: info[0], width });
-                worksheet.getRow(1).getCell(j + 1).style = boldFont;
-                if (newColNames.has(info[0])) colNames[info[0]] = j;
-            });
-            
-            worksheet.columns = worksheet_cols
+        let worksheetCols = [];
+        const colNames = {};
+        const colIndex = [], numFormatsList = [];
 
-            // Configure number formats
-            Object.keys(colNames).forEach(colName => {
-                let format_n = "";
-                if (comma.includes(colName)) {
-                    if (percent.includes(colName)) {
-                        format_n += "%";
-                    } else if (colFormat[colName]) {
-                        format_n += numFormats[colFormat[colName]];
-                    }
+        // Set headers and styles
+        table_info.forEach(([colName], j) => {
+            const width = Math.ceil(colName.length * 1.3);
+            worksheetCols.push({ header: colName, key: colName, width });
+            worksheet.getRow(1).getCell(j + 1).style = boldFont;
+            if (newColNames.has(colName)) colNames[colName] = j;
+        });
 
-                    format_n = format_n ? format_n.slice(0, -1) + "#,##" : "#,##";
-                }
+        worksheet.columns = worksheetCols;
 
-                if (decimals[colName]) {
-                    const zeroes = "0".repeat(parseInt(decimals[colName], 10));
-                    if (format_n.endsWith('%')) {
-                        format_n = format_n.slice(0, -1) + `0.${zeroes}%`;
-                    } else {
-                        format_n += `0.${zeroes}`;
-                    }
-                }
+        // Set number/date formats
+        Object.keys(colNames).forEach(colName => {
+            let fmt = "";
+            if (comma.includes(colName)) {
+                if (percent.includes(colName)) fmt += "%";
+                else if (colFormat[colName]) fmt += numFormats[colFormat[colName]];
+                fmt = fmt ? fmt.slice(0, -1) + "#,##" : "#,##";
+            }
+            if (decimals[colName]) {
+                const zeros = "0".repeat(parseInt(decimals[colName], 10));
+                fmt += `0.${zeros}`;
+                if (percent.includes(colName)) fmt += "%";
+            }
+            if (dateCols.includes(colName)) fmt = 'yyyy-mm-dd';
+            else if (datetimeCols.includes(colName)) fmt = 'yyyy-mm-dd HH:mm:ss';
 
-                if (date_numeric_cols.includes(colName)){
-                    format_n = 'yyyy-mm-dd'
-                }else if (datetime_numeric_cols.includes(colName)){
-                    format_n = 'yyyy-mm-dd HH:mm:ss'
-                }
+            numFormatsList.push(fmt);
+            colIndex.push(colNames[colName]);
+        });
 
-                numFormatsList.push(format_n);
-                colIndex.push(colNames[colName]);
-            });
-            
-            // Populate rows with data
+        // Populate data rows
+        if (rows.length > 0) {
             rows.forEach((row, i) => {
                 Object.values(row).forEach((value, j) => {
-                    if (colIndex.length > 0 && colIndex.includes(j)) {
-                        worksheet.getRow(i + 2).getCell(j + 1).value = value;
-                        worksheet.getRow(i + 2).getCell(j + 1).numFmt = numFormatsList[colIndex.indexOf(j)];
-                    } else {
-                        worksheet.getRow(i + 2).getCell(j + 1).value = value;
+                    const cell = worksheet.getRow(i + 2).getCell(j + 1);
+                    cell.value = value;
+                    if (colIndex.includes(j)) {
+                        cell.numFmt = numFormatsList[colIndex.indexOf(j)];
                     }
                 });
             });
         }
     }
 
+    // Finalize download
     const fileName = tableNames.length > 1 ? `${modelName}.xlsx` : `${tableNames[0]}.xlsx`;
     // Write the workbook to a buffer and create a Blob
     const buffer = await workbook.xlsx.writeBuffer();
@@ -749,15 +733,13 @@ export async function downloadExcel(modelName, tableNames = [], tableGroups = ["
     // For other browsers: 
     // Create a link pointing to the ObjectURL containing the blob.
     const data = window.URL.createObjectURL(newBlob);
-    var link = document.createElement('a');
+    const link = document.createElement('a');
     link.href = data;
     link.download = fileName;
     link.click();
-    setTimeout(function () {
-        // For Firefox it is necessary to delay revoking the ObjectURL
-        window.URL.revokeObjectURL(data);
-    }, 1000);
+    setTimeout(() => window.URL.revokeObjectURL(data), 1000);
 }
+
 
 //  --------------------------------------------------------------------------------------------------
 

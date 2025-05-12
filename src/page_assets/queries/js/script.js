@@ -1,172 +1,305 @@
 import * as bootstrap from 'bootstrap';
 import Sortable from 'sortablejs';
 import { executeQuery, confirmBox, get_cl_element } from '../../../assets/js/scc';
-import { populate_worksheet_def } from './page_js';
+import { populate_querysheet_def, get_query_data } from './page_js';
 
 const params = new URLSearchParams(window.location.search);
 const modelName = params.get('modelName');
-let pragmaResult = {};
-let currTable = '';
+let qr_obj = new Object
 const layout_el = ["layoutX", "layoutY", "layoutZ"];
 var typingTimer;               
 var doneTypingInterval = 300; 
+let SelectedLevel = []
+let SelectedSeries = []
+let SelectedLayouts = {layoutX:  [], layoutY: [], layoutZ:[]}
+let SerProperties
 let inrText = ""
-let SelectedLevel
-let SelectedSeries
-let SelectedLayouts
-let seriesProperties
-let layoutInitialized = false;
 
-document.addEventListener('DOMContentLoaded', async function () {
-    // Set button handlers
-    document.getElementById("addAllAggregation").onclick = move_elements.bind(null, "availableLevel", "selectedLevel", "addAll");
-    document.getElementById("removeAllAggregation").onclick = move_elements.bind(null, "selectedLevel", "availableLevel", "removeAll");
-    document.getElementById("searchQuery").onkeyup = findtr
-
+window.onload = async function () {
     let result = await executeQuery('init');
     if (!result || result.msg !== 'Success') {
         confirmBox('Alert!', 'Some error occurred while initializing SQLite.');
         return;
+    }   
+
+    enable_sortable()
+    await get_all_tables()
+    
+    
+    document.getElementById("addAllAggregation").onclick = move_elements.bind(null, "availableLevel", "selectedLevel", "addAll");
+    document.getElementById("removeAllAggregation").onclick = move_elements.bind(null, "selectedLevel", "availableLevel", "removeAll");
+    document.getElementById("searchQuery").onkeyup = findtr
+    
+    document.getElementById('aggregation-new').addEventListener('shown.bs.tab', async function () {
+        // if(sessionStorage.qr_name !== qr_name){
+        //     SelectedSeries = []
+        //     SelectedLevel = []
+        // }
+        await set_all_agg()
+        // await set_series_data()
+    })
+    document.getElementById('series-new').addEventListener('shown.bs.tab', async function () {
+        await set_series_data()
+    })
+    document.getElementById('layout-new').addEventListener('shown.bs.tab', async function () {
+        
+        document.getElementById('layoutY').innerHTML = ""
+        for (let lx of SelectedLayouts['layoutY']) {
+            let series_el = get_cl_element("li", null, null, get_cl_element("span", "fas fa-columns"))
+            series_el.appendChild(document.createTextNode(lx))
+            series_el.value = lx
+            document.getElementById("layoutY").appendChild(series_el)
+        }
+    })
+
+    document.getElementById('editQueryBtn').onclick = async function (e) {
+        inrText = e.target.innerText.trim().toLowerCase();
+    
+        if (!sessionStorage.qr_name) {
+            confirmBox('Alert!', 'No Selected queries found.');
+            return;
+        }
+        await get_querySheet_def()
+        await set_querysheet_def()
+        const tabIdMap = {
+            "edit": "display-new"
+        };
+    
+        if (tabIdMap[inrText]) {
+            const tab = new bootstrap.Tab(document.getElementById(tabIdMap[inrText]));
+            tab.show();
+        }
+        const bs_modal = new bootstrap.Modal(document.getElementById('modal-select-column'));
+        bs_modal.show()
+    }
+
+    
+    if(sessionStorage.qr_name){
+        await get_querySheet_def()
+    }else{
+        confirmBox('Alert!', "First create a new Query Sheet.");
+        return;
+    }
+    await set_querysheet_def()
+    await populate_querysheet_def()
+
+    const zSelect = document.querySelector("#ZLayoutContentDiv select");
+    
+    if (zSelect) {
+        zSelect.addEventListener("change", function () {
+            const level_name = this.closest(".z_el").getAttribute("level_name");
+            get_query_data(level_name);
+        });
     }
     
-    await get_all_tables();
-    enable_sortable();
+}
+
+async function get_all_tables() {
     
-    const links = document.querySelectorAll('#queryUl li a.nav-link');
-    links.forEach(link => {
-        link.addEventListener('click', async function (e) {
-            const fileName = link.firstElementChild.innerText;
-            if (fileName !== 'Display') {
-                e.preventDefault();
-                const query_name = document.getElementById('queryNm').value;
-                const query_val = document.getElementById('queryInp').value;
+    let query = `SELECT TableName FROM S_TableGroup WHERE Table_Status = 'Active'`;
+    let res = await executeQuery("fetchData", modelName, query);
+    const queryOpt = document.getElementById('tableNm');
 
-                if (query_name === '') {
-                    confirmBox('Alert!', 'Please enter a name for the query.');
-                    return;
-                }
+    for (let tbNm of res) {
+        const li_el = get_cl_element('option', null, null, document.createTextNode(tbNm));
+        li_el.setAttribute('value', tbNm);
+        queryOpt.appendChild(li_el);
+    }
+}
 
-                if (query_val === '') {
-                    confirmBox('Alert!', 'Please select a table name.');
-                    return;
-                }
-
-                if (query_val !== '') {
-                    if (Object.keys(pragmaResult).length <= 0 || currTable !== query_val) {
-                        currTable = query_val;
-                        const col_name_query = `PRAGMA table_info(${query_val});`;
-                        try {
-                            pragmaResult = await executeQuery("fetchData", modelName, col_name_query);
-
-                            const {numericColumns, stringColumns} = get_all_agg(pragmaResult)
-
-                            get_column_type(numericColumns, stringColumns);
-                        } catch (err) {
-                            console.error('Error executing query:', err);
-                            confirmBox('Error', err);
-                        }
-                    }
-                }
-            }
-        });
-    });
-
-    // Modal select event
-    document.getElementById('modal-select-column').addEventListener('show.bs.modal', function (e) {
-        const button = e.relatedTarget;
-        
-        if (button) {
-            let inner_text = button.classList.contains("navIocn") ?
-                button.getAttribute("title").trim().toLowerCase() :
-                button.innerText.trim().toLowerCase();
-            
-            const query_name = document.getElementById('queryNm').value;
-            const query_val = document.getElementById('queryInp').value;
-
-            if (inner_text !== "display" && (inner_text === "aggregation" || inner_text === "layout" || inner_text === "series")) {
-                if (query_name === '' && query_val !== '') {
-                    confirmBox('Alert!', 'Please enter a name for the query.');
-                    return;
-                }
-            }
-            
-            const tabIdMap = {
-                "display": "display-new",
-                "series": "series-new",
-                "aggregation": "aggregation-new",
-                "layout": "layout-new",
-                "new": "display-new",
-                "save as": "display-new"
-            };
-
-            if (tabIdMap[inner_text]) {
-                const tab = new bootstrap.Tab(document.getElementById(tabIdMap[inner_text]));
-                tab.show();
-
-                if (inner_text === "new") reset_new_wk_def();
-                if (inner_text === "save as") {
-                    document.getElementById("queryNm").value = "";
-                    document.getElementById("queryNm").disabled = false;
-                    document.getElementById("queryInp").value = "";
-                }
-            }
-            
-        }
-    });
-
-    document.getElementById('layout-new').addEventListener('shown.bs.tab', function () {
-    
-        document.getElementById("layoutY").innerHTML = "";
-    
-        const container = document.getElementById("selectedLevel");
-        for (let el of container.children) {
-            const checkbox = el.querySelector("input[type='checkbox']");
-            if (checkbox && checkbox.checked) {
-                set_layout_li('layoutY', el.cloneNode(true));
-            }
-        }
-        
-        if (layoutInitialized) return;
-        layoutInitialized = true;
-        if (SelectedLayouts) {
-            for (let layoutId of ["layoutX", "layoutZ"]) {
-                const items = SelectedLayouts[layoutId];
-                if (Array.isArray(items)) {
-                    for (let name of items) {
-                        set_layout_li(layoutId, get_tree_li_element(name, 'fas fa-file-alt'));
-                    }
-                }
-            }
-        }
-    });
-
-    document.getElementById('series-new').addEventListener('shown.bs.tab', function () {
-        const table = document.getElementById("advTable");
-        let tbody = table.querySelector("tbody");
-    
-        if (!tbody) {
-            tbody = get_cl_element("tbody");
-            table.appendChild(tbody);
+document.getElementById('modal-select-column').addEventListener('show.bs.modal', function (e) {
+    const button = e.relatedTarget // Button that triggered the modal
+    if (button) {
+        let inner_text
+        if (button.classList.contains("navIocn")) {
+            inner_text = button.getAttribute("title").trim().toLowerCase()
         } else {
-            tbody.innerHTML = "";  // Clear previous content
+            inner_text = button.innerText.trim().toLowerCase()
         }
+        if (inner_text == "display") {
+            const tab = new bootstrap.Tab(document.getElementById('display-new'));
+            tab.show()
+        } else if (inner_text == "series") {
+            const tab = new bootstrap.Tab(document.getElementById('series-new'));
+            tab.show()
+        } else if (inner_text == "aggregation") {
+            const tab = new bootstrap.Tab(document.getElementById('aggregation-new'));
+            tab.show()
+        } else if (inner_text == "layout") {
+            const tab = new bootstrap.Tab(document.getElementById('layout-new'));
+            tab.show()
+        } else if (inner_text == "new") {
+            const tab = new bootstrap.Tab(document.getElementById('display-new'));
+            tab.show()
+            reset_new_wk_def()
+        } else if (inner_text == "save as"){
+            const tab = new bootstrap.Tab(document.getElementById('display-new'));
+            tab.show()
+            document.getElementById("queryNm").value = "";
+            document.getElementById("queryNm").disabled = false;
+            document.getElementById("tableNm").value = "";
+        } 
+
+    }
+})
+
+function reset_new_wk_def() {
+    document.getElementById("queryNm").value = "";
+    document.getElementById("queryNm").disabled = false;
+    document.getElementById("tableNm").value = "";
+    document.getElementById("tableNm").disabled = false;
+    document.getElementById("showSummary").checked = true
+    document.getElementById("graphTypeNew").value = "TabularData"
+    document.getElementById("availableLevel").innerHTML = ""
+    document.getElementById("selectedLevel").innerHTML = ""
+    SelectedLevel = []
+    SelectedSeries = []
+    SelectedLayouts = {layoutX:  [], layoutY: [], layoutZ:[]}
+    for (let layout_name of layout_el) {
+        document.getElementById(layout_name).innerHTML = ""
+    }
+
+    let series_el = get_cl_element("li", null, null, get_cl_element("span", "fas fa-columns"))
+    series_el.appendChild(document.createTextNode("Series"))
+    series_el.value = "series"
+    document.getElementById("layoutX").appendChild(series_el)
+}
+
+async function get_querySheet_def() {
+    let col_names = ["Name", "TableName", "ShowSummary", "HideNullRows", "GraphType",
+                "SeriesProperties","Series", "Layout", "Levels"
+            ];
     
-        const container = document.getElementById("availableLevel");
-        for (let el of container.childNodes) {
-            if(el.childNodes[0].checked){
-                if (el.nodeType === Node.ELEMENT_NODE) {
-                    const seriesNm = el.innerText;
-                    const val = "0,0.00";
-                    get_advanced_table(seriesNm, val, tbody);
-                }
-            }
-            
+    let col_nm = ["SeriesProperties","Series", "Layout", "Levels"]
+
+    let selectedQueries = `SELECT ${col_names.join(', ')} FROM S_Queries WHERE Name = ?`;
+    let res = await executeQuery("fetchData", modelName, selectedQueries, [sessionStorage.qr_name]);
+    
+    if (res.length === 0) {
+        return;
+    }
+
+    col_names.forEach((key, index) => {
+            qr_obj[key] = res[0][index]
+    });
+    col_nm.forEach(key => {
+        try {
+            qr_obj[key] = JSON.parse(qr_obj[key]);
+        } catch (e) {
+            console.warn(`Failed to parse ${key}:`, qr_obj[key]);
         }
     });
+}
 
-});
+async function set_querysheet_def() {
+    
+    if (Object.keys(qr_obj).length == 0) {
+        return
+    }
+    document.getElementById("queryNm").value = qr_obj["Name"]
+    document.getElementById("queryNm").disabled = true;
+    document.getElementById("tableNm").value = qr_obj["TableName"]
 
-function get_all_agg(res){
+    if (qr_obj["ShowSummary"] == 1) {
+        document.getElementById("showSummary").checked = true
+    } else {
+        document.getElementById("showSummary").checked = false
+    }
+
+    if (qr_obj["hideNullRows"] == 1) {
+        document.getElementById("hideNullRows").checked = true
+    } else {
+        document.getElementById("hideNullRows").checked = false
+    }
+    
+    document.getElementById("layoutX").innerHTML = ""
+    document.getElementById("layoutY").innerHTML = ""
+    document.getElementById("layoutZ").innerHTML = ""
+    for (let lx of qr_obj["Layout"]["layoutX"]) {
+        let series_el = get_cl_element("li", null, null, get_cl_element("span", "fas fa-columns"))
+        series_el.appendChild(document.createTextNode(lx))
+        series_el.value = lx
+        document.getElementById("layoutX").appendChild(series_el)
+    }
+
+
+    for (let lx of qr_obj["Layout"]["layoutY"]) {
+        let series_el = get_cl_element("li", null, null, get_cl_element("span", "fas fa-columns"))
+        series_el.appendChild(document.createTextNode(lx))
+        series_el.value = lx
+        document.getElementById("layoutY").appendChild(series_el)
+    }
+
+    for (let lx of qr_obj["Layout"]["layoutZ"]) {
+        let series_el = get_cl_element("li", null, null, get_cl_element("span", "fas fa-columns"))
+        series_el.appendChild(document.createTextNode(lx))
+        series_el.value = lx
+        document.getElementById("layoutZ").appendChild(series_el)
+    }
+
+    document.getElementById("graphTypeNew").value = qr_obj["GraphType"]
+    SelectedSeries = qr_obj["Series"]
+    SelectedLevel = qr_obj["Levels"]
+    SerProperties = qr_obj["SeriesProperties"]
+    SelectedLayouts = qr_obj["Layout"]
+    await set_all_agg()
+    await set_series_data()
+
+}
+
+async function set_all_agg(){
+    
+    const query_name = document.getElementById('queryNm').value;
+    const table_name = document.getElementById('tableNm').value;
+    if (query_name === '') {
+        confirmBox('Alert!', 'Please enter a name for the query.');
+        return;
+    }
+
+    if (table_name === '') {
+        confirmBox('Alert!', 'Please select a table name.');
+        return;
+    }
+    
+    try {
+        const col_name_query = `PRAGMA table_info(${table_name});`;
+        const all_table = await executeQuery("fetchData", modelName, col_name_query);
+
+        const {numericColumns, stringColumns} = get_agg_value(all_table)
+
+        await get_column_type(numericColumns, stringColumns);
+    } catch (err) {
+        console.error('Error executing query:', err);
+        confirmBox('Error', err);
+    }
+}
+
+async function set_series_data(){
+    const table = document.getElementById("advTable");
+    let tbody = table.querySelector("tbody");
+
+    if (!tbody) {
+        tbody = get_cl_element("tbody");
+        table.appendChild(tbody);
+    } else {
+        tbody.innerHTML = "";
+    }
+
+    const container = document.getElementById("availableLevel");
+    
+    for (let el of container.childNodes) {
+        if(el.childNodes[0].checked){
+            if (el.nodeType === Node.ELEMENT_NODE) {
+                const seriesNm = el.innerText;
+                const val = "0,0.00";
+                get_advanced_table(seriesNm, val, tbody);
+            }
+        }
+        
+    }
+}
+
+function get_agg_value(res){
     const columnTypeInfo = res.map(row => {
         const [cid, name, type] = row;
         return { column: name, type: type.toUpperCase() };
@@ -185,29 +318,18 @@ function get_all_agg(res){
     return {numericColumns, stringColumns}
 }
 
-async function get_all_tables() {
-    let query = `SELECT TableName FROM S_TableGroup WHERE Table_Status = 'Active'`;
-    let res = await executeQuery("fetchData", modelName, query);
-    const queryOpt = document.getElementById('queryInp');
-
-    for (let tbNm of res) {
-        const li_el = get_cl_element('option', null, null, document.createTextNode(tbNm));
-        li_el.setAttribute('value', tbNm);
-        queryOpt.appendChild(li_el);
-    }
-}
-
-function get_column_type(numeric, string) {
+async function get_column_type(numeric, string) {
+    
     const num_ul = document.getElementById('availableLevel');
     const str_ul = document.getElementById('selectedLevel');
     num_ul.innerHTML = "";
     str_ul.innerHTML = "";
-
+    
     const selectedSeriesSet = new Set(SelectedSeries || []);
     const selectedLevelSet = new Set(SelectedLevel || []);
     const stringSet = new Set(string);
     const numericSet = new Set(numeric);
-
+    
     let numericItems = [
         ...numeric.filter(el => !stringSet.has(el)),
         ...[...selectedSeriesSet].filter(el => !numericSet.has(el) && !stringSet.has(el)),
@@ -232,6 +354,17 @@ function get_column_type(numeric, string) {
             if (e.target.tagName.toLowerCase() !== "input") {
                 const checkbox = this.querySelector("input[type='checkbox']");
                 checkbox.checked = !checkbox.checked;
+                const value = this.innerText;
+                if (checkbox.checked) {
+                    if (!SelectedSeries.includes(value)) {
+                        SelectedSeries.push(value);
+                    }
+                } else {
+                    const index = SelectedSeries.indexOf(value);
+                    if (index !== -1) {
+                        SelectedSeries.splice(index, 1);
+                    }
+                }
             }
             e.preventDefault();
         }
@@ -257,6 +390,25 @@ function get_column_type(numeric, string) {
             if (e.target.tagName.toLowerCase() !== "input") {
                 const checkbox = this.querySelector("input[type='checkbox']");
                 checkbox.checked = !checkbox.checked;
+                const value = this.innerText;
+                if (checkbox.checked) {
+                    if (!SelectedLevel.includes(value)) {
+                        SelectedLevel.push(value);
+                    }
+                    if (!SelectedLayouts['layoutY'].includes(value)) {
+                        SelectedLayouts['layoutY'].push(value);
+                    }
+                } else {
+                    const index = SelectedLevel.indexOf(value);
+                    const sel_y = SelectedLayouts['layoutY'].indexOf(value);
+                    if (index !== -1) {
+                        SelectedLevel.splice(index, 1);
+                    }
+                    if (sel_y !== -1) {
+                        SelectedLayouts['layoutY'].splice(sel_y, 1);
+                    }
+                    
+                }
             }
             e.preventDefault();
         }
@@ -274,53 +426,36 @@ function get_column_type(numeric, string) {
     }
 }
 
-function get_tree_li_element(level_name, icon_class) {
-    const checkbox = get_cl_element("input", "inputcheckbox");
-    checkbox.setAttribute("type", "checkbox");
+function get_advanced_table(seriesNm, val, tbody) {
+    
+    const row = get_cl_element("tr");
 
-    const icon = get_cl_element("span", icon_class);
-    const label = get_cl_element("label", "checkBox-label", null, icon);
-    const lv_name = get_cl_element("span",'aggrigation-point',null,document.createTextNode(level_name));
-    label.appendChild(lv_name)
-    const li = get_cl_element("li", null, null, checkbox);
-    li.appendChild(label);
-    return li;
+    const td1 = get_cl_element("td", "td-size");
+    td1.innerText = seriesNm;
+    row.appendChild(td1);
+
+    const td2 = get_cl_element("td");
+    const select = get_cl_element("select", "form-control form-select py-1 moduleForm-feild");
+    ["sum", "min", "max", "avg", "count", "group_concat"].forEach(opt => {
+        const option = get_cl_element("option");
+        option.setAttribute("value", opt)
+        option.innerText = opt;
+        select.appendChild(option);
+    });
+    td2.appendChild(select);
+    row.appendChild(td2);
+
+    const td3 = get_cl_element("td");
+    const input = get_cl_element("input", "form-control form-control-sm");
+    input.type = "text";
+    input.value = val;
+    td3.appendChild(input);
+    row.appendChild(td3);
+
+    tbody.appendChild(row);
 }
 
-function reset_new_wk_def() {
-    document.getElementById("queryNm").value = "";
-    document.getElementById("queryNm").disabled = false;
-    document.getElementById("queryInp").value = "";
-    document.getElementById("queryInp").disabled = false;
-    document.getElementById("showSummary").checked = true;
-    document.getElementById("availableLevel").innerHTML = ""
-    document.getElementById("selectedLevel").innerHTML = ""
-    document.getElementById("graphTypeNew").value = "TabularData"
-    SelectedLevel = null
-    SelectedSeries = null
-    SelectedLayouts = null
-    for (let layout_name of layout_el) {
-        document.getElementById(layout_name).innerHTML = ""
-    }
 
-    let series_el = get_cl_element("li", null, null, get_cl_element("span", "fas fa-columns"))
-    series_el.appendChild(document.createTextNode("Series"))
-    series_el.value = "series"
-    document.getElementById("layoutX").appendChild(series_el)
-}
-
-function set_layout_li(layoutId, li) {
-    
-    let ul = document.getElementById(layoutId);
-    let liText = li.innerText;
-    
-    const el = get_cl_element("li", null, null,
-        get_cl_element("span", "fas fa-columns", null, null)
-    );
-    
-    el.appendChild(document.createTextNode(liText));
-    ul.appendChild(el);
-}
 
 function enable_sortable() {
     Sortable.create(document.getElementById("layoutY"), {
@@ -492,38 +627,164 @@ function move_elements(src_id, dest_id, bt_type) {
     }
 }
 
-function get_advanced_table(seriesNm, val, tbody) {
-    const row = get_cl_element("tr");
+document.getElementById('deleteQueryBtn').onclick = async function () {
+    const qr_name = sessionStorage.qr_name
+    let sel_query = `SELECT Name FROM S_Queries WHERE Name = ?`;
+    let res = await executeQuery("fetchData",modelName,sel_query,[qr_name]);
 
-    const td1 = get_cl_element("td", "td-size");
-    td1.innerText = seriesNm;
-    row.appendChild(td1);
+    if (res.length === 0) {
+        confirmBox('Alert!', 'No query found with the given name.');
+        return;
+    }
 
-    const td2 = get_cl_element("td");
-    const select = get_cl_element("select", "form-control form-select py-1 moduleForm-feild");
-    ["sum", "min", "max", "avg", "count", "group_concat"].forEach(opt => {
-        const option = get_cl_element("option");
-        option.setAttribute("value", opt)
-        option.innerText = opt;
-        select.appendChild(option);
-    });
-    td2.appendChild(select);
-    row.appendChild(td2);
+    confirmBox('Alert!',`Are you sure you want to delete ${qr_name}?`,async function(){
+        let delete_query = `DELETE FROM S_Queries WHERE Name = ?`;
+        await executeQuery("deleteData", modelName, delete_query, [sessionStorage.qr_name]);
+        confirmBox('Success', 'Query Sheet deleted successfully!');
+        for (let tr of document.getElementById("selectQueries-table").childNodes) {
+            if (tr.innerText == qr_name) {
+                tr.remove()
+                break;
+            }
+        }
+        const tb_container = document.getElementById('table_container');
+        tb_container.innerHTML = "";
+        sessionStorage.removeItem('qr_name')
+        document.getElementById("zContent").style.display = "none"
+        qr_obj = {}
+        reset_new_wk_def()
+    }, 1, 'Yes', 'No')
 
-    const td3 = get_cl_element("td");
-    const input = get_cl_element("input", "form-control form-control-sm");
-    input.type = "text";
-    input.value = val;
-    td3.appendChild(input);
-    row.appendChild(td3);
 
-    tbody.appendChild(row);
+}
+
+document.getElementById('openModalBtn').onclick = async function (e) {
+    // inrText = e.target.innerText.trim().toLowerCase();
+    let sel_body = document.getElementById('selectQueries-table')
+    sel_body.innerHTML = ""
+    document.getElementById('searchQuery').value = "";
+    document.getElementById('searchQuery').style.display = 'none';
+    let sel_query = `SELECT Q_id, Name FROM S_Queries`;
+    let res = await executeQuery("fetchData",modelName,sel_query);
+    
+    if (res.length === 0) {
+        confirmBox('Alert!', 'No queries found.');
+        return;
+    }
+
+    for (let quNm of res){
+        sel_body.appendChild(get_tr_element(quNm[1], quNm[0])  )
+    }
+
+    if (sel_body.firstChild) {
+        sel_body.firstChild.click()
+    }
+    
+    const bs_modal = new bootstrap.Modal(document.getElementById('select-querySheet'));
+    bs_modal.show()
+}
+
+document.getElementById('selectQuery-ok').onclick = async function () {
+    let selected_query = document.getElementById('selectQueries-table').querySelector('tr.selectedValue').innerText
+    
+    const bs_modal = bootstrap.Modal.getInstance(document.getElementById('select-querySheet'))
+    bs_modal.hide()
+
+    if(selected_query !== sessionStorage.qr_name){
+        sessionStorage.qr_name = selected_query
+        await get_querySheet_def()
+        await set_querysheet_def()
+        await populate_querysheet_def()
+    }
+
+    const zSelect = document.querySelector("#ZLayoutContentDiv select");
+    
+    if (zSelect) {
+        zSelect.addEventListener("change", function () {
+            const level_name = this.closest(".z_el").getAttribute("level_name");
+            get_query_data(level_name);
+        });
+    }
+}
+
+function get_tr_element(member_name, colname = "xx") {
+    let tr = document.createElement("tr")
+    tr.setAttribute("colname", colname)
+    tr.appendChild(document.createElement("td"))
+    tr.firstChild.classList.add("border-remove")
+    tr.style.userSelect = "none";
+    tr.style.borderBottom = "thin solid #89CFF0"
+    tr.firstChild.innerText = member_name
+    if(member_name == sessionStorage.qr_name){
+        tr.classList.add("selectedValue")
+    }
+    tr.onclick = function (e) {
+        if (!e.ctrlKey) {
+            for (let cn of this.parentNode.querySelectorAll("tr.selectedValue")) {
+                cn.classList.remove("selectedValue")
+            }
+        }
+        this.classList.add("selectedValue")
+        e.preventDefault();
+    }
+
+    // tr.ondblclick = function () {
+    //     let new_col_name = this.parentNode.getAttribute("destination-table")
+    //     document.getElementById(new_col_name).appendChild(get_tr_element(member_name, colname))
+    //     this.remove()
+    // }
+    return tr
+}
+
+document.getElementById('search_qr').onclick = function () {
+    let search_inp = document.getElementById('searchQuery')
+    if (search_inp.style.display == "none") {
+        search_inp.style.display = '';
+        search_inp.focus()
+    } else {
+        search_inp.style.display = 'none';
+    }
+}
+
+const findtr = function (e, recurring = null) {
+    if (recurring === null){
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(function(){findtr(e, 'zz')}, doneTypingInterval);
+        return
+    }
+    let el = e.target
+    let colname = el.getAttribute("colname")
+    let tbody_id = "selectQueries-table"
+    let str_val = el.value
+    
+    if (colname) {
+        for (let trd of document.getElementById(tbody_id).querySelectorAll(`tr[colname="${colname}"]`)) {
+            if (trd.firstChild.innerText.toLowerCase().indexOf(str_val.toLowerCase()) > -1) {
+                trd.style.display = "";
+            } else {
+                trd.style.display = "none";
+            }
+        }
+    } else {
+        let flag = 0
+        for (let trd of document.getElementById(tbody_id).childNodes) {
+            if (trd.firstChild.innerText.toLowerCase().indexOf(str_val.toLowerCase()) > -1) {
+                if (flag == 0) {
+                    flag = 1
+                    trd.click()
+                }
+                trd.style.display = "";
+            } else {
+                trd.style.display = "none";
+            }
+        }
+    }
 }
 
 document.getElementById('save_qr').onclick = async function () {
     let new_query = {}
     new_query["Name"] = document.getElementById("queryNm").value
-    new_query["tableName"] = document.getElementById("queryInp").value
+    new_query["tableName"] = document.getElementById("tableNm").value
     new_query["GraphType"] = document.getElementById("graphTypeNew").value
     
     if(new_query["Name"].trim() === ''){
@@ -642,6 +903,7 @@ document.getElementById('save_qr').onclick = async function () {
             return;
         }
     }
+    inrText = ""
     const lastUpdateDate = getFormattedDateTime()
 
     let insert_query = `INSERT INTO S_Queries (Name, TableName, ShowSummary, HideNullRows, Levels, Series, SeriesProperties, Layout, GraphType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -653,7 +915,7 @@ document.getElementById('save_qr').onclick = async function () {
     );
 
     document.getElementById('queryNm').value = '';
-    document.getElementById('queryInp').value = '';
+    document.getElementById('tableNm').value = '';
     document.getElementById('showSummary').checked = true;
     document.getElementById('hideNullRows').checked = false;
     sessionStorage.qr_name = new_query["Name"]
@@ -661,212 +923,17 @@ document.getElementById('save_qr').onclick = async function () {
     const bs_modal = bootstrap.Modal.getInstance(document.getElementById('modal-select-column'));
     bs_modal.hide()
     confirmBox('Success', 'Query saved successfully!');
-    await populate_worksheet_def(new_query)
-}
+    await get_querySheet_def()
+    await set_querysheet_def()
+    await populate_querysheet_def()
 
-document.getElementById('deleteQueryBtn').onclick = async function () {
-    let sel_query = `SELECT Name FROM S_Queries WHERE Name = ?`;
-    let res = await executeQuery("fetchData",modelName,sel_query,[sessionStorage.qr_name]);
+    const zSelect = document.querySelector("#ZLayoutContentDiv select");
     
-    if (res.length === 0) {
-        confirmBox('Alert!', 'No query found with the given name.');
-        return;
-    }
-
-    confirmBox('Alert!',`Are you sure you want to delete ${sessionStorage.qr_name}?`,async function(){
-        let delete_query = `DELETE FROM S_Queries WHERE Name = ?`;
-        await executeQuery("deleteData", modelName, delete_query, [sessionStorage.qr_name]);
-        sessionStorage.removeItem("qr_name")
-        confirmBox('Success', 'Query deleted successfully!');
-    }, 1, 'Yes', 'No')
-
-}
-
-document.getElementById('openModalBtn').onclick = async function (e) {
-    inrText = e.target.innerText.trim().toLowerCase();
-    let sel_body = document.getElementById('selectQueries-table')
-    sel_body.innerHTML = ""
-    document.getElementById('searchQuery').value = "";
-    document.getElementById('searchQuery').style.display = 'none';
-    let sel_query = `SELECT Q_id, Name FROM S_Queries`;
-    let res = await executeQuery("fetchData",modelName,sel_query);
-    
-    if (res.length === 0) {
-        confirmBox('Alert!', 'No queries found.');
-        return;
-    }
-
-    for (let quNm of res){
-        sel_body.appendChild(get_tr_element(quNm[1], quNm[0])  )
-    }
-
-    if (sel_body.firstChild) {
-        sel_body.firstChild.click()
-    }
-    
-    const bs_modal = new bootstrap.Modal(document.getElementById('select-querySheet'));
-    bs_modal.show()
-}
-
-document.getElementById('editQueryBtn').onclick = async function (e) {
-    inrText = e.target.innerText.trim().toLowerCase();
-
-    if (!sessionStorage.qr_name) {
-        confirmBox('Alert!', 'No Selected queries found.');
-        return;
-    }
-
-    if(inrText == "edit"){
-        let selectedQueries = "SELECT * FROM S_Queries WHERE Name = ?"
-        let res = await executeQuery("fetchData",modelName,selectedQueries,[sessionStorage.qr_name])
-
-        if (res.length === 0) {
-            confirmBox('Alert!', 'No details found for the selected query.');
-            return;
-        }
-        
-        for(let item of res){
-            document.getElementById("queryNm").value = item[1]
-            document.getElementById("queryNm").disabled = true;
-            document.getElementById("queryInp").value = item[2]
-            document.getElementById("queryInp").disabled = true;
-            document.getElementById("showSummary").checked = item[3] == 1 ? true : false
-            document.getElementById("hideNullRows").checked = item[4] == 1 ? true : false
-            document.getElementById("graphTypeNew").value = item[9]
-            SelectedLevel = JSON.parse(item[5])
-            SelectedSeries = JSON.parse(item[6])
-            seriesProperties = JSON.parse(item[7])
-            SelectedLayouts = JSON.parse(item[8]);
-
-            const table = document.getElementById("advTable");
-            let tbody = table.querySelector("tbody");
-            if (!tbody) {
-                tbody = get_cl_element("tbody");
-                table.appendChild(tbody);
-            } else {
-                tbody.innerHTML = "";  // Clear previous content
-            }
-            
-            for (const [seriesName, properties] of Object.entries(seriesProperties)) {
-                get_advanced_table(seriesName, properties.Format, tbody);
-                const select = tbody.querySelector(`tr:last-child td:nth-child(2) select`);
-                select.value = properties.Agg;
-            }
-        }
-
-        const col_name = `PRAGMA table_info(${document.getElementById("queryInp").value});`;
-
-        let res_out = await executeQuery("fetchData", modelName, col_name);
-
-        const {numericColumns, stringColumns} = get_all_agg(res_out)
-
-        get_column_type(numericColumns, stringColumns);
-
-    }
-    const tabIdMap = {
-        "edit": "display-new"
-    };
-
-    if (tabIdMap[inrText]) {
-        const tab = new bootstrap.Tab(document.getElementById(tabIdMap[inrText]));
-        tab.show();
-    }
-    const bs_modal = new bootstrap.Modal(document.getElementById('modal-select-column'));
-    bs_modal.show()
-}
-
-document.getElementById('selectQuery-ok').onclick = async function () {
-    sessionStorage.qr_name = document.getElementById('selectQueries-table').querySelector('tr.selectedValue').innerText
-    let query = `SELECT TableName, Layout, Series, SeriesProperties FROM S_Queries WHERE Name = ?`
-    let result = await executeQuery("fetchData", modelName, query,[sessionStorage.qr_name]);
-    let res_query = {}
-    if(result.length > 0){
-        const layoutJSON = JSON.parse(result[0][1])
-        for(let res of result){
-            res_query["tableName"] = res[0]
-            res_query["layoutX"] = layoutJSON.layoutX || []
-            res_query["layoutY"] = layoutJSON.layoutY || []
-            res_query["AvailableLevels"] = JSON.parse(res[2])
-            res_query["SeriesProperties"] = JSON.parse(res[3])
-        }
-    }
-    console.log(res_query);
-    
-    const bs_modal = bootstrap.Modal.getInstance(document.getElementById('select-querySheet'))
-    bs_modal.hide()
-}
-
-function get_tr_element(member_name, colname = "xx") {
-    let tr = document.createElement("tr")
-    tr.setAttribute("colname", colname)
-    tr.appendChild(document.createElement("td"))
-    tr.firstChild.classList.add("border-remove")
-    tr.style.userSelect = "none";
-    tr.style.borderBottom = "thin solid #89CFF0"
-    tr.firstChild.innerText = member_name
-    if(member_name == sessionStorage.qr_name){
-        tr.classList.add("selectedValue")
-    }
-    tr.onclick = function (e) {
-        if (!e.ctrlKey) {
-            for (let cn of this.parentNode.querySelectorAll("tr.selectedValue")) {
-                cn.classList.remove("selectedValue")
-            }
-        }
-        this.classList.add("selectedValue")
-        e.preventDefault();
-    }
-
-    // tr.ondblclick = function () {
-    //     let new_col_name = this.parentNode.getAttribute("destination-table")
-    //     document.getElementById(new_col_name).appendChild(get_tr_element(member_name, colname))
-    //     this.remove()
-    // }
-    return tr
-}
-
-document.getElementById('search_qr').onclick = function () {
-    let search_inp = document.getElementById('searchQuery')
-    if (search_inp.style.display == "none") {
-        search_inp.style.display = '';
-        search_inp.focus()
-    } else {
-        search_inp.style.display = 'none';
-    }
-}
-
-const findtr = function (e, recurring = null) {
-    if (recurring === null){
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(function(){findtr(e, 'zz')}, doneTypingInterval);
-        return
-    }
-    let el = e.target
-    let colname = el.getAttribute("colname")
-    let tbody_id = "selectQueries-table"
-    let str_val = el.value
-    
-    if (colname) {
-        for (let trd of document.getElementById(tbody_id).querySelectorAll(`tr[colname="${colname}"]`)) {
-            if (trd.firstChild.innerText.toLowerCase().indexOf(str_val.toLowerCase()) > -1) {
-                trd.style.display = "";
-            } else {
-                trd.style.display = "none";
-            }
-        }
-    } else {
-        let flag = 0
-        for (let trd of document.getElementById(tbody_id).childNodes) {
-            if (trd.firstChild.innerText.toLowerCase().indexOf(str_val.toLowerCase()) > -1) {
-                if (flag == 0) {
-                    flag = 1
-                    trd.click()
-                }
-                trd.style.display = "";
-            } else {
-                trd.style.display = "none";
-            }
-        }
+    if (zSelect) {
+        zSelect.addEventListener("change", function () {
+            const level_name = this.closest(".z_el").getAttribute("level_name");
+            get_query_data(level_name);
+        });
     }
 }
 
@@ -882,19 +949,15 @@ function getFormattedDateTime() {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-// document.getElementById("ZLayoutContentDiv").querySelector('select').onchange = function(){
-    
-//     for (let new_el of document.getElementById("ZLayoutContentDiv").childNodes){
-//         new_el.removeAttribute("selected_mem")
-//         let span = new_el.querySelector("button.dropdown-toggle-split")
-//         if(span && span.childNodes[1]){
-//             span.removeChild(span.childNodes[0])
-//             span.firstChild.style = ""
-//         }
+function get_tree_li_element(level_name, icon_class) {
+    const checkbox = get_cl_element("input", "inputcheckbox");
+    checkbox.setAttribute("type", "checkbox");
 
-//     }
-
-//     incremental_load(sessionStorage.wk_name, {})
-// }
-
-
+    const icon = get_cl_element("span", icon_class);
+    const label = get_cl_element("label", "checkBox-label", null, icon);
+    const lv_name = get_cl_element("span",'aggrigation-point',null,document.createTextNode(level_name));
+    label.appendChild(lv_name)
+    const li = get_cl_element("li", null, null, checkbox);
+    li.appendChild(label);
+    return li;
+}
