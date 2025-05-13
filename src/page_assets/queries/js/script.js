@@ -730,25 +730,21 @@ function getItemsFromLayout(id) {
 
 
 function move_elements(src_id, dest_id, bt_type) {
-    if (bt_type == "addAll") {
-        for (let trd of document.getElementById(src_id).querySelectorAll("li")) {
-            document.getElementById(dest_id).appendChild(trd)
-            trd.classList.remove("selectedValue")
-            const checkbox = trd.querySelector("input[type='checkbox']");
-            if(checkbox.checked){
-                checkbox.checked = false
-            }
-        }
-        
-    } else if (bt_type == "removeAll") {
-        for (let trd of document.getElementById(src_id).querySelectorAll("li")) {
-            document.getElementById(dest_id).appendChild(trd)
-            trd.classList.remove("selectedValue")
-            const checkbox = trd.querySelector("input[type='checkbox']");
-            if(checkbox.checked){
-                checkbox.checked = false
-            }
-        }
+    if (bt_type !== "addAll" && bt_type !== "removeAll") return;
+
+    const srcUl = document.getElementById(src_id);
+    const destUl = document.getElementById(dest_id);
+    if (!srcUl || !destUl) return;
+
+    for (let trd of srcUl.querySelectorAll("li")) {
+        destUl.appendChild(trd);
+        trd.classList.remove("selectedValue");
+
+        const checkbox = trd.querySelector("input[type='checkbox']");
+        if (checkbox) checkbox.checked = false;
+
+        trd.onclick = (dest_id === "selectedLevel") ? stringClickHandler : numericClickHandler;
+        trd.ondblclick = dblClickHandler;
     }
 }
 
