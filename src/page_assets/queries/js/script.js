@@ -31,18 +31,55 @@ window.onload = async function () {
     document.getElementById("searchQuery").onkeyup = findtr
     
     document.getElementById('aggregation-new').addEventListener('shown.bs.tab', async function () {
+        const query_name = document.getElementById('queryNm').value;
+        const table_name = document.getElementById('tableNm').value;
+        if (query_name === '') {
+            confirmBox('Alert!', 'Please enter a name for the query.');
+            return;
+        }
+
+        if (table_name === '') {
+            confirmBox('Alert!', 'Please select a table name.');
+            return;
+        }
         // if(sessionStorage.qr_name !== qr_name){
         //     SelectedSeries = []
         //     SelectedLevel = []
         // }
-        await set_all_agg()
+        const avl_lvl = document.getElementById("availableLevel").innerHTML
+        const sel_lvl = document.getElementById("selectedLevel").innerHTML
+
+        if(!avl_lvl && !sel_lvl){
+            await set_all_agg()
+        }
         // await set_series_data()
     })
     document.getElementById('series-new').addEventListener('shown.bs.tab', async function () {
+        const query_name = document.getElementById('queryNm').value;
+        const table_name = document.getElementById('tableNm').value;
+        if (query_name === '') {
+            confirmBox('Alert!', 'Please enter a name for the query.');
+            return;
+        }
+
+        if (table_name === '') {
+            confirmBox('Alert!', 'Please select a table name.');
+            return;
+        }
         await set_series_data()
     })
     document.getElementById('layout-new').addEventListener('shown.bs.tab', async function () {
-        
+        const query_name = document.getElementById('queryNm').value;
+        const table_name = document.getElementById('tableNm').value;
+        if (query_name === '') {
+            confirmBox('Alert!', 'Please enter a name for the query.');
+            return;
+        }
+
+        if (table_name === '') {
+            confirmBox('Alert!', 'Please select a table name.');
+            return;
+        }
         document.getElementById('layoutY').innerHTML = ""
         for (let lx of SelectedLayouts['layoutY']) {
             let series_el = get_cl_element("li", null, null, get_cl_element("span", "fas fa-columns"))
@@ -152,6 +189,10 @@ function reset_new_wk_def() {
     document.getElementById("graphTypeNew").value = "TabularData"
     document.getElementById("availableLevel").innerHTML = ""
     document.getElementById("selectedLevel").innerHTML = ""
+    const tbody = document.querySelector("#advTable tbody");
+    if (tbody) {
+        tbody.innerHTML = "";
+    }
     SelectedLevel = []
     SelectedSeries = []
     SelectedLayouts = {layoutX:  [], layoutY: [], layoutZ:[]}
@@ -378,6 +419,15 @@ async function get_column_type(numeric, string) {
                 const checkbox = this.querySelector("input[type='checkbox']");
                 checkbox.checked = false;
             }
+
+            // Reassign new click and double-click handlers
+            if (new_col_name === 'selectedLevel') {
+                this.onclick = stringClickHandler;
+                this.ondblclick = dblClickHandler;
+            } else if (new_col_name === 'availableLevel') {
+                this.onclick = numericClickHandler;
+                this.ondblclick = dblClickHandler;
+            }
         }
     }
 
@@ -422,8 +472,83 @@ async function get_column_type(numeric, string) {
                 const checkbox = this.querySelector("input[type='checkbox']");
                 checkbox.checked = false;
             }
+
+            // Reassign new click and double-click handlers
+            if (new_col_name === 'selectedLevel') {
+                this.onclick = stringClickHandler;
+                this.ondblclick = dblClickHandler;
+            } else if (new_col_name === 'availableLevel') {
+                this.onclick = numericClickHandler;
+                this.ondblclick = dblClickHandler;
+            }
+        };
+    }
+}
+
+function stringClickHandler(e) {
+    if (e.target.tagName.toLowerCase() !== "input") {
+        const checkbox = this.querySelector("input[type='checkbox']");
+        checkbox.checked = !checkbox.checked;
+        const value = this.innerText.trim();
+
+        if (checkbox.checked) {
+            if (!SelectedLevel.includes(value)) {
+                SelectedLevel.push(value);
+            }
+            if (!SelectedLayouts['layoutY'].includes(value)) {
+                SelectedLayouts['layoutY'].push(value);
+            }
+        } else {
+            const index = SelectedLevel.indexOf(value);
+            const layoutIndex = SelectedLayouts['layoutY'].indexOf(value);
+            if (index !== -1) SelectedLevel.splice(index, 1);
+            if (layoutIndex !== -1) SelectedLayouts['layoutY'].splice(layoutIndex, 1);
         }
     }
+    e.preventDefault();
+}
+
+function numericClickHandler(e) {
+    if (e.target.tagName.toLowerCase() !== "input") {
+        const checkbox = this.querySelector("input[type='checkbox']");
+        checkbox.checked = !checkbox.checked;
+        const value = this.innerText.trim();
+
+        if (checkbox.checked) {
+            if (!SelectedSeries.includes(value)) {
+                SelectedSeries.push(value);
+            }
+        } else {
+            const index = SelectedSeries.indexOf(value);
+            if (index !== -1) SelectedSeries.splice(index, 1);
+        }
+    }
+    e.preventDefault();
+}
+
+function dblClickHandler(e) {
+    let new_col_name = this.parentNode.getAttribute("dest");
+    const targetUl = document.getElementById(new_col_name);
+    if (!targetUl) return;
+
+    this.classList.remove("selectedValue");
+    targetUl.appendChild(this);
+
+    // Uncheck if click is not on input
+    if (e.target.tagName.toLowerCase() !== "input") {
+        const checkbox = this.querySelector("input[type='checkbox']");
+        if (checkbox) checkbox.checked = false;
+    }
+
+    // Reassign click and double-click handlers
+    if (new_col_name === 'selectedLevel') {
+        this.onclick = stringClickHandler;
+    } else if (new_col_name === 'availableLevel') {
+        this.onclick = numericClickHandler;
+    }
+    this.ondblclick = dblClickHandler;
+
+    e.preventDefault();
 }
 
 function get_advanced_table(seriesNm, val, tbody) {
