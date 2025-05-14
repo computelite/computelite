@@ -241,6 +241,22 @@ function get_li_element(model_name) {
                 LastUpdateDate	VARCHAR DEFAULT (datetime('now','localtime'))
             )`
         )
+        await executeQuery('executeQuery', db_name,
+            `CREATE TABLE IF NOT EXISTS S_Queries (
+                QueryId			INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                Name	        VARCHAR,
+                TableName       VARCHAR,
+                ShowSummary     INTEGER NOT NULL,
+                HideNullRows    INTEGER NOT NULL,
+                Levels			VARCHAR DEFAULT '[]',
+                Series          VARCHAR DEFAULT '[]',
+                SeriesProperties     VARCHAR DEFAULT '{}',
+                Layout	        VARCHAR DEFAULT '{}',
+                GraphType       VARCHAR DEFAULT,
+                WorksheetProperties  VARCHAR DEFAULT '{}',
+                LevelsProperties	 VARCHAR DEFAULT '{}'
+            )`
+        )
         // const shareBtn = document.getElementById('shareBtn');
         // shareBtn.classList.add('blink');
 
@@ -890,7 +906,7 @@ function downloadExcelFile(e) {
     }
 
     const model_name = selected_model.innerText
-    const [modal_body, add_btn] = populate_modal("Download Excel", "Download")
+    const [modal_body, add_btn1] = populate_modal("Download Excel", "Download")
     const input_div = get_cl_element("input", "form-check-input round-check")
     const form_div = get_cl_element("div", "form-check", null, input_div)
     input_div.setAttribute("type", "checkbox")
@@ -904,17 +920,38 @@ function downloadExcelFile(e) {
         modal_body.appendChild(form_div1)
     }
 
+    const modal_footer = scc_one_modal.querySelector(".modal-footer");
+    modal_footer.innerHTML = ""
     
-    const empty_input = get_cl_element("input", "form-check-input form-check-sm round-check","emptyCheck");
+    const footer_flex = get_cl_element("div", "w-100");
+    const empty_input = get_cl_element("input", "form-check-input form-check-sm round-check", "emptyCheck");
     empty_input.type = "checkbox";
     empty_input.checked = true;
 
-    const empty_label = get_cl_element("label", "form-check-label small text-muted", null ,document.createTextNode("Include Empty Tables"));
-    empty_label.setAttribute("for","emptyCheck")
-    const empty_form_div = get_cl_element("div", "form-check mt-3", null);
+    const empty_label = get_cl_element("label", "form-check-label small text-muted", null, document.createTextNode("Include Empty Tables"));
+    empty_label.setAttribute("for", "emptyCheck");
+
+    const empty_form_div = get_cl_element("div", "form-check mb-0", null);
     empty_form_div.appendChild(empty_input);
     empty_form_div.appendChild(empty_label);
-    modal_body.appendChild(empty_form_div);
+
+    const cancel_button = get_cl_element("button", "btn btn-tertiary", null,
+    document.createTextNode("Cancel"));
+    cancel_button.setAttribute("type", "button");
+    cancel_button.setAttribute("data-bs-dismiss", "modal");
+
+    const add_btn = get_cl_element("button", "btn btn-primary ml-2", null,
+    document.createTextNode("Download"));
+    add_btn.setAttribute("type", "button");
+
+
+    const btn_group = get_cl_element("div", "d-flex justify-content-between align-items-center", null);
+    btn_group.appendChild(cancel_button);
+    btn_group.appendChild(add_btn);
+    footer_flex.appendChild(empty_form_div);
+    footer_flex.appendChild(btn_group);
+    modal_footer.appendChild(footer_flex);
+
 
 
     add_btn.onclick = async function (e) {

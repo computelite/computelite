@@ -20,6 +20,7 @@ export default defineConfig({
         notebook: path.resolve(__dirname, 'src/PyNotebook.html'),
         notebookJS: path.resolve(__dirname, 'src/JsNotebook.html'),
         notebookR: path.resolve(__dirname, 'src/RNotebook.html'),
+        queries: path.resolve(__dirname, 'src/Queries.html'),
       },
       output: {
         assetFileNames: 'assets/[name].[hash].[ext]',
