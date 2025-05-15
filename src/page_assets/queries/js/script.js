@@ -42,17 +42,16 @@ window.onload = async function () {
             confirmBox('Alert!', 'Please select a table name.');
             return;
         }
-        // if(sessionStorage.qr_name !== qr_name){
-        //     SelectedSeries = []
-        //     SelectedLevel = []
-        // }
-        const avl_lvl = document.getElementById("availableLevel").innerHTML
-        const sel_lvl = document.getElementById("selectedLevel").innerHTML
+        
+        // const avl_lvl = document.getElementById("availableLevel").innerHTML
+        // const sel_lvl = document.getElementById("selectedLevel").innerHTML
 
-        if(!avl_lvl && !sel_lvl){
+        const isDisabled = document.getElementById("tableNm").disabled
+
+        if(!isDisabled){
             await set_all_agg()
         }
-        // await set_series_data()
+        
     })
     document.getElementById('series-new').addEventListener('shown.bs.tab', async function () {
         const query_name = document.getElementById('queryNm').value;
@@ -239,6 +238,7 @@ async function set_querysheet_def() {
     }
     document.getElementById("queryNm").value = qr_obj["Name"]
     document.getElementById("queryNm").disabled = true;
+    document.getElementById("tableNm").disabled = true;
     document.getElementById("tableNm").value = qr_obj["TableName"]
 
     if (qr_obj["ShowSummary"] == 1) {

@@ -244,7 +244,7 @@ function get_li_element(model_name) {
         await executeQuery('executeQuery', db_name,
             `CREATE TABLE IF NOT EXISTS S_Queries (
                 QueryId			INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                Name	        VARCHAR,
+                Name	        VARCHAR UNIQUE,
                 TableName       VARCHAR,
                 ShowSummary     INTEGER NOT NULL,
                 HideNullRows    INTEGER NOT NULL,
@@ -252,9 +252,11 @@ function get_li_element(model_name) {
                 Series          VARCHAR DEFAULT '[]',
                 SeriesProperties     VARCHAR DEFAULT '{}',
                 Layout	        VARCHAR DEFAULT '{}',
-                GraphType       VARCHAR DEFAULT,
+                GraphType       VARCHAR,
                 WorksheetProperties  VARCHAR DEFAULT '{}',
-                LevelsProperties	 VARCHAR DEFAULT '{}'
+                LevelsProperties	 VARCHAR DEFAULT '{}',
+                CreationDate	VARCHAR DEFAULT (datetime('now','localtime')),
+                LastUpdateDate	VARCHAR DEFAULT (datetime('now','localtime'))
             )`
         )
         // const shareBtn = document.getElementById('shareBtn');
