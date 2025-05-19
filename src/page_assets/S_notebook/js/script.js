@@ -74,7 +74,7 @@ async function populateCells(notebookName){
 }
 
 
-function createCodeEditor(rowId,NotebookId,content = "") {
+export function createCodeEditor(rowId,NotebookId,content = "") {
   const kernelId = nanoid();
   const kernel = get_cl_element('computelite-cell','cell-grid cell-container celltype-python',kernelId);
   kernel.setAttribute('tabindex', '0');

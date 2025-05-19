@@ -57,7 +57,7 @@ async function populateCells(notebookName,blobFiles){
 
 
 
-function createCodeEditor(rowId,NotebookId,blobFiles,content = "") {
+export function createCodeEditor(rowId,NotebookId,blobFiles,content = "") {
   const kernelId = nanoid();
   const kernel = get_cl_element('computelite-cell','cell-grid cell-container celltype-r',kernelId);
   kernel.setAttribute('tabindex', '0');

@@ -2,23 +2,29 @@ import CodeMirror from "codemirror";
 import 'codemirror/theme/dracula.css';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/r/r.js';
+import "codemirror/addon/edit/closebrackets.js";
+import "codemirror/addon/edit/matchbrackets.js";
 import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
 import { consoleNotebookOutput, get_cl_element, executeQuery } from '../../../assets/js/scc'
+import { createCodeEditor } from "./script";
 
 let canvas = null
 
 export function createCodeMirrorEditor(kernelId, modelName, CellId, content,notebookId,blobFiles = []) {
     const cell = document.getElementById(kernelId);
     var editor = CodeMirror(cell.querySelector("div.computelite-text-editor"), {
+        mode: "r",
         lineNumbers: true,
         lineWrapping: true,
-        mode: "r",
-        autoRefresh: true,
-        autofocus: true,
         tabSize: 4,
         indentUnit: 4,
+        smartIndent: true,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        autofocus:true,
         extraKeys: {
             'Ctrl-Enter': async (cm) => executeCode(editor, cell, modelName, CellId,notebookId,blobFiles),
+            "Shift-Enter": async (cm) => runAndMoveToNextCell(editor, cell, modelName, CellId, notebookId, blobFiles),
         },
     });
 
@@ -48,6 +54,47 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content,note
         }
     }, 10);
     return editor
+}
+
+async function runAndMoveToNextCell(editor, cell, modelName, CellId, notebookId, blobFiles) {
+    await executeCode(editor, cell, modelName, CellId, notebookId, blobFiles);
+    const cells = document.querySelectorAll('computelite-cell')
+    const isLastCell = cells[cells.length - 1] === cell;
+
+    if (isLastCell) {
+        const selected_li_el = document.getElementById('jsListDiv').querySelector("li.selectedValue");
+        const notebookId = selected_li_el.getAttribute('id');
+
+        if (!modelName) {
+            confirmBox('Alert!', 'Model Name not found in the URL.');
+            return;
+        }
+
+        try {
+            const rowId = await executeQuery(
+            "insertData",
+            modelName,
+            "INSERT INTO S_NotebookContent (CellContent, Name, NotebookId, CellType) VALUES (?, ?, ?, ?)",
+            ['', selected_li_el.innerText, notebookId, 'r']
+            );
+            const newCellElement = createCodeEditor(rowId, notebookId, blobFiles);
+            setTimeout(() => {
+            const editors = document.querySelectorAll(".computelite-cell .CodeMirror");
+            const lastEditor = editors[editors.length - 1];
+            lastEditor?.CodeMirror?.focus();
+            }, 50);
+        } catch (err) {
+            console.error("Failed to add new cell:", err);
+        }
+    } else {
+        for (let i = 0; i < cells.length - 1; i++) {
+            if (cells[i] === cell) {
+            const nextEditor = cells[i + 1].querySelector(".CodeMirror");
+            nextEditor?.CodeMirror?.focus();
+            break;
+            }
+        }
+    }
 }
 
 // Initialize WebR
