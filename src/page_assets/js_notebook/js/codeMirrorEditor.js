@@ -27,6 +27,7 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content, Not
     matchBrackets: true,
     autoCloseBrackets:true,
     extraKeys: {
+      "Ctrl-/": "toggleComment",
       "Ctrl-Enter": async (cm) => executeCode(editor, cell, jsRunner, modelName, CellId, NotebookId),
       "Shift-Enter": async (cm) => runAndMoveToNextCell(editor, cell, jsRunner, modelName, CellId, NotebookId),
     },

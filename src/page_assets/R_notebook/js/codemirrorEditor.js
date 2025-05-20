@@ -4,6 +4,7 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/r/r.js';
 import "codemirror/addon/edit/closebrackets.js";
 import "codemirror/addon/edit/matchbrackets.js";
+import "codemirror/addon/comment/comment.js";
 import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
 import { consoleNotebookOutput, get_cl_element, executeQuery } from '../../../assets/js/scc'
 import { createCodeEditor } from "./script";
@@ -23,6 +24,7 @@ export function createCodeMirrorEditor(kernelId, modelName, CellId, content,note
         autoCloseBrackets: true,
         autofocus:true,
         extraKeys: {
+            "Ctrl-/": "toggleComment",
             'Ctrl-Enter': async (cm) => executeCode(editor, cell, modelName, CellId,notebookId,blobFiles),
             "Shift-Enter": async (cm) => runAndMoveToNextCell(editor, cell, modelName, CellId, notebookId, blobFiles),
         },

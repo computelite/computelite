@@ -4,6 +4,7 @@ import "codemirror/theme/dracula.css";
 import "codemirror/mode/python/python.js";
 import "codemirror/addon/edit/closebrackets.js";
 import "codemirror/addon/edit/matchbrackets.js";
+import "codemirror/addon/comment/comment.js";
 import {executePython,consoleNotebookOutput, get_cl_element,executeQuery,drawImageFromPython} from '../../../assets/js/scc'
 import { createCodeEditor } from "./script";
 
@@ -23,6 +24,7 @@ export function createCodeMirrorEditor(kernelId,modelName,CellId,content,noteboo
     matchBrackets: true,
     autoCloseBrackets: true,
     extraKeys: {
+      "Ctrl-/": "toggleComment",
       'Ctrl-Enter': async (cm) => executeCode(editor, cell, modelName, CellId, kernelId, notebookId),
       "Shift-Enter": async (cm) => runAndMoveToNextCell(editor, cell, modelName, CellId, kernelId, notebookId),
     },

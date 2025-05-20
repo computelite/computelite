@@ -785,7 +785,7 @@ document.getElementById('openModalBtn').onclick = async function (e) {
     sel_body.innerHTML = ""
     document.getElementById('searchQuery').value = "";
     document.getElementById('searchQuery').style.display = 'none';
-    let sel_query = `SELECT Q_id, Name FROM S_Queries`;
+    let sel_query = `SELECT QueryId, Name FROM S_Queries`;
     let res = await executeQuery("fetchData",modelName,sel_query);
     
     if (res.length === 0) {
