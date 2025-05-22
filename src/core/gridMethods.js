@@ -745,30 +745,30 @@ export async function downloadExcel(modelName, tableNames = [], tableGroups = ["
 
 // Uploads data from an Excel file
 
-export async function uploadExcel(modelName, tableNames, file,excelInfo = {}) {
-   
+export async function uploadExcel(modelName, tableNames, file, excelInfo = {}) {
     const msgList = {};
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(file);
 
     for (const newSheetName of workbook.worksheets) {
         const sheetName = newSheetName.name.trim();
-        
-        if (Object.keys(excelInfo).length > 0 && excelInfo[sheetName] === 'ignore'){
-            continue
-        }
 
-        const sheet = newSheetName;
-        if (sheet.rowCount <= 1) {
-            msgList[sheetName] = "No rows to import";
+        if (Object.keys(excelInfo).length > 0 && excelInfo[sheetName] === 'ignore') {
             continue;
         }
 
+        const sheet = newSheetName;
+
         const sheetHeaders = [];
         sheet.getRow(1).eachCell((cell, colNumber) => {
-            const header = cell.value.toString().trim();
+            const header = cell.value?.toString().trim();
             if (header) sheetHeaders.push(header);
         });
+
+        if (sheetHeaders.length === 0) {
+            msgList[sheetName] = "No valid headers found";
+            continue;
+        }
 
         if (Object.keys(excelInfo).length > 0 && excelInfo[sheetName] === 'createAndUpload') {
             msgList[sheetName] = await createAndImportTable(modelName, sheetName, sheet, sheetHeaders);
@@ -792,7 +792,7 @@ export async function uploadExcel(modelName, tableNames, file,excelInfo = {}) {
         }
         let dateColumns = []
         let col_formatter = columnFormatter[0][0]
-        
+
         for (let [idx,col] of colList.entries()){
 
             if (col_formatter['lov'] && col_formatter['lov'][col[4]] && col_formatter['lov'][col[4]].toLowerCase()==='date'){
@@ -801,37 +801,36 @@ export async function uploadExcel(modelName, tableNames, file,excelInfo = {}) {
         }
         
         const deleteQuery = `DELETE FROM [${sheetName}]`;
-        
-        let rowCount = await executeQuery('deleteData',modelName,deleteQuery)
+        await executeQuery('deleteData', modelName, deleteQuery);
+
         let values = []
-        
+
         for (let j = 2; j <= sheet.rowCount; j++) {
             const newRow = sheet.getRow(j);
             const newTpl = colList.map(i => {
                 const cell = newRow.getCell(i[3] + 1)
                 const cellValue = cell.value;
-                if (!cellValue && cellValue != '0') return null;    
+                if (!cellValue && cellValue !== '0') return null;    
                 if (i[1] === 'VARCHAR' && typeof cellValue === 'number') return getVarcharVal(cellValue);
-                if (i[1] === 'NUMERIC' && cell.model.type == 4) return getNumericVal(cellValue)
+                if (i[1] === 'NUMERIC' && cell.model.type === 4) return getNumericVal(cellValue);
                 return cellValue;
             });
-            
-            const dataRow = newTpl
-            .map((val, idx) => {
-                    if (checkValue(val)) {
-                        if (typeof val === 'object'){                            
-                            try{
-                                const date = new Date(val)
-                                return convertDate(date)
-                            }catch{
-                                return val
-                            }                              
-                        }else{
+
+            const dataRow = newTpl.map((val, idx) => {
+                if (checkValue(val)) {
+                    if (typeof val === 'object'){
+                        try{
+                            const date = new Date(val)
+                            return convertDate(date)
+                        }catch{
                             return val
-                        }                
+                        }
+                    }else{
+                        return val
                     }
-                    return null
-             })
+                }
+                return null
+            })
 
             let breakLoop = false;
             for (let idx = 0; idx < colList.length; idx++) {
@@ -851,23 +850,30 @@ export async function uploadExcel(modelName, tableNames, file,excelInfo = {}) {
             if (breakLoop) {
                 break;
             }
-            values.push(dataRow)
 
+            values.push(dataRow)
         }
-        const header = colList.map((col, idx) => col[0]);
-    
+
+        // If no data rows, insert one row with all nulls to preserve the header
+        if (values.length === 0) {
+            values.push(colList.map(() => null));
+        }
+
+        const header = colList.map(col => col[0]);
         const insertQuery = `INSERT INTO [${sheetName}](${header.join(',')}) VALUES(${header.map(() => '?').join(',')})`;
-        try {    
-            const last_insert_rowid = await executeQuery('executeMany',modelName,insertQuery,values);
+
+        try {
+            await executeQuery('executeMany', modelName, insertQuery, values);
         } catch (ex) {
-            msgList[sheetName] = `Invalid Row "${newTpl}" at ${j}th row in sheet ${sheetName}, error ${ex}`;
+            msgList[sheetName] = `Error inserting rows in sheet ${sheetName}: ${ex}`;
             continue;
         }
 
         if (!msgList[sheetName]) {
-            msgList[sheetName] = sheet.rowCount - 1;
+            msgList[sheetName] = values.length === 1 && sheet.rowCount === 1
+                ? "Only header inserted"
+                : sheet.rowCount - 1;
         }
-
     }
 
     return msgList;

@@ -1940,3 +1940,20 @@ document.getElementById("update-script").onclick = async function(){
     document.getElementById("upScName").innerHTML = ''
     confirmBox("Success","Script updated successfully.")
 }
+
+function updateCloseButtonPosition() {
+    const outputTxt = document.getElementById("outputTxt");
+    const closeBtn = document.getElementById("closeOutput");
+
+    if (outputTxt.scrollHeight > outputTxt.clientHeight) {
+        closeBtn.style.right = "20px";
+    } else {
+        closeBtn.style.right = "4px";
+    }
+}
+
+
+updateCloseButtonPosition();
+window.addEventListener('resize', updateCloseButtonPosition);
+const observer = new MutationObserver(updateCloseButtonPosition);
+observer.observe(document.getElementById("outputTxt"), { childList: true, subtree: true });

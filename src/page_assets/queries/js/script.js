@@ -1,7 +1,7 @@
 import * as bootstrap from 'bootstrap';
 import Sortable from 'sortablejs';
 import { executeQuery, confirmBox, get_cl_element } from '../../../assets/js/scc';
-import { populate_querysheet_def, get_query_data } from './page_js';
+import { populate_querysheet_def, get_query_data, get_refresh_data } from './page_js';
 
 const params = new URLSearchParams(window.location.search);
 const modelName = params.get('modelName');
@@ -1081,4 +1081,9 @@ function get_tree_li_element(level_name, icon_class) {
     const li = get_cl_element("li", null, null, checkbox);
     li.appendChild(label);
     return li;
+}
+
+document.getElementById('refresh_wk').onclick = async function() {
+    const level_name = document.querySelector("#ZLayoutContentDiv select").closest(".z_el").getAttribute("level_name");
+    get_refresh_data(level_name);
 }

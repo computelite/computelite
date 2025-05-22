@@ -145,15 +145,19 @@ const create_scl_pivot = async (table_name, x_columns, y_columns, z_columns, z_d
 
         select_query += `) AS ${header_name}`;
     }
-
+    
     let where_clause = '';
+    let where_data = []
     if (z_columns && z_columns.length > 0) {
-        const conditions = z_columns.map((col, i) => `[${col}] = '${z_data}'`).join(' AND ');
+        const conditions = z_columns.map((col, i) => `[${col}] = ?`).join(' AND ');
         where_clause = `WHERE ${conditions}`;
+        if(z_data){
+            where_data.push(z_data)
+        }
     }
-
+    
     select_query += ` FROM [${table_name}] ${where_clause} GROUP BY [${local_y.join('], [')}]`;
-    const query_data = await executeQuery('fetchData', modelName, select_query);
+    const query_data = await executeQuery('fetchData', modelName, select_query,where_data);
 
     const split_index = local_y.length;
     let y_data = query_data.map(row => row.slice(0, split_index));
@@ -238,6 +242,31 @@ export async function get_query_data(level_name){
     tb_container.innerHTML = "";
     tb_container.appendChild(loader_div());
     let sel_z = document.getElementById("ZLayoutContentDiv").querySelector("select").value
+
+    const [x_data, y_data, pivot_data] = await create_scl_pivot(
+        table_name, x_columns, y_columns, [level_name], sel_z, series_list, series_property
+    );
+
+    
+    const wk_obj_instance = new wk_obj(
+        x_columns, x_data, y_columns, y_data, [level_name], [],
+        pivot_data, series_property, table_name, worksheet_name
+    );
+
+    const tbl = wk_obj_instance.populateTable();
+    tb_container.innerHTML = "";
+    tb_container.appendChild(tbl);
+}
+
+export async function get_refresh_data(level_name){
+    const tb_container = document.getElementById('table_container');
+    tb_container.innerHTML = "";
+    tb_container.appendChild(loader_div());
+    let sel_z = document.getElementById("ZLayoutContentDiv").querySelector("select").value
+
+    await getLayoutFromTable();
+    await reset_z_layout(x_columns, y_columns, z_columns);
+    await populate_z_data(table_name, z_columns);
 
     const [x_data, y_data, pivot_data] = await create_scl_pivot(
         table_name, x_columns, y_columns, [level_name], sel_z, series_list, series_property

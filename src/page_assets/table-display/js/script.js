@@ -682,33 +682,51 @@ document.getElementById("excelDownloadBtn").onclick = async function (e) {
 }
 
 document.getElementById("importExcel").onclick = async function (e) {
-    if (document.getElementById("fileUpload").files[0]) {
-        document.getElementById("data-loader").style.display = ""
-        let selected_file = document.getElementById("fileUpload").files[0]
-        const file = await selected_file.arrayBuffer();
-        const data = await gm.uploadExcel(modelName, [tableName.toLowerCase()], file)
-        document.getElementById("data-loader").style.display = "none"
-        let sheet_names_case = Object.keys(data)
-        let sheet_names = sheet_names_case.map(el => el.toLowerCase())
-        let idx = sheet_names.indexOf(tableName.toLowerCase())
-        if (idx > -1) {
-            if (!isNaN(data[sheet_names_case[idx]])) {
-                reload_table_data()
-                confirmBox("Success!", "Total Rows: " + data[sheet_names_case[idx]] + " Imported")
+    const fileInput = document.getElementById("fileUpload");
+    const loader = document.getElementById("data-loader");
 
-            } else {
-                confirmBox("Error!", data[sheet_names_case[idx]])
-            }
-
-        } else {
-            confirmBox("Error!", "No sheet matches with table name")
-        }
-
-    } else {
-        confirmBox('Alert!', 'Please choose a file to upload')
+    if (!fileInput.files[0]) {
+        confirmBox('Alert!', 'Please choose a file to upload');
+        return;
     }
 
-}
+    loader.style.display = "";
+    let selected_file = fileInput.files[0];
+    const file = await selected_file.arrayBuffer();
+    const data = await gm.uploadExcel(modelName, [tableName.toLowerCase()], file);
+    loader.style.display = "none";
+
+    const sheetNamesOriginal = Object.keys(data);
+    const sheetNamesLower = sheetNamesOriginal.map(el => el.toLowerCase());
+    const idx = sheetNamesLower.indexOf(tableName.toLowerCase());
+
+    if (idx > -1) {
+        const sheetName = sheetNamesOriginal[idx];
+        const result = data[sheetName];
+
+        if (typeof result === 'string') {
+            if (result === "Only header inserted") {
+                confirmBox("Success!", "Only header inserted");
+            } else if (result === "No valid headers found" || result === "No column matches with existing table") {
+                confirmBox("Error!", result);
+            } else {
+                confirmBox("Error!", result);
+            }
+        } else if (typeof result === 'number') {
+            if (result > 0) {
+                reload_table_data();
+                confirmBox("Success!", "Total Rows: " + result + " Imported");
+            } else {
+                confirmBox("Info", "No row inserted");
+            }
+        } else {
+            confirmBox("Error!", "Unexpected result from import");
+        }
+    } else {
+        confirmBox("Error!", "No sheet matches with table name");
+    }
+};
+
 
 
 async function update_column_formatters(header_rows) {
