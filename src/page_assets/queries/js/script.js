@@ -119,14 +119,14 @@ window.onload = async function () {
     await set_querysheet_def()
     await populate_querysheet_def()
 
-    const zSelect = document.querySelector("#ZLayoutContentDiv select");
+    // const zSelect = document.querySelector("#ZLayoutContentDiv select");
     
-    if (zSelect) {
-        zSelect.addEventListener("change", function () {
-            const level_name = this.closest(".z_el").getAttribute("level_name");
-            get_query_data(level_name);
-        });
-    }
+    // if (zSelect) {
+    //     zSelect.addEventListener("change", function () {
+    //         const level_name = this.closest(".z_el").getAttribute("level_name");
+    //         get_query_data(level_name);
+    //     });
+    // }
     
 }
 
@@ -818,14 +818,14 @@ document.getElementById('selectQuery-ok').onclick = async function () {
         await populate_querysheet_def()
     }
 
-    const zSelect = document.querySelector("#ZLayoutContentDiv select");
+    // const zSelect = document.querySelector("#ZLayoutContentDiv select");
     
-    if (zSelect) {
-        zSelect.addEventListener("change", function () {
-            const level_name = this.closest(".z_el").getAttribute("level_name");
-            get_query_data(level_name);
-        });
-    }
+    // if (zSelect) {
+    //     zSelect.addEventListener("change", function () {
+    //         const level_name = this.closest(".z_el").getAttribute("level_name");
+    //         get_query_data(level_name);
+    //     });
+    // }
 }
 
 function get_tr_element(member_name, colname = "xx") {
@@ -1048,14 +1048,14 @@ document.getElementById('save_qr').onclick = async function () {
     await set_querysheet_def()
     await populate_querysheet_def()
 
-    const zSelect = document.querySelector("#ZLayoutContentDiv select");
+    // const zSelect = document.querySelector("#ZLayoutContentDiv select");
     
-    if (zSelect) {
-        zSelect.addEventListener("change", function () {
-            const level_name = this.closest(".z_el").getAttribute("level_name");
-            get_query_data(level_name);
-        });
-    }
+    // if (zSelect) {
+    //     zSelect.addEventListener("change", function () {
+    //         const level_name = this.closest(".z_el").getAttribute("level_name");
+    //         get_query_data(level_name);
+    //     });
+    // }
 }
 
 function getFormattedDateTime() {
@@ -1084,6 +1084,6 @@ function get_tree_li_element(level_name, icon_class) {
 }
 
 document.getElementById('refresh_wk').onclick = async function() {
-    const level_name = document.querySelector("#ZLayoutContentDiv select").closest(".z_el").getAttribute("level_name");
+    const level_name = document.querySelector("#ZLayoutContentDiv span").innerText.trim();
     get_refresh_data(level_name);
 }
